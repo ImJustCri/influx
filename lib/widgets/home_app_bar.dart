@@ -28,7 +28,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(LucideIcons.circle_user),
           tooltip: 'Il tuo account',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/profile');
+          },
         ),
         const SizedBox(width: 16),
       ],
