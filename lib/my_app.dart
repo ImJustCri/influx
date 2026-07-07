@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:influx/pages/account/profile.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/theme.dart';
 
@@ -11,6 +12,9 @@ class MyApp extends StatelessWidget {
       title: 'INFLUX',
       theme: darkTheme,
       home: const MainShellScreen(),
+      routes: {
+        '/profile': (context) => ProfilePage(userUuid: "UUID Placeholder", budget: 500),
+      },
     );
   }
 }
