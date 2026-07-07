@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.backgroundColor,
+    fontFamily: 'Inter',
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF0D1230),
       brightness: Brightness.dark,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      titleTextStyle: AppTypography.pageTitle,
     )
 );
 
@@ -44,7 +49,7 @@ class AppTypography {
   static const TextStyle userEmailSubtitle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: AppColors.inputBorder,
+    color: AppColors.white,
   );
 
   static const TextStyle settingsPageName = TextStyle(
@@ -56,7 +61,7 @@ class AppTypography {
   // Container Styles
   static const TextStyle containerTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500, // Medium
+    fontWeight: FontWeight.w700,
     color: AppColors.white,
   );
 
@@ -100,3 +105,4 @@ class AppTypography {
     color: AppColors.white,
   );
 }
+
