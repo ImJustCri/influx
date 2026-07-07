@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
-
 import 'home_page.dart';
 
 class MainShellScreen extends StatefulWidget {

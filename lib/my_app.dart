@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:influx/pages/main_shell_screen.dart';
+import 'package:influx/services/auth_service.dart';
 import 'package:influx/theme.dart';
 
 class MyApp extends StatelessWidget {
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'INFLUX',
       theme: darkTheme,
-      home: const MainShellScreen(),
+      home: const AuthService(),
     );
   }
 }
