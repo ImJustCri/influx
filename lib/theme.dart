@@ -12,16 +12,17 @@ final ThemeData darkTheme = ThemeData(
 class AppColors {
   static const Color backgroundColor = Color(0xFF0D1230);
   static const Color backgroundAccent = Color(0xFF010007);
-  static const Color btnBackground = Color(0xFF0091EA);
+  static const Color btnBackground = Color(0xE60091EA);
   static const Color btnBorder = Color(0xFF0064A3);
   static const Color containerBackground = Color(0x33010007);
   static const Color containerBorder = Color(0xFF333856);
-  static const Color inputBackground = Color(0xFF3B3559);
+  static const Color inputBackground = Color(0x33010007);
   static const Color inputBorder = Color(0xFF6D678D);
   static const Color white = Color(0xFFE8DEED);
 }
 
 class AppTypography {
+
   // Page / User Header Styles
   static const TextStyle pageTitle = TextStyle(
     fontSize: 24,
