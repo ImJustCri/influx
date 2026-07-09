@@ -30,7 +30,7 @@ class AppTypography {
   // Page / User Header Styles
   static const TextStyle pageTitle = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w900,
     color: AppColors.white,
   );
 
@@ -43,7 +43,7 @@ class AppTypography {
   static const TextStyle pageSubtitle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: AppColors.inputBorder,
+    color: AppColors.white,
   );
 
   static const TextStyle userEmailSubtitle = TextStyle(
@@ -81,7 +81,7 @@ class AppTypography {
   static const TextStyle expenseDescription = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal, // Regular
-    color: AppColors.inputBorder,
+    color: AppColors.white,
   );
 
   // Navigation Styles
