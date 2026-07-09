@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/widgets/app_container.dart';
+import '../../constants.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
@@ -67,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         SelectableText(
-                          "${widget.budget}",
+                          "${widget.budget}$currency",
                           style: AppTypography.budgetIndicator,
                         ),
                       ],
@@ -83,24 +84,31 @@ class _ProfilePageState extends State<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          spacing: 16,
                           children: [
                             const Icon(LucideIcons.fingerprint_pattern, color: AppColors.white),
-                            const SizedBox(width: 10),
-                            Text(
-                              "UUID dell'utente",
-                              style: AppTypography.containerTitle,
-                            ),
+                            Column(
+                              spacing: 2,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "ID utente",
+                                  style: AppTypography.containerTitle,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: widget.userUuid));
+                                  },
+                                  child: SelectableText(
+                                    widget.userUuid,
+                                    style: AppTypography.containerBody,
+                                  ),
+                                ),
+                              ],
+                            )
                           ],
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Clipboard.setData(ClipboardData(text: widget.userUuid));
-                          },
-                          child: SelectableText(
-                            widget.userUuid,
-                            style: AppTypography.containerBody,
-                          ),
-                        ),
+
                       ],
                     ),
                   ),
