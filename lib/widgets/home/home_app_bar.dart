@@ -10,6 +10,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
       backgroundColor: Colors.transparent,
       title: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
