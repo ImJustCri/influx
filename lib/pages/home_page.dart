@@ -52,8 +52,9 @@ class HomePage extends StatelessWidget {
                     const BudgetCard(),
                     const SizedBox(height: 24),
                     SimpleTrendChart(
-                      startValue: 1500,
-                      endValue: 1600,
+                      firstValue: 200,
+                      secondValue: 350,
+                      thirdValue: 270,
                     ),
                     const SizedBox(height: 24),
                     RecentExpensesSection(expenses: recentExpenses),

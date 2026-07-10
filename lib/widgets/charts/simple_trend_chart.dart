@@ -6,20 +6,23 @@ import 'package:influx/theme.dart';
 import '../app_container.dart';
 
 class SimpleTrendChart extends StatelessWidget {
-  final double startValue;
-  final double endValue;
+  final double firstValue;
+  final double secondValue;
+  final double thirdValue;
   final String title;
 
   const SimpleTrendChart({
     super.key,
-    required this.startValue,
-    required this.endValue,
+    required this.firstValue,
+    required this.secondValue,
+    required this.thirdValue,
     this.title = "Spesi questo mese",
   });
 
+  // percentage change from previous period and current period
   double get percentChange {
-    if (startValue == 0) return 0;
-    return ((endValue - startValue) / startValue) * 100;
+    if (secondValue == 0) return 0;
+    return ((thirdValue - secondValue) / secondValue) * 100;
   }
 
   @override
@@ -27,8 +30,8 @@ class SimpleTrendChart extends StatelessWidget {
     final isUp = percentChange >= 0;
     final color = isUp ? Colors.redAccent : Colors.greenAccent;
 
-    final minY = math.min(startValue, endValue);
-    final maxY = math.max(startValue, endValue);
+    final minY = math.min(math.min(firstValue, secondValue), thirdValue);
+    final maxY = math.max(math.max(firstValue, secondValue), thirdValue);
     final padding = (maxY - minY) * 0.25 == 0 ? 1 : (maxY - minY) * 0.25;
 
     return AppContainer(
@@ -54,7 +57,7 @@ class SimpleTrendChart extends StatelessWidget {
             child: LineChart(
               LineChartData(
                 minX: 0,
-                maxX: 1,
+                maxX: 2,
                 minY: minY - padding,
                 maxY: maxY + padding,
                 gridData: const FlGridData(show: false),
@@ -63,8 +66,9 @@ class SimpleTrendChart extends StatelessWidget {
                 lineBarsData: [
                   LineChartBarData(
                     spots: [
-                      FlSpot(0, startValue),
-                      FlSpot(1, endValue),
+                      FlSpot(0, firstValue),
+                      FlSpot(1, secondValue),
+                      FlSpot(2, thirdValue),
                     ],
                     isCurved: false,
                     barWidth: 5,
