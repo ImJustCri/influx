@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
-import 'package:influx/constants.dart';
+import 'package:influx/global.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import 'expense_type_helpers.dart';

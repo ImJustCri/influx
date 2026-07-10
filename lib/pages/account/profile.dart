@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/widgets/app_container.dart';
-import '../../constants.dart';
+import '../../global.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';

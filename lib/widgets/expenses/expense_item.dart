@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:influx/constants.dart';
+import 'package:influx/global.dart';
 import '../../theme.dart';
 import 'expense_type_helpers.dart';
 import 'expense_detail_page.dart';

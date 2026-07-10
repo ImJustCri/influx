@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../constants.dart';
+import '../../global.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
@@ -10,6 +9,7 @@ class BudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return AppContainer(
       padding: const EdgeInsets.all(24),
       width: double.infinity,
@@ -22,12 +22,12 @@ class BudgetCard extends StatelessWidget {
             style: AppTypography.containerBody,
           ),
           SelectableText(
-            "1.500$currency",
+            "$remaining$currency",
             style: AppTypography.budgetIndicator,
           ),
           const SizedBox(height: 8),
           RoundedLinearProgressBar(
-            value: 0.7,
+            value: spent/budget,
             minHeight: 8,
             backgroundColor: AppColors.backgroundAccent,
             valueColor: AppColors.btnBackground,
@@ -36,8 +36,8 @@ class BudgetCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Spesi:", style: AppTypography.containerBody),
-              Text("Totale:", style: AppTypography.containerBody),
+              Text("Spesi: $spent$currency", style: AppTypography.containerBody),
+              Text("Totale: $budget$currency", style: AppTypography.containerBody),
             ],
           ),
           const Divider(

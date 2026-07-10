@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
 
+import '../global.dart';
 import '../models/expense_data.dart';
 import '../widgets/charts/simple_trend_chart.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
@@ -54,7 +55,7 @@ class HomePage extends StatelessWidget {
                     SimpleTrendChart(
                       firstValue: 200,
                       secondValue: 350,
-                      thirdValue: 270,
+                      thirdValue: spent,
                     ),
                     const SizedBox(height: 24),
                     RecentExpensesSection(expenses: recentExpenses),
