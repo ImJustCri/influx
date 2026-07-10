@@ -73,36 +73,10 @@ extension ExpenseTypeData on ExpenseType {
   }
 }
 
-double amountFor(ExpenseType type) {
-  switch (type) {
-    case ExpenseType.food:
-      return 480;
-    case ExpenseType.fuel:
-      return 240;
-    case ExpenseType.clothing:
-      return 60;
-    case ExpenseType.pharmacy:
-      return 150;
-    case ExpenseType.onlineServices:
-      return 20;
-    case ExpenseType.electronics:
-      return 0;
-  }
+double amountFor(ExpenseType type, double categorySpent) {
+  return categorySpent;
 }
 
-double percentageFor(ExpenseType type) {
-  switch (type) {
-    case ExpenseType.food:
-      return 0.14;
-    case ExpenseType.fuel:
-      return 0.35;
-    case ExpenseType.clothing:
-      return 0.02;
-    case ExpenseType.pharmacy:
-      return 0.14;
-    case ExpenseType.onlineServices:
-      return 0.05;
-    case ExpenseType.electronics:
-      return 0;
-  }
+double percentageFor(ExpenseType type, double spent, double categorySpent) {
+  return categorySpent / spent;
 }
