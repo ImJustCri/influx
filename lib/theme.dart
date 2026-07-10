@@ -24,6 +24,7 @@ class AppColors {
   static const Color inputBackground = Color(0xFF3B3559);
   static const Color inputBorder = Color(0xFF6D678D);
   static const Color white = Color(0xFFE8DEED);
+  static const Color whiteDim = Color(0xFFD2CCDA);
 }
 
 class AppTypography {
@@ -68,20 +69,20 @@ class AppTypography {
   static const TextStyle containerBody = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal, // Regular
-    color: AppColors.white,
+    color: AppColors.whiteDim,
   );
 
   // Expense Styles
   static const TextStyle expenseTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w700,
     color: AppColors.white,
   );
 
   static const TextStyle expenseDescription = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.normal,
-    color: AppColors.white,
+    color: AppColors.whiteDim,
   );
 
   // Navigation Styles
