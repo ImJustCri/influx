@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    scaffoldBackgroundColor: Colors.transparent,
-    fontFamily: 'Inter',
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0D1230),
-      brightness: Brightness.dark,
-    ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
-      titleTextStyle: AppTypography.pageTitle,
-    )
+  useMaterial3: true,
+  scaffoldBackgroundColor: Colors.transparent,
+  fontFamily: 'Inter',
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF0D1230),
+    brightness: Brightness.dark,
+  ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.transparent,
+    titleTextStyle: AppTypography.pageTitle,
+  ),
+  textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        backgroundColor: AppColors.backgroundAccent.withValues(alpha: 0.25),
+        foregroundColor: AppColors.white,
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          fontFamily: 'Inter',
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+  )
 );
 
 class AppColors {

@@ -27,6 +27,7 @@ class ExpensesPage extends StatelessWidget {
             onPressed: () {},
             label: Text('Maggio', style: AppTypography.pageSubtitle),
             icon: const Icon(LucideIcons.chevron_down),
+            iconAlignment: IconAlignment.end,
           )
         ],
       ),
