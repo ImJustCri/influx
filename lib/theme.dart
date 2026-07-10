@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.backgroundColor,
+    scaffoldBackgroundColor: Colors.transparent,
     fontFamily: 'Inter',
     colorScheme: ColorScheme.fromSeed(
       seedColor: const Color(0xFF0D1230),
@@ -74,13 +74,13 @@ class AppTypography {
   // Expense Styles
   static const TextStyle expenseTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500, // Medium
+    fontWeight: FontWeight.w500,
     color: AppColors.white,
   );
 
   static const TextStyle expenseDescription = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.normal, // Regular
+    fontWeight: FontWeight.normal,
     color: AppColors.white,
   );
 
