@@ -6,6 +6,7 @@ import '../../constants.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userUuid;
@@ -127,6 +128,14 @@ class _ProfilePageState extends State<ProfilePage> {
                               icon: LucideIcons.pencil,
                               title: "Modifica profilo",
                               onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProfilePage(
+                                      userUuid: 'user-uuid-here',
+                                      initialName: 'Mario Rossi',
+                                    ),
+                                  ),
+                                );
                               },
                             ),
                             SettingsTile(
