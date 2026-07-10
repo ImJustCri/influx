@@ -4,7 +4,7 @@ import 'package:influx/widgets/page_padding.dart';
 
 import '../models/expense_data.dart';
 import '../widgets/charts/simple_trend_chart.dart';
-import '../widgets/expenses/expense_item.dart';
+import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 
