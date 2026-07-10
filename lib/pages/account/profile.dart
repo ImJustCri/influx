@@ -117,7 +117,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     spacing: 16,
                     children: [
                       // settings
-
                       AppContainer(
                         width: double.infinity,
                         child: Column(
