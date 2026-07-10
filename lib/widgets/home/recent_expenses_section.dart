@@ -23,8 +23,6 @@ class RecentExpensesSection extends StatelessWidget {
             type: expense.type,
             title: expense.title,
             amount: expense.amount,
-            description: expense.description,
-            purchaseDate: expense.purchaseDate,
           ),
         ),
       ],

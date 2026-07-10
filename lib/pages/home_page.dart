@@ -16,22 +16,16 @@ class HomePage extends StatelessWidget {
       type: ExpenseType.electronics,
       title: 'Undertale',
       amount: '2,5',
-      description: 'Acquisto gioco su Steam',
-      purchaseDate: DateTime(2024, 7, 10, 14, 30),
     ),
     ExpenseData(
       type: ExpenseType.clothing,
       title: 'JD Sport',
       amount: '50',
-      description: 'Scarpe sportive',
-      purchaseDate: DateTime(2024, 7, 9, 10, 15),
     ),
     ExpenseData(
       type: ExpenseType.food,
       title: 'Carrefour',
       amount: '18,30',
-      description: 'Spesa settimanale',
-      purchaseDate: DateTime(2024, 7, 8, 16, 45),
     ),
   ];
 
