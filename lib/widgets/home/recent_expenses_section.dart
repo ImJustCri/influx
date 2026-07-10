@@ -20,9 +20,11 @@ class RecentExpensesSection extends StatelessWidget {
         Text("Ultime spese", style: AppTypography.containerBody),
         ...expenses.map(
               (expense) => ExpenseItem(
-            type: expense.type,
-            title: expense.title,
-            amount: expense.amount,
+                type: expense.type,
+                title: expense.title,
+                amount: expense.amount,
+                purchaseDate: expense.purchaseDate,
+                description: expense.description,
           ),
         ),
       ],
