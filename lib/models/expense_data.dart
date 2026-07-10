@@ -1,4 +1,3 @@
-import 'package:influx/widgets/expenses/expense_item.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
 
 class ExpenseData {
@@ -8,7 +7,9 @@ class ExpenseData {
   final DateTime purchaseDate;
   final String? description;
 
-  const ExpenseData( {
+  double get numericAmount => double.tryParse(amount) ?? 0.0;
+
+  const ExpenseData({
     required this.type,
     required this.title,
     required this.amount,
