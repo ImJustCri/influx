@@ -11,21 +11,25 @@ import '../widgets/home/recent_expenses_section.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const List<ExpenseData> recentExpenses = [
+  static final List<ExpenseData> recentExpenses = [
     ExpenseData(
       type: ExpenseType.electronics,
       title: 'Undertale',
       amount: '2,5',
+      purchaseDate: DateTime.now(),
+      description: "Ciao"
     ),
     ExpenseData(
       type: ExpenseType.clothing,
       title: 'JD Sport',
       amount: '50',
+      purchaseDate: DateTime.now(),
     ),
     ExpenseData(
       type: ExpenseType.food,
       title: 'Carrefour',
       amount: '18,30',
+      purchaseDate: DateTime.now(),
     ),
   ];
 
