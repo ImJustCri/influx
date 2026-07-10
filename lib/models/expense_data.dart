@@ -1,4 +1,5 @@
 import 'package:influx/widgets/expenses/expense_item.dart';
+import '../widgets/expenses/expense_type_helpers.dart';
 
 class ExpenseData {
   final ExpenseType type;
