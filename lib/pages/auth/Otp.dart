@@ -8,6 +8,7 @@ import 'package:influx/widgets/page_padding.dart';
 
 class OtpPage extends StatefulWidget {
   final email;
+
   const OtpPage({
     super.key,
     this.email
@@ -44,7 +45,8 @@ class OtpState extends State<OtpPage>{
                       fontSize: 16,
                       color: AppColors.white,
                     decoration: TextDecoration.underline,
-                    decorationThickness: 1.5
+                    decorationThickness: 2,
+                    decorationColor: AppColors.white, // Usare un colore piu' spento rispetto al testo
                   ),
                 ),
               ),
@@ -92,7 +94,11 @@ class OtpState extends State<OtpPage>{
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.btnBackground,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13)
+                      borderRadius: BorderRadius.circular(13),
+                      side: BorderSide(
+                        color: AppColors.btnBorder,
+                        width: 1
+                      )
                     )
                   ),
                   onPressed: () async{
@@ -190,7 +196,7 @@ class OtpState extends State<OtpPage>{
 
                   },
                   child: Text(
-                      "Accedi",
+                      "Continua",
                     style: TextStyle(
                       color: AppColors.white,
                       fontSize: 16,

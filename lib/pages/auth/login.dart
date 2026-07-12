@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/pages/auth/Otp.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/widgets/page_padding.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../services/auth_service.dart';
 
@@ -168,8 +169,6 @@ class LoginPage extends StatefulWidget {
                                               ),
                                             )
                                           ],
-                                          
-
                                         );
                                       }
                                   );
@@ -191,7 +190,7 @@ class LoginPage extends StatefulWidget {
                               ),
                             ),
                             child: Text(
-                              "Accedi",
+                              "Continua",
                               style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold
@@ -233,8 +232,40 @@ class LoginPage extends StatefulWidget {
                             height: 64,
                             width: 100,
                             child: IconButton(
-                              onPressed: () {
-                                Navigator.push(context,MaterialPageRoute(builder: (context)=> OtpPage(email: "Ciao@gmail.com",)));
+                              onPressed: () async{
+                                await auth.loginWithGoogle();
+
+                                Supabase.instance.client.auth.onAuthStateChange.listen((data){
+                                  final session=data.session;
+
+                                  if(session!=null){
+                                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const MainShellScreen()), (route)=>false);
+                                  }else{
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          duration: Duration(seconds: 2),
+                                          behavior: SnackBarBehavior.floating,
+                                          content: Text(
+                                            "Errore durante l'accesso. Riprova",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.white,
+                                            ),
+                                          ),
+                                          backgroundColor: AppColors.inputBackground,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16),
+                                            side: BorderSide(
+                                                color: AppColors.inputBorder,
+                                                width: 2
+                                            ),
+                                          ),
+                                        )
+                                    );
+                                  }
+
+                                });
                               },
                               icon: Image.asset(
                                 'assets/icon/iconGoogle.png',

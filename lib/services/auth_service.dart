@@ -1,8 +1,5 @@
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:influx/pages/auth/login.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -60,6 +57,14 @@ class AuthService extends StatelessWidget {
       }
     }
 
+  }
+
+
+  Future<void> loginWithGoogle() async{
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: "io.supabase.flutter://login-callback"
+      );
   }
 
 
