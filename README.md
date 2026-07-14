@@ -5,7 +5,7 @@
 ![Stato](https://img.shields.io/badge/stato-in%20sviluppo-FBBF24?style=flat-square)
 
 >[!note]
-WIP: File ancora non caricati in repo
+Questa è la branch dedicata all'autenticazione (SSO con Google o Facebook + Passwordless con OTP)
 
 **Influx** è un'app di finanza personale che ti aiuta a monitorare le spese, capire la tua inflazione reale e trovare alternative più economiche o sostenibili ai prodotti che compri già.
 
