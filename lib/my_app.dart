@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:influx/services/auth_service.dart';
 import 'package:influx/pages/account/profile.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/theme.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
           ],
         );
       },
-      home: const MainShellScreen(),
+      home: const AuthService(),
       routes: {
         '/profile': (context) => ProfilePage(
           userUuid: "UUID Placeholder",
