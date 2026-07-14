@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.backgroundColor,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0D1230),
-      brightness: Brightness.dark,
-    )
+  useMaterial3: true,
+  scaffoldBackgroundColor: Colors.transparent,
+  fontFamily: 'Inter',
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF0D1230),
+    brightness: Brightness.dark,
+  ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.transparent,
+    titleTextStyle: AppTypography.pageTitle,
+  ),
+  textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        backgroundColor: AppColors.backgroundAccent.withValues(alpha: 0.25),
+        foregroundColor: AppColors.white,
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          fontFamily: 'Inter',
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+  )
 );
 
 class AppColors {
@@ -19,6 +36,7 @@ class AppColors {
   static const Color inputBorder = Color(0xFF333856);
   static const Color inputBackground = Color(0x33000000);
   static const Color white = Color(0xFFE8DEED);
+  static const Color whiteDim = Color(0xFFD2CCDA);
 }
 
 class AppTypography {
@@ -26,7 +44,7 @@ class AppTypography {
   // Page / User Header Styles
   static const TextStyle pageTitle = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w900,
     color: AppColors.white,
   );
 
@@ -39,13 +57,13 @@ class AppTypography {
   static const TextStyle pageSubtitle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: AppColors.inputBorder,
+    color: AppColors.white,
   );
 
   static const TextStyle userEmailSubtitle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: AppColors.inputBorder,
+    color: AppColors.white,
   );
 
   static const TextStyle settingsPageName = TextStyle(
@@ -57,27 +75,27 @@ class AppTypography {
   // Container Styles
   static const TextStyle containerTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500, // Medium
+    fontWeight: FontWeight.w700,
     color: AppColors.white,
   );
 
   static const TextStyle containerBody = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.normal, // Regular
-    color: AppColors.white,
+    color: AppColors.whiteDim,
   );
 
   // Expense Styles
   static const TextStyle expenseTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w500, // Medium
+    fontWeight: FontWeight.w700,
     color: AppColors.white,
   );
 
   static const TextStyle expenseDescription = TextStyle(
     fontSize: 12,
-    fontWeight: FontWeight.normal, // Regular
-    color: AppColors.inputBorder,
+    fontWeight: FontWeight.normal,
+    color: AppColors.whiteDim,
   );
 
   // Navigation Styles
@@ -101,3 +119,4 @@ class AppTypography {
     color: AppColors.white,
   );
 }
+

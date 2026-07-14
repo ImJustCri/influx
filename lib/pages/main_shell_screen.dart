@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
+import '../widgets/expenses/expenses_page.dart';
 import 'home_page.dart';
 
 class MainShellScreen extends StatefulWidget {
@@ -14,8 +15,8 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   final List<Widget> _pages = const [
     HomePage(),
-    Center(child: Text('Switch', style: TextStyle(color: Colors.white, fontSize: 14))),
     Center(child: Text('Spese', style: TextStyle(color: Colors.white, fontSize: 14))),
+    ExpensesPage(),
     Center(child: Text('Gruppo', style: TextStyle(color: Colors.white, fontSize: 14))),
   ];
 
