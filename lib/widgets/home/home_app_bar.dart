@@ -10,6 +10,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      toolbarHeight: 72,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
       backgroundColor: Colors.transparent,
       title: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -28,7 +31,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(LucideIcons.circle_user),
           tooltip: 'Il tuo account',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/profile');
+          },
         ),
         const SizedBox(width: 16),
       ],

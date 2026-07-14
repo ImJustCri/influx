@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:influx/pages/account/profile.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/theme.dart';
+import 'package:influx/widgets/global_background.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,7 +12,21 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'INFLUX',
       theme: darkTheme,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            const Positioned.fill(child: GlobalBackground()),
+            ?child,
+          ],
+        );
+      },
       home: const MainShellScreen(),
+      routes: {
+        '/profile': (context) => ProfilePage(
+          userUuid: "UUID Placeholder",
+          budget: 500,
+        ),
+      },
     );
   }
 }
