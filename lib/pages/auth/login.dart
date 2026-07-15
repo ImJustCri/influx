@@ -54,7 +54,7 @@ class LoginPage extends StatefulWidget {
                       SizedBox(height: 8),
 
                       SizedBox(
-                        height: 55,
+                        height: 56,
                         child: TextFormField(
                           controller: emailContent,
                           decoration: InputDecoration(
@@ -229,7 +229,7 @@ class LoginPage extends StatefulWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
-                            height: 64,
+                            height: 65,
                             width: 100,
                             child: IconButton(
                               onPressed: () async{
@@ -288,8 +288,8 @@ class LoginPage extends StatefulWidget {
                           SizedBox(width: 16),
 
                           SizedBox(
-                            height: 64,
-                            width: 100,
+                            height: 65,
+                            width: 101,
                             child: IconButton(
                               onPressed: () {},
                               icon: Image.asset(
