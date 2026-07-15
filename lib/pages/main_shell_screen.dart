@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
-
 import '../widgets/expenses/expenses_page.dart';
 import 'home_page.dart';
 
