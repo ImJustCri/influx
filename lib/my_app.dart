@@ -24,9 +24,7 @@ class MyApp extends StatelessWidget {
         },
         home: const AuthService(),
         routes: {
-          '/profile': (context) => ProfilePage(
-            budget: 500,
-          ),
+          '/profile': (context) => ProfilePage(),
         },
       ),
     );
