@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:influx/pages/auth/Otp.dart';
+import 'package:influx/pages/auth/otp.dart';
 import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
