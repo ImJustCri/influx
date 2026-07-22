@@ -95,19 +95,6 @@ class LoginPage extends StatefulWidget {
                                       behavior: SnackBarBehavior.floating,
                                       content: Text(
                                           "Inserisci l'email",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.white,
-                                          ),
-                                      ),
-                                      backgroundColor: AppColors.inputBackground,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: BorderSide(
-                                          color: AppColors.inputBorder,
-                                          width: 2
-                                        ),
                                       ),
                                   )
                                 );
@@ -119,26 +106,11 @@ class LoginPage extends StatefulWidget {
                                       context: context,
                                       builder: (builder){
                                         return AlertDialog(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(32),
-                                            side: BorderSide(
-                                              color: AppColors.inputBorder,
-                                              width: 1
-                                            )
-                                          ),
                                           title: Text(
                                               "Qualcosa è andato storto",
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold
-                                              ),
                                           ),
                                           content: Text(
                                               result,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              color: AppColors.white,
-                                            ),
                                           ),
                                           actions: [
                                             SizedBox(
@@ -148,23 +120,8 @@ class LoginPage extends StatefulWidget {
                                                   onPressed: (){
                                                     Navigator.pop(context);
                                                   },
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: AppColors.btnBackground,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  side: BorderSide(
-                                                    color: AppColors.btnBorder,
-                                                    width: 1
-                                                  )
-                                                ),
                                                   child: Text(
                                                       "Chiudi",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: AppColors.white
-                                                    ),
                                                   ),
                                               ),
                                             )
@@ -247,19 +204,6 @@ class LoginPage extends StatefulWidget {
                                           behavior: SnackBarBehavior.floating,
                                           content: Text(
                                             "Errore durante l'accesso. Riprova",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.white,
-                                            ),
-                                          ),
-                                          backgroundColor: AppColors.inputBackground,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                            side: BorderSide(
-                                                color: AppColors.inputBorder,
-                                                width: 2
-                                            ),
                                           ),
                                         )
                                     );
