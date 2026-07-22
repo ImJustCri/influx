@@ -182,82 +182,53 @@ class LoginPage extends StatefulWidget {
 
                       SizedBox(height: 24),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
+                      SizedBox(
                             height: 65,
-                            width: 100,
-                            child: IconButton(
-                              onPressed: () async{
-                                await auth.loginWithGoogle();
+                            width: double.infinity,
+                            child: TextButton.icon(
+                                onPressed: () async{
+                                  await auth.loginWithGoogle();
 
-                                Supabase.instance.client.auth.onAuthStateChange.listen((data){
-                                  final session=data.session;
+                                  Supabase.instance.client.auth.onAuthStateChange.listen((data){
+                                    final session=data.session;
 
-                                  if(session!=null){
-                                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const MainShellScreen()), (route)=>false);
-                                  }else{
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          duration: Duration(seconds: 2),
-                                          behavior: SnackBarBehavior.floating,
-                                          content: Text(
-                                            "Errore durante l'accesso. Riprova",
-                                          ),
-                                        )
-                                    );
-                                  }
+                                    if(session!=null){
+                                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const MainShellScreen()), (route)=>false);
+                                    }else{
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            duration: Duration(seconds: 2),
+                                            behavior: SnackBarBehavior.floating,
+                                            content: Text(
+                                              "Errore durante l'accesso. Riprova",
+                                            ),
+                                          )
+                                      );
+                                    }
 
-                                });
-                              },
-                              icon: Image.asset(
-                                'assets/icon/iconGoogle.png',
-                                height: 36,
-                                width: 36,
-                              ),
-                                style: IconButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8)
-                                    ),
-                                    backgroundColor: AppColors.inputBackground,
-                                    side: BorderSide(
-                                        color: AppColors.inputBorder,
-                                        width:1
-                                    ),
+                                  });
+                                },
+                                icon: Image.asset(
+                                  'assets/icon/iconGoogle.png',
+                                  height: 36,
+                                  width: 36,
                                 ),
-                            ),
-                          ),
-
-                          SizedBox(width: 16),
-
-                          SizedBox(
-                            height: 65,
-                            width: 101,
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Image.asset(
-                                'assets/icon/iconFacebook.png',
-                                height: 36,
-                                width: 36,
+                                label: Text("Google"),
+                              style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)
+                                ),
+                                backgroundColor: AppColors.inputBackground,
+                                side: BorderSide(
+                                  color: AppColors.inputBorder,
+                                  width: 1
+                                )
                               ),
-                              style: IconButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8)
-                                  ),
-                                  backgroundColor: AppColors.inputBackground,
-                                  side: BorderSide(
-                                      color: AppColors.inputBorder,
-                                      width:1
-                                  )
                             ),
-                          ),
                           ),
                         ],
                       ),
-                    ],
                   ),
-                ),
             ],
           ),
         ),

@@ -67,9 +67,5 @@ class AuthService extends StatelessWidget {
       );
   }
 
-
-
-
-
 }
 
