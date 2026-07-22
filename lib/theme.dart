@@ -20,10 +20,60 @@ final ThemeData darkTheme = ThemeData(
           fontSize: 16,
           fontWeight: FontWeight.normal,
           fontFamily: 'Inter',
+          color: AppColors.white,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-  )
+  ),
+
+  snackBarTheme: SnackBarThemeData(
+    backgroundColor: AppColors.inputBackground,
+    contentTextStyle: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: AppColors.white,
+    ),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(
+        color: AppColors.inputBorder,
+        width: 2,
+      ),
+    ),
+    behavior: SnackBarBehavior.floating,
+  ),
+
+  dialogTheme: DialogThemeData(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(32),
+      side: BorderSide(
+        color: AppColors.inputBorder,
+        width: 1,
+      ),
+    ),
+    titleTextStyle: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+      color: AppColors.white,
+    ),
+    contentTextStyle: TextStyle(
+      fontSize: 16,
+      color: AppColors.white,
+    ),
+  ),
+
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      padding: EdgeInsetsGeometry.symmetric(vertical: 16),
+      textStyle: TextStyle(
+        color: AppColors.white,
+      ),
+      backgroundColor: AppColors.btnBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(32),
+      ),
+    ),
+  ),
 );
 
 class AppColors {
