@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../global.dart';
 import '../../models/profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../services/auth_service.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
+import '../../widgets/user_qr_dialog.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -90,7 +89,6 @@ class ProfilePage extends ConsumerWidget {
       WidgetRef ref,
       Profile userProfile,
       ) {
-
     final userEmail = Supabase.instance.client.auth.currentUser?.email ?? 'Nessuna email';
 
     return PagePadding(
@@ -119,110 +117,85 @@ class ProfilePage extends ConsumerWidget {
             Column(
               spacing: 16,
               children: [
-                AppContainer(
-                  width: double.infinity,
-                  child: Column(
-                    spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(LucideIcons.banknote, color: AppColors.white),
-                          SizedBox(width: 10),
-                          Text(
-                            "Budget",
-                            style: AppTypography.containerTitle,
-                          ),
-                        ],
-                      ),
-                      SelectableText(
-                        "${userProfile.budget}$currency",
-                        style: AppTypography.budgetIndicator,
-                      ),
-                    ],
-                  ),
-                ),
-
-                AppContainer(
-                  width: double.infinity,
-                  child: Column(
-                    spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        spacing: 16,
-                        children: [
-                          const Icon(LucideIcons.fingerprint_pattern, color: AppColors.white),
-                          Expanded(
-                            child: Column(
-                              spacing: 2,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "ID utente",
-                                  style: AppTypography.containerTitle,
-                                ),
-                                Text(
-                                  "Clicca per copiare",
-                                  style: AppTypography.containerBody,
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: userProfile.id));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("ID copiato negli appunti")),
-                              );
-                            },
-                            icon: const Icon(LucideIcons.copy),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                AppContainer(
-                  width: double.infinity,
-                  child: Column(
-                    spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SettingsTile(
-                        icon: LucideIcons.pencil,
-                        title: "Modifica profilo",
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => EditProfilePage(
-                                userUuid: userProfile.id,
-                                initialName: userProfile.fullName!,
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => UserQrDialog(userId: userProfile.id),
+                    );
+                  },
+                  child: AppContainer(
+                    width: double.infinity,
+                    child: Column(
+                      spacing: 16,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          spacing: 16,
+                          children: [
+                            const Icon(LucideIcons.fingerprint_pattern, color: AppColors.white),
+                            Expanded(
+                              child: Column(
+                                spacing: 2,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "ID utente",
+                                    style: AppTypography.containerTitle,
+                                  ),
+                                  Text(
+                                    "Mostra QR Code",
+                                    style: AppTypography.containerBody,
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      SettingsTile(
-                        icon: LucideIcons.lock,
-                        title: "Sicurezza Account",
-                        onTap: () {},
-                      ),
-                      SettingsTile(
-                        icon: LucideIcons.log_out,
-                        title: "Logout",
-                        onTap: () async {
-                          await Supabase.instance.client.auth.signOut();
-                          if (!context.mounted) return;
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (context) => const AuthService()),
-                                (route) => false,
-                          );
-                        },
-                      ),
-                    ],
+                            const Icon(LucideIcons.chevron_right, color: Colors.white54),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  spacing: 8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Azioni", style: AppTypography.containerBody),
+                    const SizedBox(height: 4),
+                    SettingsTile(
+                      icon: LucideIcons.pencil,
+                      title: "Modifica profilo",
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => EditProfilePage(
+                              userUuid: userProfile.id,
+                              initialName: userProfile.fullName!,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    SettingsTile(
+                      icon: LucideIcons.lock,
+                      title: "Sicurezza Account",
+                      onTap: () {},
+                    ),
+                    SettingsTile(
+                      icon: LucideIcons.log_out,
+                      title: "Logout",
+                      onTap: () async {
+                        await Supabase.instance.client.auth.signOut();
+                        if (!context.mounted) return;
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => const AuthService()),
+                              (route) => false,
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             )
