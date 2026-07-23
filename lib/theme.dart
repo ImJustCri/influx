@@ -94,7 +94,7 @@ class AppTypography {
   // Page / User Header Styles
   static const TextStyle pageTitle = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.bold,
     color: AppColors.white,
   );
 
@@ -125,13 +125,13 @@ class AppTypography {
   // Container Styles
   static const TextStyle containerTitle = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.bold,
     color: AppColors.white,
   );
 
   static const TextStyle containerBody = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.normal, // Regular
+    fontWeight: FontWeight.normal,
     color: AppColors.whiteDim,
   );
 
