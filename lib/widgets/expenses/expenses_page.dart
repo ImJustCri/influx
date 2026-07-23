@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/services/ocr_service.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../theme.dart';
@@ -21,6 +22,7 @@ class ExpensesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double totalSpent = _mockExpenses.fold(0.0, (sum, item) => sum + item.numericAmount);
+    final ocr_service= OcrService();
 
     return Scaffold(
       appBar: AppBar(
@@ -63,6 +65,14 @@ class ExpensesPage extends StatelessWidget {
                 );
               },
             ),
+            SizedBox(height: 1),
+            ElevatedButton(
+                onPressed: () async{
+                  await ocr_service.ocr_method();
+                },
+                child: Text("OCR")
+            ),
+            SizedBox(height: 150),
           ],
         ),
       ),

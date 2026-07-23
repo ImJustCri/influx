@@ -42,6 +42,8 @@ dependencies:
   intl: ^0.20.3
   riverpod: ^3.3.2
   flutter_riverpod: ^3.3.2
+  flutter_native_ocr: ^0.1.0
+  image_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:
