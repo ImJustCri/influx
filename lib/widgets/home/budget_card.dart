@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:influx/pages/edit_budget_page.dart';
 import '../../global.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
 
 class BudgetCard extends StatelessWidget {
-  const BudgetCard({super.key});
+  final double totalBudget;
+  final double totalExpenses;
+  final DateTime resetDate;
+  final bool isNotAuthorized;
+  final bool isGroup;
+
+  const BudgetCard({
+    super.key,
+    required this.totalBudget,
+    required this.totalExpenses,
+    required this.resetDate,
+    this.isNotAuthorized = false,
+    this.isGroup = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final remaining = totalBudget - totalExpenses;
+    final progressValue = (totalExpenses / totalBudget).clamp(0.0, 1.0);
+    final resetDateFormatted = "${resetDate.day} ${_getMonthName(resetDate.month)}";
 
     return AppContainer(
       padding: const EdgeInsets.all(24),
@@ -27,7 +44,7 @@ class BudgetCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           RoundedLinearProgressBar(
-            value: spent/budget,
+            value: progressValue,
             minHeight: 8,
             backgroundColor: AppColors.backgroundAccent,
             valueColor: AppColors.btnBackground,
@@ -36,8 +53,8 @@ class BudgetCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Spesi: $spent$currency", style: AppTypography.containerBody),
-              Text("Totale: $budget$currency", style: AppTypography.containerBody),
+              Text("Spesi: $totalExpenses$currency", style: AppTypography.containerBody),
+              Text("Totale: $totalBudget$currency", style: AppTypography.containerBody),
             ],
           ),
           const Divider(
@@ -48,12 +65,26 @@ class BudgetCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Reset: 1 Giugno", style: AppTypography.containerBody),
-              Text("Modifica ->", style: AppTypography.containerBody),
+              Text("Reset: $resetDateFormatted", style: AppTypography.containerBody),
+              if (!isNotAuthorized)
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditBudgetPage(initialBudget: totalBudget, initialResetDate: resetDate)));
+                  },
+                  child: Text("Modifica ->", style: AppTypography.containerBody),
+                ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+    ];
+    return months[month - 1];
   }
 }
