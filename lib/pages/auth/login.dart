@@ -123,6 +123,9 @@ class LoginPage extends StatefulWidget {
                                                   child: Text(
                                                       "Chiudi",
                                                   ),
+                                                style: ElevatedButton.styleFrom(
+                                                  padding: EdgeInsets.all(0)
+                                                ),
                                               ),
                                             )
                                           ],

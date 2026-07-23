@@ -135,6 +135,9 @@ class OtpState extends State<OtpPage>{
                                       onPressed: (){
                                         Navigator.pop(context);
                                       },
+                                      style: ElevatedButton.styleFrom(
+                                          padding: EdgeInsets.all(0)
+                                      ),
                                       child: Text(
                                         "Chiudi",
                                       ),
