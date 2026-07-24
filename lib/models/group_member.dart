@@ -3,6 +3,7 @@ import 'package:influx/theme.dart';
 
 class GroupMember {
   final String id;
+  final bool isAdmin;
   final String name;
   final double amount;
   final String? avatarImageUrl;
@@ -18,6 +19,7 @@ class GroupMember {
     required this.progressValue,
     this.backgroundColor = AppColors.backgroundAccent,
     this.valueColor = AppColors.white,
+    required this.isAdmin,
   });
 
   /// Create a copy of this member with optional field overrides
@@ -38,6 +40,7 @@ class GroupMember {
       progressValue: progressValue ?? this.progressValue,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       valueColor: valueColor ?? this.valueColor,
+      isAdmin: isAdmin ?? false,
     );
   }
 
