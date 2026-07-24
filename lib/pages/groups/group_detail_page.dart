@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:influx/widgets/group/group_expense_summary.dart';
+import 'package:influx/pages/groups/settings/group_admin_settings.dart';
 import 'package:influx/widgets/home/budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
 
@@ -28,6 +28,7 @@ class _GroupsPageState extends State<GroupDetailPage> {
         amount: 1280,
         avatarImageUrl: 'https://cdn.pfps.gg/pfps/8324-mario-profile-image.png',
         progressValue: 0.5,
+        isAdmin: true,
       ),
       GroupMember(
         id: '2',
@@ -35,6 +36,7 @@ class _GroupsPageState extends State<GroupDetailPage> {
         amount: 950,
         avatarImageUrl: 'https://cdn.pfps.gg/pfps/7553-paper-luigi.png',
         progressValue: 0.35,
+        isAdmin: false,
       ),
       GroupMember(
         id: '3',
@@ -42,6 +44,7 @@ class _GroupsPageState extends State<GroupDetailPage> {
         amount: 2100,
         avatarImageUrl: 'https://example.com/peach.png',
         progressValue: 0.75,
+        isAdmin: false,
       ),
     ];
   }
@@ -71,7 +74,11 @@ class _GroupsPageState extends State<GroupDetailPage> {
                       Text('Budget condiviso', style: AppTypography.pageSubtitle),
                     ],
                   ),
-                  IconButton(onPressed: () {  }, icon: Icon(LucideIcons.settings_2),)
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => GroupAdminSettings(members: members)));
+                    },
+                    icon: Icon(LucideIcons.settings_2),)
                 ],
               ),
             ),
