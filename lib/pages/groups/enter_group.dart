@@ -128,20 +128,8 @@ class _EnterGroupPageState extends State<EnterGroupPage> {
                 child: ElevatedButton(
                   onPressed: _isModified ? () {
                   } : null,
-                  style: ElevatedButton.styleFrom(
-
-                    backgroundColor: AppColors.btnBackground,
-                    disabledBackgroundColor: AppColors.btnBackground.withValues(alpha: 0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(
-                        color: AppColors.btnBorder,
-                        width: 1,
-                      ),
-                    ),
-                  ),
                   child: Text(
-                    'Salva modifiche',
+                    'Entra',
                     style: AppTypography.containerTitle.copyWith(
                       color: _isModified
                           ? AppColors.white
