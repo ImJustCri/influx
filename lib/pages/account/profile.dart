@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/pages/account/security_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/profile.dart';
@@ -181,7 +182,13 @@ class ProfilePage extends ConsumerWidget {
                     SettingsTile(
                       icon: LucideIcons.lock,
                       title: "Sicurezza Account",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SecurityPage(),
+                          ),
+                        );
+                      },
                     ),
                     SettingsTile(
                       icon: LucideIcons.log_out,
