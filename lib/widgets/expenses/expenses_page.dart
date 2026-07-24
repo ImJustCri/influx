@@ -68,11 +68,37 @@ class ExpensesPage extends StatelessWidget {
             SizedBox(height: 1),
             ElevatedButton(
                 onPressed: () async{
-                  await ocr_service.ocr_method();
+                  String? a=await ocr_service.ocr_method();
+                  showDialog(
+                      context: context,
+                      builder: (builder){
+                        return AlertDialog(
+                          title: Text(
+                            "Qualcosa è andato storto",
+                          ),
+                          content: Text(
+                            a!,
+                          ),
+                          actions: [
+                            SizedBox(
+                              width: double.infinity,
+                              height: 40,
+                              child:  ElevatedButton(
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  "Chiudi",
+                                ),
+                              ),
+                            )
+                          ],
+                        );
+                      }
+                  );
                 },
                 child: Text("OCR")
             ),
-            SizedBox(height: 150),
           ],
         ),
       ),
