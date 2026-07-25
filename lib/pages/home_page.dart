@@ -50,12 +50,10 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const BudgetCard(),
-                    const SizedBox(height: 24),
-                    SimpleTrendChart(
-                      firstValue: 200,
-                      secondValue: 350,
-                      thirdValue: spent,
+                    BudgetCard(
+                      totalBudget: 5000,
+                      totalExpenses: 1280,
+                      resetDate: DateTime(2026, 6, 1),
                     ),
                     const SizedBox(height: 24),
                     RecentExpensesSection(expenses: recentExpenses),
