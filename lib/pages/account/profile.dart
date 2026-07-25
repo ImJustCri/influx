@@ -168,15 +168,19 @@ class ProfilePage extends ConsumerWidget {
                     SettingsTile(
                       icon: LucideIcons.pencil,
                       title: "Modifica profilo",
-                      onTap: () {
-                        Navigator.of(context).push(
+                      onTap: () async {
+                        // wait for the edit page to close
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => EditProfilePage(
                               userUuid: userProfile.id,
                               initialName: userProfile.fullName!,
+                              initialAvatarUrl: userProfile.avatarUrl,
                             ),
                           ),
                         );
+                        // reload user profile
+                        ref.invalidate(profileProvider);
                       },
                     ),
                     SettingsTile(
