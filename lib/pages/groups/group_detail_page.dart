@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
 import 'package:influx/widgets/home/budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
@@ -9,13 +10,18 @@ import '../../widgets/group/members_expense_list.dart';
 import '../../models/group_member.dart';
 
 class GroupDetailPage extends StatefulWidget {
-  const GroupDetailPage({super.key});
+  final Group group;
+
+  const GroupDetailPage({
+    super.key,
+    required this.group,
+  });
 
   @override
-  State<GroupDetailPage> createState() => _GroupsPageState();
+  State<GroupDetailPage> createState() => _GroupDetailPageState();
 }
 
-class _GroupsPageState extends State<GroupDetailPage> {
+class _GroupDetailPageState extends State<GroupDetailPage> {
   late final List<GroupMember> members;
 
   @override
@@ -70,15 +76,21 @@ class _GroupsPageState extends State<GroupDetailPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Famiglia Rossi', style: AppTypography.pageTitle),
+                      Text(widget.group.name, style: AppTypography.pageTitle),
                       Text('Budget condiviso', style: AppTypography.pageSubtitle),
                     ],
                   ),
                   IconButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => GroupAdminSettings(members: members)));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GroupAdminSettings(members: members),
+                        ),
+                      );
                     },
-                    icon: Icon(LucideIcons.settings_2),)
+                    icon: const Icon(LucideIcons.settings_2),
+                  )
                 ],
               ),
             ),
@@ -87,9 +99,9 @@ class _GroupsPageState extends State<GroupDetailPage> {
                 spacing: 24,
                 children: [
                   BudgetCard(
-                    totalBudget: 5000,
-                    totalExpenses: 1280,
-                    resetDate: DateTime(2026, 6, 1),
+                    totalBudget: widget.group.totalBudget,
+                    totalExpenses: 10,
+                    resetDate: widget.group.startedAt ?? DateTime.now(),
                     isNotAuthorized: true,
                     isGroup: true,
                   ),

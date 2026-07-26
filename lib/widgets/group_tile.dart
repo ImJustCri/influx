@@ -29,7 +29,9 @@ class GroupTile extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  child: Icon(icon, color: AppColors.white, size: 32),
+                  radius: 24,
+                  backgroundColor: AppColors.btnBackground,
+                  child: Icon(icon, color: AppColors.white, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
