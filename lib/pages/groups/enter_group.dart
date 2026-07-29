@@ -1,42 +1,158 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/page_padding.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 
-class EnterGroupPage extends StatefulWidget {
+class EnterGroupPage extends ConsumerStatefulWidget {
   const EnterGroupPage({super.key});
 
   @override
-  State<EnterGroupPage> createState() => _EnterGroupPageState();
+  ConsumerState<EnterGroupPage> createState() => _EnterGroupPageState();
 }
 
-class _EnterGroupPageState extends State<EnterGroupPage> {
-  // Declare the controller
+class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
   late TextEditingController groupCodeController;
-
-  // Declare a boolean to track if the text is modified
   bool _isModified = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the controller
     groupCodeController = TextEditingController();
 
-    // Listen to changes in the text field
     groupCodeController.addListener(() {
       setState(() {
-        _isModified = groupCodeController.text.isNotEmpty;
+        _isModified = groupCodeController.text.trim().isNotEmpty;
       });
     });
   }
 
   @override
   void dispose() {
-    // Dispose the controller to free resources
     groupCodeController.dispose();
     super.dispose();
+  }
+
+  void _openQrScanner() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.inputBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return Container(
+          height: MediaQuery.of(bottomSheetContext).size.height * 0.6,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Scansiona il codice QR',
+                    style: AppTypography.containerTitle.copyWith(
+                      color: AppColors.white,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.white),
+                    onPressed: () => Navigator.of(bottomSheetContext).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: MobileScanner(
+                    onDetect: (capture) {
+                      final List<Barcode> barcodes = capture.barcodes;
+                      for (final barcode in barcodes) {
+                        if (barcode.rawValue != null) {
+                          final String code = barcode.rawValue!;
+                          setState(() {
+                            groupCodeController.text = code;
+                          });
+                          // Close the bottom sheet popup upon successful scan
+                          if (Navigator.of(bottomSheetContext).canPop()) {
+                            Navigator.of(bottomSheetContext).pop();
+                          }
+                          break;
+                        }
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _joinGroup() async {
+    final code = groupCodeController.text.trim();
+    if (code.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      final response = await supabase.functions.invoke(
+        'join-group-by-code',
+        body: {
+          'code': code
+        },
+      );
+
+      if (response.status == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sei entrato nel gruppo con successo!'),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        final errorMessage =
+            response.data?['error'] ?? 'Errore durante l\'accesso al gruppo.';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage.toString())),
+          );
+        }
+      }
+    } on FunctionException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.reasonPhrase ?? 'Errore della funzione.'),
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Errore imprevisto: $error')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -70,7 +186,6 @@ class _EnterGroupPageState extends State<EnterGroupPage> {
               ),
               const SizedBox(height: 32),
 
-              // Amount Section
               Center(
                 child: Column(
                   children: [
@@ -92,30 +207,35 @@ class _EnterGroupPageState extends State<EnterGroupPage> {
                 ),
               ),
               const SizedBox(height: 40),
+
               TextFormField(
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 controller: groupCodeController,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
                 decoration: InputDecoration(
                   hintText: "Inserisci il codice",
-                  hintStyle: TextStyle(
+                  hintStyle: const TextStyle(
                     color: AppColors.white,
                     fontSize: 14,
                   ),
                   filled: true,
                   fillColor: AppColors.inputBackground,
+                  suffixIcon: IconButton(
+                    icon: const Icon(
+                      LucideIcons.qr_code,
+                      color: AppColors.white,
+                    ),
+                    onPressed: _openQrScanner,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: AppColors.inputBorder,
                       width: 1,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: AppColors.inputBorder,
                       width: 2,
                     ),
@@ -123,12 +243,21 @@ class _EnterGroupPageState extends State<EnterGroupPage> {
                 ),
               ),
               const SizedBox(height: 16),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _isModified ? () {
-                  } : null,
-                  child: Text(
+                  onPressed: (_isModified && !_isLoading) ? _joinGroup : null,
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.white,
+                    ),
+                  )
+                      : Text(
                     'Entra',
                     style: AppTypography.containerTitle.copyWith(
                       color: _isModified
