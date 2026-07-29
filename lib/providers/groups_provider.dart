@@ -1,17 +1,8 @@
-final groupsProvider = FutureProvider<List<Group>>((ref) async {
-  final userId = supabase.auth.currentUser?.id;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/group.dart';
 
-  if (userId == null) return [];
-
-  final response = await supabase
-      .from('profile_group')
-      .select('group:group_id(*)')
-      .eq('profile_id', userId);
-
-  final List<Group> groups = [];
-
-  for (final item in response as List) {
-    final groupData = item['group'];
+final supabase = Supabase.instance.client;
 
     if (groupData == null) continue;
 
@@ -24,5 +15,7 @@ final groupsProvider = FutureProvider<List<Group>>((ref) async {
     }
   }
 
-  return groups;
+  return (response as List<dynamic>)
+      .map((json) => Group.fromJson(json as Map<String, dynamic>))
+      .toList();
 });
