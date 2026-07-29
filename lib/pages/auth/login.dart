@@ -197,18 +197,7 @@ class LoginPage extends StatefulWidget {
 
                                     if(session!=null){
                                       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const MainShellScreen()), (route)=>false);
-                                    }else{
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            duration: Duration(seconds: 2),
-                                            behavior: SnackBarBehavior.floating,
-                                            content: Text(
-                                              "Errore durante l'accesso. Riprova",
-                                            ),
-                                          )
-                                      );
                                     }
-
                                   });
                                 },
                                 icon: Image.asset(
