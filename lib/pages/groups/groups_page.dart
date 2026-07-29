@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/pages/groups/create_group.dart';
 import 'package:influx/pages/groups/group_detail_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
@@ -100,8 +101,14 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                   child: SettingsTile(
                     icon: LucideIcons.plus,
                     title: "Crea",
-                    onTap: () {
-
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateGroupPage(),
+                        ),
+                      );
+                      ref.invalidate(groupsProvider);
                     },
                   ),
                 ),
@@ -109,13 +116,14 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                   child: SettingsTile(
                     icon: LucideIcons.door_open,
                     title: "Entra",
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const EnterGroupPage(),
                         ),
                       );
+                      ref.invalidate(groupsProvider);
                     },
                   ),
                 ),

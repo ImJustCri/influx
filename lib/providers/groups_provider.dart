@@ -4,16 +4,9 @@ import '../models/group.dart';
 
 final supabase = Supabase.instance.client;
 
-    if (groupData == null) continue;
-
-    if (groupData is Map<String, dynamic>) {
-      groups.add(Group.fromJson(groupData));
-    } 
-
-    else if (groupData is List && groupData.isNotEmpty) {
-      groups.add(Group.fromJson(groupData[0] as Map<String, dynamic>));
-    }
-  }
+final groupsProvider = FutureProvider<List<Group>>((ref) async {
+  // Query all rows from the 'group' table
+  final response = await supabase.from('group').select();
 
   return (response as List<dynamic>)
       .map((json) => Group.fromJson(json as Map<String, dynamic>))
