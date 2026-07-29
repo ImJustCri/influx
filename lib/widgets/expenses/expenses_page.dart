@@ -22,7 +22,6 @@ class ExpensesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double totalSpent = _mockExpenses.fold(0.0, (sum, item) => sum + item.numericAmount);
-    final ocr_service= OcrService();
 
     return Scaffold(
       appBar: AppBar(
@@ -64,40 +63,6 @@ class ExpensesPage extends StatelessWidget {
                   percentage: percentageFor(type, totalSpent, categorySpent)
                 );
               },
-            ),
-            SizedBox(height: 1),
-            ElevatedButton(
-                onPressed: () async{
-                  String? a=await ocr_service.ocr_method();
-                  showDialog(
-                      context: context,
-                      builder: (builder){
-                        return AlertDialog(
-                          title: Text(
-                            "Qualcosa è andato storto",
-                          ),
-                          content: Text(
-                            a!,
-                          ),
-                          actions: [
-                            SizedBox(
-                              width: double.infinity,
-                              height: 40,
-                              child:  ElevatedButton(
-                                onPressed: (){
-                                  Navigator.pop(context);
-                                },
-                                child: Text(
-                                  "Chiudi",
-                                ),
-                              ),
-                            )
-                          ],
-                        );
-                      }
-                  );
-                },
-                child: Text("OCR")
             ),
           ],
         ),

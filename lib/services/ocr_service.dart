@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
-import 'package:flutter_native_ocr/flutter_native_ocr.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'package:flutter_native_ocr/flutter_native_ocr.dart';
 
 
 class OcrService extends StatelessWidget {
@@ -10,29 +11,57 @@ class OcrService extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Placeholder();
   }
-
-  Future<String?> ocr_method() async{
-    final ocrService= FlutterNativeOcr();
-    final imagePicker=ImagePicker();
-    String? _text;
-
+  Future<String?> ocrMethod() async{
+    final ImagePicker imagePicker = ImagePicker();
+    String? text;
     final XFile? image= await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 100);
 
-    if(image!=null) {
-      try {
-        final temp = await ocrService.recognizeText(image.path);
+    if(image!=null){
+      String path= image.path;
 
-        return _text= temp.isNotEmpty ? temp : "Nessun testo trovato";
 
-      } catch (e) {
-        print(e);
-      }
+      final testo= await FlutterTesseractOcr.extractText(
+          path,
+          language: "ita",
+          args: {
+            "psm" : "4"
+          }
+      );
+
+      text=estraiImporto(testo);
+      return text;
     }
-
+    return "errore";
 
 
   }
+  String? estraiImporto(String testo) {
+
+    List<String> righe = testo.split("\n");
+
+    for (String riga in righe) {
+
+      String pulita = riga.toUpperCase();
+
+      if (pulita.contains("IMPORTO") && pulita.contains("PAGATO")) {
+
+        RegExp regex = RegExp(r'\d+[,.]\d{2}');
+
+        Match? match = regex.firstMatch(pulita);
+
+        if (match != null) {
+          return match.group(0);
+        }
+      }
+    }
+
+    return null;
+  }
 }
+
+
+
+
 
 
 
