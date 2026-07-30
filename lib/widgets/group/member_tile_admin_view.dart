@@ -21,7 +21,7 @@ class MemberTileAdminView extends StatelessWidget {
       borderRadius: BorderRadius.circular(32),
       onTap: () {
             Navigator.push(context, MaterialPageRoute(
-              builder: (context) => GroupMemberEdit()
+              builder: (context) => GroupMemberEdit(member: member, groupId: groupId,)
             )
           );
         },
