@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
 import 'package:influx/widgets/home/budget_card.dart';
@@ -7,9 +8,9 @@ import 'package:influx/widgets/page_padding.dart';
 
 import '../../theme.dart';
 import '../../widgets/group/members_expense_list.dart';
-import '../../models/group_member.dart';
+import '../../providers/group_members_provider.dart';
 
-class GroupDetailPage extends StatefulWidget {
+class GroupDetailPage extends ConsumerWidget {
   final Group group;
 
   const GroupDetailPage({
@@ -18,45 +19,10 @@ class GroupDetailPage extends StatefulWidget {
   });
 
   @override
-  State<GroupDetailPage> createState() => _GroupDetailPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the AsyncValue from Riverpod using the group's ID
+    final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
 
-class _GroupDetailPageState extends State<GroupDetailPage> {
-  late final List<GroupMember> members;
-
-  @override
-  void initState() {
-    super.initState();
-    members = [
-      GroupMember(
-        id: '1',
-        name: 'Mario Rossi',
-        amount: 1280,
-        avatarImageUrl: 'https://cdn.pfps.gg/pfps/8324-mario-profile-image.png',
-        progressValue: 0.5,
-        isAdmin: true,
-      ),
-      GroupMember(
-        id: '2',
-        name: 'Luigi Rossi',
-        amount: 950,
-        avatarImageUrl: 'https://cdn.pfps.gg/pfps/7553-paper-luigi.png',
-        progressValue: 0.35,
-        isAdmin: false,
-      ),
-      GroupMember(
-        id: '3',
-        name: 'Peach Rossi',
-        amount: 2100,
-        avatarImageUrl: 'https://example.com/peach.png',
-        progressValue: 0.75,
-        isAdmin: false,
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
@@ -64,59 +30,77 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         elevation: 0,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.group.name, style: AppTypography.pageTitle),
-                      Text('Budget condiviso', style: AppTypography.pageSubtitle),
-                    ],
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GroupAdminSettings(members: members),
-                        ),
-                      );
-                    },
-                    icon: const Icon(LucideIcons.settings_2),
-                  )
-                ],
+      body: membersAsync.when(
+        data: (members) => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(group.name, style: AppTypography.pageTitle),
+                        Text('Budget condiviso', style: AppTypography.pageSubtitle),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GroupAdminSettings(
+                              members: members,
+                              name: group.name,
+                              groupId: group.id,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(LucideIcons.settings_2),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            PagePadding(
-              child: Column(
-                spacing: 24,
-                children: [
-                  BudgetCard(
-                    totalBudget: widget.group.totalBudget,
-                    totalExpenses: 10,
-                    resetDate: widget.group.startedAt ?? DateTime.now(),
-                    isNotAuthorized: true,
-                    isGroup: true,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 16,
-                    children: [
-                      Text('Spese per membro', style: AppTypography.containerBody),
-                      MembersExpenseList(members: members),
-                    ],
-                  )
-                ],
+              PagePadding(
+                child: Column(
+                  spacing: 24,
+                  children: [
+                    BudgetCard(
+                      totalExpenses: 10,
+                      resetDate: group.startedAt ?? DateTime.now(),
+                      isNotAuthorized: true,
+                      isGroup: true,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 16,
+                      children: [
+                        Text('Spese per membro', style: AppTypography.containerBody),
+                        MembersExpenseList(members: members),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+        ),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Text(
+              'Errore durante il caricamento dei membri: $error',
+              style: AppTypography.pageSubtitle,
+              textAlign: TextAlign.center,
             ),
-          ],
+          ),
         ),
       ),
     );
