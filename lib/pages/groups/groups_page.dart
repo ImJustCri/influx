@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../../widgets/group_tile.dart';
 import '../../widgets/settings_tile.dart';
 import 'enter_group.dart';
+import 'group_not_started_page.dart';
 
 class GroupsPage extends ConsumerStatefulWidget {
   const GroupsPage({super.key});
@@ -78,14 +79,25 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                         title: group.name,
                         members: group.maxMembers,
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GroupDetailPage(
-                                group: group,
+                          if (group.status == "active") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupDetailPage(
+                                  group: group,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupNotStartedPage(
+                                  group: group,
+                                ),
+                              ),
+                            );
+                          }
                         },
                       );
                     }).toList(),
