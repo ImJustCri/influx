@@ -48,12 +48,6 @@ class MemberTileAdminView extends StatelessWidget {
                           member.name,
                           style: AppTypography.containerTitle,
                         ),
-                        Text(
-                          'member.email', // todo
-                          style: AppTypography.containerBody.copyWith(
-                            color: Color(0xFF6B7280),
-                          ),
-                        )
                       ],
                     )
                   ],
