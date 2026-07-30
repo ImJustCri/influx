@@ -7,10 +7,12 @@ import '../../pages/groups/settings/group_member_edit.dart';
 
 class MemberTileAdminView extends StatelessWidget {
   final GroupMember member;
+  final String groupId;
 
   const MemberTileAdminView({
     super.key,
     required this.member,
+    required this.groupId,
   });
 
   @override
