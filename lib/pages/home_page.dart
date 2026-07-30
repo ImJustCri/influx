@@ -51,8 +51,7 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     BudgetCard(
-                      totalBudget: 5000,
-                      totalExpenses: 1280,
+                      totalExpenses: 500,
                       resetDate: DateTime(2026, 6, 1),
                     ),
                     const SizedBox(height: 24),
