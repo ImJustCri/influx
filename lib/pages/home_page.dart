@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
-
-import '../global.dart';
 import '../models/expense_data.dart';
-import '../widgets/charts/simple_trend_chart.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
@@ -93,8 +91,8 @@ class HomePage extends StatelessWidget {
 
             },
           backgroundColor: AppColors.backgroundAccent,
-          icon: Image.asset("assets/icon/addIcon.png"),
-          label: Text("aggiungi")
+          icon: Icon(LucideIcons.circle_plus, color: AppColors.purple),
+          label: Text("Aggiungi", style: TextStyle(color: AppColors.white))
         ),
       ),
     );
