@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:influx/services/ocr_service.dart';
+import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
 
@@ -36,6 +38,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final OcrService s=OcrService();
+
     return Scaffold(
       body: SingleChildScrollView(
         child: ConstrainedBox(
@@ -63,6 +67,37 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 136),
+        child: FloatingActionButton.extended(
+            onPressed: () async {
+              final a = await s.ocrMethod();
+              showDialog(
+                  context: context,
+                  builder: (builder){
+                    return AlertDialog(
+                      title: Text("Ocr"),
+                      content: Text(a ?? "ciao"),
+                      actions: [
+                        ElevatedButton(
+                            onPressed: (){
+                              Navigator.pop(context);
+                            }, child: Text("chiudi"),
+                        )
+                      ],
+                    );
+                  }
+              );
+
+            },
+          backgroundColor: AppColors.backgroundAccent,
+          icon: Image.asset("assets/icon/addIcon.png"),
+          label: Text("aggiungi")
+        ),
+      ),
     );
+
   }
 }
