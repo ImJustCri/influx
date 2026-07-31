@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/repositories/profile_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 
-class EditProfilePage extends StatefulWidget {
+class EditProfilePage extends ConsumerStatefulWidget {
   final String userUuid;
   final String initialName;
   final String? initialAvatarUrl;
@@ -16,37 +19,23 @@ class EditProfilePage extends StatefulWidget {
   });
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  ConsumerState<EditProfilePage> createState() => _EditProfilePageState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
-  late TextEditingController _nameController;
-  late TextEditingController _avatarUrlController;
-
-  static const String _defaultAvatarUrl =
-      'https://i.pinimg.com/736x/f9/b6/ee/f9b6ee085996dee0e22ddc52dda03ac2.jpg';
-
-  bool _isModified = false;
+class _EditProfilePageState extends ConsumerState<EditProfilePage> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _avatarUrlController;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
-    _avatarUrlController = TextEditingController(
-      text: widget.initialAvatarUrl ?? '',
-    );
+    _avatarUrlController = TextEditingController(text: widget.initialAvatarUrl ?? '');
 
-    _nameController.addListener(_checkModified);
-    _avatarUrlController.addListener(_checkModified);
-  }
-
-  void _checkModified() {
-    final nameChanged = _nameController.text != widget.initialName;
-    final avatarChanged =
-        _avatarUrlController.text != (widget.initialAvatarUrl ?? '');
-
-    setState(() {
-      _isModified = nameChanged || avatarChanged;
+    _avatarUrlController.addListener(() {
+      setState(() {});
     });
   }
 
@@ -57,181 +46,128 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _saveChanges() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profilo aggiornato con successo')),
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final supabase = Supabase.instance.client;
+      final newAvatarUrl = _avatarUrlController.text.trim();
+
+      // Perform update via ProfileRepository static method
+      await ProfileRepository.updateProfile(
+        supabase: supabase,
+        userUuid: widget.userUuid,
+        fullName: _nameController.text.trim(),
+        avatarUrl: newAvatarUrl.isEmpty ? null : newAvatarUrl,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profilo aggiornato con successo!')),
+      );
+
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Errore durante l\'aggiornamento: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Widget _buildAvatarPreview() {
+    final url = _avatarUrlController.text.trim();
+    final hasValidUrl = url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'));
+
+    return Center(
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: AppColors.white.withValues(alpha: 0.1),
+            backgroundImage: hasValidUrl ? NetworkImage(url) : null,
+            child: !hasValidUrl
+                ? const Icon(LucideIcons.user, size: 48, color: Colors.white)
+                : null,
+          ),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              LucideIcons.pencil,
+              size: 16,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
     );
-    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentAvatarUrl = _avatarUrlController.text.isNotEmpty
-        ? _avatarUrlController.text
-        : (widget.initialAvatarUrl ?? _defaultAvatarUrl);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Modifica profilo'),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrow_left),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        title: const Text("Modifica profilo"),
       ),
       body: PagePadding(
         child: SingleChildScrollView(
-          child: Column(
-            spacing: 40,
-            children: [
-              Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundImage: NetworkImage(currentAvatarUrl),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.btnBackground,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            width: 2,
-                          ),
-                        ),
-                        child: const Icon(
-                          LucideIcons.camera,
-                          size: 16,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              spacing: 24,
+              children: [
+                _buildAvatarPreview(),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome completo',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Inserisci un nome valido';
+                    }
+                    if (value.trim().length >= 15) {
+                      return 'Il nome deve essere inferiore a 15 caratteri';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-
-              Column(
-                spacing: 20,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Nome completo',
-                        style: AppTypography.containerTitle,
-                      ),
-                      TextField(
-                        controller: _nameController,
-                        style: AppTypography.containerBody,
-                        decoration: InputDecoration(
-                          hintText: 'Inserisci il tuo nome',
-                          hintStyle: AppTypography.containerBody.copyWith(
-                            color: AppColors.white.withValues(alpha: 0.5),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.inputBackground,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.inputBorder,
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.inputBorder,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.btnBackground,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'URL Immagine Profilo',
-                        style: AppTypography.containerTitle,
-                      ),
-                      TextField(
-                        controller: _avatarUrlController,
-                        style: AppTypography.containerBody,
-                        decoration: InputDecoration(
-                          hintText: 'Inserisci URL immagine',
-                          hintStyle: AppTypography.containerBody.copyWith(
-                            color: AppColors.white.withValues(alpha: 0.5),
-                          ),
-                          filled: true,
-                          fillColor: AppColors.inputBackground,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.inputBorder,
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.inputBorder,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.btnBackground,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isModified ? _saveChanges : null,
-                  child: Text(
-                    'Salva modifiche',
-                    style: AppTypography.containerTitle.copyWith(
-                      color: _isModified
-                          ? AppColors.white
-                          : AppColors.white.withValues(alpha: 0.5),
-                    ),
+                TextFormField(
+                  controller: _avatarUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'URL Immagine Avatar',
+                    hintText: 'https://example.com/avatar.png',
+                    border: OutlineInputBorder(),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  child: _isLoading
+                      ? Text('Salvataggio...', style: AppTypography.containerTitle)
+                      : Text('Salva Modifiche', style: AppTypography.containerTitle),
+                ),
+              ],
+            ),
           ),
         ),
       ),

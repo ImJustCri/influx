@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/services/ocr_service.dart';
+import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
-
-import '../global.dart';
 import '../models/expense_data.dart';
-import '../widgets/charts/simple_trend_chart.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
@@ -36,6 +36,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final OcrService s=OcrService();
+
     return Scaffold(
       body: SingleChildScrollView(
         child: ConstrainedBox(
@@ -51,8 +53,7 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     BudgetCard(
-                      totalBudget: 5000,
-                      totalExpenses: 1280,
+                      totalExpenses: 500,
                       resetDate: DateTime(2026, 6, 1),
                     ),
                     const SizedBox(height: 24),
@@ -64,6 +65,37 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 136),
+        child: FloatingActionButton.extended(
+            onPressed: () async {
+              final a = await s.ocrMethod();
+              showDialog(
+                  context: context,
+                  builder: (builder){
+                    return AlertDialog(
+                      title: Text("Ocr"),
+                      content: Text(a ?? "ciao"),
+                      actions: [
+                        ElevatedButton(
+                            onPressed: (){
+                              Navigator.pop(context);
+                            }, child: Text("chiudi"),
+                        )
+                      ],
+                    );
+                  }
+              );
+
+            },
+          backgroundColor: AppColors.backgroundAccent,
+          icon: Icon(LucideIcons.circle_plus, color: AppColors.purple),
+          label: Text("Aggiungi", style: TextStyle(color: AppColors.white))
+        ),
+      ),
     );
+
   }
 }
