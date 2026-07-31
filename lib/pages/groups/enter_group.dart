@@ -40,56 +40,45 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.inputBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (bottomSheetContext) {
-        return Container(
-          height: MediaQuery.of(bottomSheetContext).size.height * 0.6,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Scansiona il codice QR',
-                    style: AppTypography.containerTitle.copyWith(
-                      color: AppColors.white,
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: SizedBox(
+            height: MediaQuery.of(bottomSheetContext).size.height * 0.5,
+            child: Column(
+              children: [
+                Text(
+                  'Scansiona il codice QR',
+                  style: AppTypography.containerTitle,
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: MobileScanner(
+                      onDetect: (capture) {
+                        final List<Barcode> barcodes = capture.barcodes;
+                        for (final barcode in barcodes) {
+                          if (barcode.rawValue != null) {
+                            final String code = barcode.rawValue!;
+                            setState(() {
+                              groupCodeController.text = code;
+                            });
+
+                            // Close the bottom sheet popup upon successful scan
+                            if (Navigator.of(bottomSheetContext).canPop()) {
+                              Navigator.of(bottomSheetContext).pop();
+                            }
+                            break;
+                          }
+                        }
+                      },
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.white),
-                    onPressed: () => Navigator.of(bottomSheetContext).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: MobileScanner(
-                    onDetect: (capture) {
-                      final List<Barcode> barcodes = capture.barcodes;
-                      for (final barcode in barcodes) {
-                        if (barcode.rawValue != null) {
-                          final String code = barcode.rawValue!;
-                          setState(() {
-                            groupCodeController.text = code;
-                          });
-                          // Close the bottom sheet popup upon successful scan
-                          if (Navigator.of(bottomSheetContext).canPop()) {
-                            Navigator.of(bottomSheetContext).pop();
-                          }
-                          break;
-                        }
-                      }
-                    },
-                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         );
       },
