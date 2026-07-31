@@ -3,10 +3,13 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/widgets/page_padding.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import '../../providers/group_members_provider.dart';
 import '../../widgets/group/members_tile_view.dart';
+import '../../widgets/settings_tile.dart';
 
 class GroupNotStartedPage extends ConsumerWidget {
   final Group group;
@@ -79,7 +82,75 @@ class GroupNotStartedPage extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
+
+                        if (isUserGroupOwner) ...[
+                          SettingsTile(
+                            icon: LucideIcons.key,
+                            title: "Vedi codice di ingresso",
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Codice di ingresso",
+                                          style: AppTypography.containerTitle,
+                                        ),
+                                        Text(
+                                          "${group.inviteCode}",
+                                          style: AppTypography.budgetIndicator.copyWith(
+                                            color: Colors.white
+                                          ),
+                                        ),
+                                        QrImageView(
+                                          data: "${group.inviteCode}",
+                                          eyeStyle: QrEyeStyle(
+                                              eyeShape: QrEyeShape.square,
+                                              color: Colors.white
+                                          ),
+                                          dataModuleStyle: QrDataModuleStyle(
+                                              dataModuleShape: QrDataModuleShape.square,
+                                              color: Colors.white
+                                          ),
+                                          size: 192,
+                                        ),
+                                        const SizedBox(height: 24),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: const Text("Chiudi"),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+
+                          SettingsTile(
+                            icon: LucideIcons.pencil,
+                            title: "Modifica gruppo",
+                            onTap: () {},
+                          ),
+
+                          SettingsTile(
+                            icon: LucideIcons.circle_power,
+                            title: "Attiva il gruppo",
+                            onTap: () {},
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+
                         AppContainer(
                           padding: EdgeInsets.zero,
                           child: Column(
