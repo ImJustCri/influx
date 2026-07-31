@@ -43,7 +43,7 @@ class OcrService extends StatelessWidget {
 
       String pulita = riga.toUpperCase();
 
-      if (pulita.contains("IMPORTO") && pulita.contains("PAGATO")) {
+      if (pulita.contains("IMPORTO PAGATO") || pulita.contains("TOTALE COMPLESSIVO")) {
 
         RegExp regex = RegExp(r'\d+[,.]\d{2}');
 
