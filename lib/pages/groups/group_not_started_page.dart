@@ -157,7 +157,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                             children: List.generate(
                               members.length,
                                   (index) => MemberTileView(
-                                member: members[index], groupId: group.id,
+                                member: members[index], groupId: group.id, creatorId: group.creatorId,
                               ),
                             ),
                           ),
