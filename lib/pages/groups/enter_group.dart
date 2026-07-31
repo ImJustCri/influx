@@ -96,37 +96,32 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
     try {
       final supabase = Supabase.instance.client;
 
-      final response = await supabase.functions.invoke(
+      await supabase.functions.invoke(
         'join-group-by-code',
-        body: {
-          'code': code
-        },
+        body: {'code': code},
       );
 
-      if (response.status == 200) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Sei entrato nel gruppo con successo!'),
-            ),
-          );
-          Navigator.of(context).pop();
-        }
-      } else {
-        final errorMessage =
-            response.data?['error'] ?? 'Errore durante l\'accesso al gruppo.';
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage.toString())),
-          );
-        }
+      // HTTP Status is 2xx if no exception was thrown
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sei entrato nel gruppo con successo!'),
+          ),
+        );
+        Navigator.of(context).pop();
       }
     } on FunctionException catch (error) {
       if (mounted) {
+        String message;
+
+        if (error.status == 404) {
+          message = 'Gruppo non trovato!';
+        } else {
+          message = error.reasonPhrase ?? 'Errore durante l\'accesso al gruppo.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.reasonPhrase ?? 'Errore della funzione.'),
-          ),
+          SnackBar(content: Text(message)),
         );
       }
     } catch (error) {
