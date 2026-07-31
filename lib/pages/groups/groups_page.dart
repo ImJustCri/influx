@@ -109,7 +109,6 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                 },
               ),
             ),
-            Text("Vuoi fare parte di un'altro gruppo?", style: AppTypography.containerBody),
             Row(
               spacing: 8,
               children: [
