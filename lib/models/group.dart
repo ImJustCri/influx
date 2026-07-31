@@ -8,6 +8,7 @@ class Group {
   final double? perCapitaBudget;
   final DateTime createdAt;
   final DateTime? startedAt;
+  final String creatorId;
 
   Group({
     required this.id,
@@ -19,6 +20,7 @@ class Group {
     this.perCapitaBudget,
     required this.createdAt,
     this.startedAt,
+    required this.creatorId,
   });
 
   factory Group.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class Group {
           ? (json['per_capita_budget'] as num).toDouble()
           : null,
       createdAt: DateTime.parse(json['created_at'] as String),
+      creatorId: json['created_by'] as String,
       startedAt: json['started_at'] != null
           ? DateTime.parse(json['started_at'] as String)
           : null,
@@ -49,6 +52,7 @@ class Group {
       'total_budget': totalBudget,
       'per_capita_budget': perCapitaBudget,
       'created_at': createdAt.toIso8601String(),
+      'creator_id': creatorId,
       'started_at': startedAt?.toIso8601String(),
     };
   }
