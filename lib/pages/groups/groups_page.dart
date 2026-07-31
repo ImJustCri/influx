@@ -24,6 +24,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
   @override
   Widget build(BuildContext context) {
     final groupsAsync = ref.watch(groupsProvider);
+    final userId = supabase.auth.currentUser?.id;
 
     return Scaffold(
       appBar: AppBar(
@@ -78,6 +79,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                         icon: LucideIcons.users,
                         title: group.name,
                         members: group.maxMembers,
+                        isUserGroupOwner: (group.creatorId == userId),
                         onTap: () {
                           if (group.status == "active") {
                             Navigator.push(
@@ -85,6 +87,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                               MaterialPageRoute(
                                 builder: (context) => GroupDetailPage(
                                   group: group,
+                                  isUserGroupOwner: (group.creatorId == userId),
                                 ),
                               ),
                             );
@@ -94,6 +97,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                               MaterialPageRoute(
                                 builder: (context) => GroupNotStartedPage(
                                   group: group,
+                                  isUserGroupOwner: (group.creatorId == userId),
                                 ),
                               ),
                             );
