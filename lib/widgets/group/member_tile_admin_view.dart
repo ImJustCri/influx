@@ -7,10 +7,12 @@ import '../../pages/groups/settings/group_member_edit.dart';
 
 class MemberTileAdminView extends StatelessWidget {
   final GroupMember member;
+  final String groupId;
 
   const MemberTileAdminView({
     super.key,
     required this.member,
+    required this.groupId,
   });
 
   @override
@@ -19,7 +21,7 @@ class MemberTileAdminView extends StatelessWidget {
       borderRadius: BorderRadius.circular(32),
       onTap: () {
             Navigator.push(context, MaterialPageRoute(
-              builder: (context) => GroupMemberEdit()
+              builder: (context) => GroupMemberEdit(member: member, groupId: groupId,)
             )
           );
         },
@@ -48,12 +50,6 @@ class MemberTileAdminView extends StatelessWidget {
                           member.name,
                           style: AppTypography.containerTitle,
                         ),
-                        Text(
-                          'member.email', // todo
-                          style: AppTypography.containerBody.copyWith(
-                            color: Color(0xFF6B7280),
-                          ),
-                        )
                       ],
                     )
                   ],

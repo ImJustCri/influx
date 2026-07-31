@@ -9,8 +9,10 @@ import '../../../theme.dart';
 import '../../../widgets/group/member_tile_admin_view.dart';
 
 class GroupAdminSettings extends StatefulWidget {
+  final String name;
+  final String groupId;
   final List<GroupMember> members;
-  const GroupAdminSettings({super.key, required this.members});
+  const GroupAdminSettings({super.key, required this.members, required this.name, required this.groupId});
 
   @override
   State<GroupAdminSettings> createState() => _GroupAdminSettingsState();
@@ -38,7 +40,7 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Famiglia Rossi', style: AppTypography.pageTitle),
+                  Text(widget.name, style: AppTypography.pageTitle),
                   Text('${widget.members.length} membri - budget condiviso',
                       style: AppTypography.pageSubtitle),
                 ],
@@ -106,7 +108,7 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
             children: List.generate(
               members.length,
                   (index) => MemberTileAdminView(
-                member: members[index],
+                member: members[index], groupId: widget.groupId,
               ),
             ),
           ),

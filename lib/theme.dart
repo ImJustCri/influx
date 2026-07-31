@@ -62,6 +62,14 @@ final ThemeData darkTheme = ThemeData(
     ),
   ),
 
+  bottomSheetTheme: const BottomSheetThemeData(
+    backgroundColor: AppColors.backgroundColor,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(24), top: Radius.circular(24)),
+    ),
+    showDragHandle: true,
+  ),
+
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       padding: EdgeInsetsGeometry.symmetric(vertical: 16),

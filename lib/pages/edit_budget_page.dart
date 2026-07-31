@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../widgets/page_padding.dart';
 
@@ -23,6 +24,7 @@ class EditBudgetPage extends StatefulWidget {
 class _EditBudgetPageState extends State<EditBudgetPage> {
   late TextEditingController budgetController;
   late DateTime selectedResetDate;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -56,7 +58,10 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
               onPrimary: AppColors.white,
               surface: AppColors.inputBackground,
               onSurface: AppColors.white,
-            ), dialogTheme: DialogThemeData(backgroundColor: AppColors.inputBackground),
+            ),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: AppColors.inputBackground,
+            ),
           ),
           child: child!,
         );
@@ -69,22 +74,55 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
     }
   }
 
-  void _saveBudget() {
+  Future<void> _saveBudget() async {
     final cleanText = budgetController.text.replaceAll(',', '.');
     final newBudget = double.tryParse(cleanText);
 
-    if (newBudget != null && newBudget > 0) {
-      Navigator.pop(context, {
-        'budget': newBudget,
-        'resetDate': selectedResetDate,
-      });
-    } else {
+    if (newBudget == null || newBudget <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Inserisci un budget valido'),
           backgroundColor: Color(0xFFFF5252),
         ),
       );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw Exception('Utente non autenticato');
+
+      // Update budget_personale column in 'profilo' table
+      await Supabase.instance.client
+          .from('profilo')
+          .update({'budget_personale': newBudget})
+          .eq('id', user.id);
+
+      if (!mounted) return;
+
+      Navigator.pop(context, {
+        'budget': newBudget,
+        'resetDate': selectedResetDate,
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Errore durante il salvataggio: ${e.toString()}'),
+          backgroundColor: const Color(0xFFFF5252),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -114,7 +152,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                       children: [
                         Text(
                           'Budget disponibile',
-                          style: AppTypography.containerBody
+                          style: AppTypography.containerBody,
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,14 +160,17 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                             Expanded(
                               child: TextField(
                                 controller: budgetController,
-                                keyboardType: const TextInputType.numberWithOptions(
+                                keyboardType:
+                                const TextInputType.numberWithOptions(
                                   decimal: true,
                                 ),
                                 style: AppTypography.budgetIndicator,
                                 decoration: InputDecoration(
                                   hintText: '0',
-                                  hintStyle: AppTypography.budgetIndicator.copyWith(
-                                    color: AppColors.white.withValues(alpha: 0.3),
+                                  hintStyle: AppTypography.budgetIndicator
+                                      .copyWith(
+                                    color:
+                                    AppColors.white.withValues(alpha: 0.3),
                                   ),
                                   border: InputBorder.none,
                                   enabledBorder: InputBorder.none,
@@ -150,15 +191,10 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                       ],
                     ),
                   ),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 8,
                     children: [
-                      Text(
-                        'Data Reset',
-                        style: AppTypography.containerBody,
-                      ),
                       InkWell(
                         onTap: _selectDate,
                         borderRadius: BorderRadius.circular(32),
@@ -169,7 +205,8 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: AppColors.btnBackground.withValues(alpha: 0.15),
+                                  color: AppColors.btnBackground
+                                      .withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -181,14 +218,17 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   spacing: 2,
                                   children: [
                                     Text(
                                       'Rinnovo ogni mese il',
-                                      style: AppTypography.containerBody.copyWith(
+                                      style:
+                                      AppTypography.containerBody.copyWith(
                                         fontSize: 12,
-                                        color: AppColors.white.withValues(alpha: 0.5),
+                                        color: AppColors.white
+                                            .withValues(alpha: 0.5),
                                       ),
                                     ),
                                     Text(
@@ -212,13 +252,22 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                 ],
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _saveBudget,
-                child: Text(
+                onPressed: _isLoading ? null : _saveBudget,
+                child: _isLoading
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.white,
+                  ),
+                )
+                    : Text(
                   'Salva modifiche',
                   style: AppTypography.containerTitle.copyWith(
                     color: AppColors.white,

@@ -120,9 +120,10 @@ class ProfilePage extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    showDialog(
+                    showModalBottomSheet(
                       context: context,
                       builder: (context) => UserQrDialog(userId: userProfile.id),
+                      isScrollControlled: true
                     );
                   },
                   child: AppContainer(

@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/pages/groups/create_group.dart';
 import 'package:influx/pages/groups/group_detail_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
 
+import '../../providers/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/group_tile.dart';
 import '../../widgets/settings_tile.dart';
 import 'enter_group.dart';
+import 'group_not_started_page.dart';
 
-class GroupsPage extends StatefulWidget {
+class GroupsPage extends ConsumerStatefulWidget {
   const GroupsPage({super.key});
 
   @override
-  State<GroupsPage> createState() => _GroupsPageState();
+  ConsumerState<GroupsPage> createState() => _GroupsPageState();
 }
 
-class _GroupsPageState extends State<GroupsPage> {
+class _GroupsPageState extends ConsumerState<GroupsPage> {
   @override
   Widget build(BuildContext context) {
+    final groupsAsync = ref.watch(groupsProvider);
+    final userId = supabase.auth.currentUser?.id;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
@@ -35,29 +42,73 @@ class _GroupsPageState extends State<GroupsPage> {
           spacing: 24,
           children: [
             AppContainer(
-              padding: EdgeInsets.all(0),
-              child: Column(
-                children: [
-                  GroupTile(
-                    icon: LucideIcons.plus,
-                    title: "Famiglia",
-                    members: 2,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => GroupDetailPage()));
-                    }
-                  ),
-                  GroupTile(
-                    icon: LucideIcons.plus,
-                    title: "Amici viaggio",
-                    members: 5,
-                    onTap: () {
+              padding: const EdgeInsets.all(0),
+              child: groupsAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(24.0),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, stack) {
+                  debugPrint("Groups Provider Error: $error");
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'Errore nel caricamento dei gruppi',
+                        style: AppTypography.containerBody,
+                      ),
+                    ),
+                  );
+                },
+                data: (groups) {
+                  if (groups.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: Center(
+                        child: Text(
+                          "Nessun gruppo trovato",
+                          style: AppTypography.containerBody,
+                        ),
+                      ),
+                    );
+                  }
 
-                    },
-                  ),
-                ],
-              )
+                  return Column(
+                    children: groups.map((group) {
+                      return GroupTile(
+                        icon: LucideIcons.users,
+                        title: group.name,
+                        members: group.maxMembers,
+                        isUserGroupOwner: (group.creatorId == userId),
+                        onTap: () {
+                          if (group.status == "active") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupDetailPage(
+                                  group: group,
+                                  isUserGroupOwner: (group.creatorId == userId),
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupNotStartedPage(
+                                  group: group,
+                                  isUserGroupOwner: (group.creatorId == userId),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ),
-            Text("Vuoi fare parte di un'altro gruppo?", style: AppTypography.containerBody),
             Row(
               spacing: 8,
               children: [
@@ -65,8 +116,14 @@ class _GroupsPageState extends State<GroupsPage> {
                   child: SettingsTile(
                     icon: LucideIcons.plus,
                     title: "Crea",
-                    onTap: () {
-
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateGroupPage(),
+                        ),
+                      );
+                      ref.invalidate(groupsProvider);
                     },
                   ),
                 ),
@@ -74,8 +131,14 @@ class _GroupsPageState extends State<GroupsPage> {
                   child: SettingsTile(
                     icon: LucideIcons.door_open,
                     title: "Entra",
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => EnterGroupPage()));
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EnterGroupPage(),
+                        ),
+                      );
+                      ref.invalidate(groupsProvider);
                     },
                   ),
                 ),

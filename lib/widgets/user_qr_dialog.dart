@@ -14,72 +14,43 @@ class UserQrDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "ID dell'utente",
-                  style: AppTypography.containerTitle,
-                ),
-                IconButton(
-                  icon: const Icon(LucideIcons.x, color: Colors.white70),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "ID dell'utente",
+            style: AppTypography.containerTitle,
+          ),
+          const SizedBox(height: 8),
+          SelectableText(
+            userId,
+            style: AppTypography.containerBody,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
 
-            // QR Code rendering
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: QrImageView(
-                data: userId,
-                version: QrVersions.auto,
-                size: 200.0,
-                eyeStyle: const QrEyeStyle(
-                  eyeShape: QrEyeShape.square,
-                  color: Colors.black,
-                ),
-                dataModuleStyle: const QrDataModuleStyle(
-                  dataModuleShape: QrDataModuleShape.square,
-                  color: Colors.black,
-                ),
-              ),
+          // Clean white QR Code
+          QrImageView(
+            data: userId,
+            version: QrVersions.auto,
+            size: 192,
+            eyeStyle: const QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: Colors.white,
             ),
-            const SizedBox(height: 20),
-
-            // ID text view
-            SelectableText(
-              userId,
-              style: AppTypography.containerBody.copyWith(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
+            dataModuleStyle: const QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: Colors.white,
             ),
-            const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 24),
 
-            // Copy ID Button
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          // Action Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: userId));
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -89,11 +60,12 @@ class UserQrDialog extends StatelessWidget {
                   ),
                 );
               },
-              icon: Icon(LucideIcons.copy, size: 18, color: AppColors.white),
-              label: const Text("Copia ID", style: AppTypography.containerTitle),
+              icon: const Icon(LucideIcons.copy, size: 18, color: AppColors.white),
+              label: const Text("Copia ID", style: TextStyle(color: AppColors.white)),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
