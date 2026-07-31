@@ -10,10 +10,12 @@ import '../../widgets/group/members_tile_view.dart';
 
 class GroupNotStartedPage extends ConsumerWidget {
   final Group group;
+  final bool isUserGroupOwner;
 
   const GroupNotStartedPage({
     super.key,
     required this.group,
+    required this.isUserGroupOwner,
   });
 
   @override
@@ -65,6 +67,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                               Text(
                                 textAlign: TextAlign.center,
                                 "Il gruppo non è ancora attivo. Ti invieremo una notifica quando il proprietario lo avvierà",
+                                subtitle,
                                 style: AppTypography.pageSubtitle.copyWith(
                                   color: AppColors.white.withValues(alpha: 0.7),
                                 ),
