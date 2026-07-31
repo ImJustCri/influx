@@ -95,6 +95,7 @@ class AppColors {
   static const Color inputBackground = Color(0x33000000);
   static const Color white = Color(0xFFE8DEED);
   static const Color whiteDim = Color(0xFFD2CCDA);
+  static const Color purple = Color(0xFF625BA5);
 }
 
 class AppTypography {
