@@ -22,6 +22,11 @@ class GroupNotStartedPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
 
+    final String subtitle = isUserGroupOwner
+        ? "Il gruppo non è ancora attivo. Per attivarlo, controlla prima che tutto sia stato impostato correttamente"
+        : "Il gruppo non è ancora attivo. Ti invieremo una notifica quando il proprietario lo avvierà";
+
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
@@ -66,7 +71,6 @@ class GroupNotStartedPage extends ConsumerWidget {
                               const SizedBox(height: 16),
                               Text(
                                 textAlign: TextAlign.center,
-                                "Il gruppo non è ancora attivo. Ti invieremo una notifica quando il proprietario lo avvierà",
                                 subtitle,
                                 style: AppTypography.pageSubtitle.copyWith(
                                   color: AppColors.white.withValues(alpha: 0.7),
