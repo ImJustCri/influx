@@ -12,15 +12,16 @@ import '../../providers/group_members_provider.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final Group group;
+  final bool isUserGroupOwner;
 
   const GroupDetailPage({
     super.key,
     required this.group,
+    required this.isUserGroupOwner,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the AsyncValue from Riverpod using the group's ID
     final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
 
     return Scaffold(
