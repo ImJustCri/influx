@@ -6,11 +6,13 @@ import '../../../models/group_member.dart';
 class MemberTileView extends StatelessWidget {
   final GroupMember member;
   final String groupId;
+  final String creatorId;
 
   const MemberTileView({
     super.key,
     required this.member,
     required this.groupId,
+    required this.creatorId,
   });
 
   @override
@@ -44,7 +46,16 @@ class MemberTileView extends StatelessWidget {
                   )
                 ],
               ),
-              if (member.isAdmin) CircleAvatar(
+
+              if (member.id == creatorId) CircleAvatar(
+                backgroundColor: Colors.purple,
+                child: Icon(
+                  LucideIcons.crown,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              )
+              else if (member.isAdmin) CircleAvatar(
                 backgroundColor: Colors.red,
                 child: Icon(
                   LucideIcons.shield,
