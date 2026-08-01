@@ -8,6 +8,7 @@ import '../models/expense_data.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
+import 'expenses/add_expense_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -71,22 +72,27 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 136),
         child: FloatingActionButton.extended(
             onPressed: () async {
-              final a = await s.ocrMethod();
-              showDialog(
-                  context: context,
-                  builder: (builder){
-                    return AlertDialog(
-                      title: Text("Ocr"),
-                      content: Text(a ?? "ciao"),
-                      actions: [
-                        ElevatedButton(
-                            onPressed: (){
-                              Navigator.pop(context);
-                            }, child: Text("chiudi"),
-                        )
-                      ],
-                    );
-                  }
+              // final a = await s.ocrMethod();
+              // showDialog(
+              //     context: context,
+              //     builder: (builder){
+              //       return AlertDialog(
+              //         title: Text("Ocr"),
+              //         content: Text(a ?? "ciao"),
+              //         actions: [
+              //           ElevatedButton(
+              //               onPressed: (){
+              //                 Navigator.pop(context);
+              //               }, child: Text("chiudi"),
+              //           )
+              //         ],
+              //       );
+              //     }
+              // );
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => AddExpensePage()
+                ),
               );
 
             },
