@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../theme.dart';
 
 class AppContainer extends StatelessWidget {
@@ -8,6 +7,7 @@ class AppContainer extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final Color? color;
   final double borderRadius;
+  final BorderRadiusGeometry? customBorderRadius;
   final double? width;
   final double? height;
   final Border? border;
@@ -20,6 +20,7 @@ class AppContainer extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     this.color,
     this.borderRadius = 32,
+    this.customBorderRadius,
     this.width,
     this.height,
     this.border,
@@ -35,11 +36,12 @@ class AppContainer extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: color ?? AppColors.containerBackground,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: border ?? Border.all(
-          color: AppColors.containerBorder,
-          width: 1,
-        ),
+        borderRadius: customBorderRadius ?? BorderRadius.circular(borderRadius),
+        border: border ??
+            Border.all(
+              color: AppColors.containerBorder,
+              width: 1,
+            ),
         boxShadow: boxShadow,
       ),
       child: child,
