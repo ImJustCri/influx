@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/services/ocr_service.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
-import '../../widgets/page_padding.dart';
 import '../../widgets/expenses/add/group_selection_section.dart';
+import '../../widgets/page_padding.dart';
 
 class AddExpensePage extends ConsumerStatefulWidget {
   final bool initialIsGroup;
@@ -23,6 +24,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
+  final OcrService _ocrService = OcrService();
 
   late bool isGroup;
   String? selectedCategory;
@@ -51,6 +53,52 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     descriptionController.dispose();
     amountController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleOcrScan() async {
+    final result = await _ocrService.ocrMethod();
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Risultato OCR",
+                style: AppTypography.containerBody,
+              ),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(
+                    result ?? "Nessun testo rilevato",
+                    style: AppTypography.budgetIndicator.copyWith(
+                      fontSize: 24
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Chiudi"),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _saveExpense() async {
@@ -131,6 +179,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
           icon: const Icon(LucideIcons.x),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.qr_code),
+            onPressed: _handleOcrScan,
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: PagePadding(
         child: Column(
