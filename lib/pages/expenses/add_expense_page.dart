@@ -32,12 +32,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   bool _isLoading = false;
 
   final List<String> _categories = [
-    'Spesa',
-    'Trasporti',
-    'Ristorazione',
-    'Svago',
-    'Casa',
-    'Salute',
+    'Alimentari',
+    'Servizi Online',
+    'Farmaci',
+    'Elettronica',
+    'Abbigliamento',
+    'Carburante',
+    'Intrattenimento',
     'Altro',
   ];
 

@@ -8,6 +8,8 @@ enum ExpenseType {
   pharmacy,
   onlineServices,
   electronics,
+  entertainment,
+  others
 }
 
 extension ExpenseTypeData on ExpenseType {
@@ -25,6 +27,10 @@ extension ExpenseTypeData on ExpenseType {
         return 'Servizi online';
       case ExpenseType.electronics:
         return 'Elettronica';
+      case ExpenseType.others:
+        return 'Altri';
+      case ExpenseType.entertainment:
+        return 'Intrattenimento';
     }
   }
 
@@ -42,6 +48,10 @@ extension ExpenseTypeData on ExpenseType {
         return LucideIcons.globe;
       case ExpenseType.electronics:
         return Icons.devices;
+      case ExpenseType.others:
+        return LucideIcons.banknote;
+      case ExpenseType.entertainment:
+        return LucideIcons.party_popper;
     }
   }
 
@@ -59,6 +69,11 @@ extension ExpenseTypeData on ExpenseType {
         return Colors.yellow;
       case ExpenseType.electronics:
         return Colors.purpleAccent;
+      case ExpenseType.entertainment:
+        return Colors.deepOrangeAccent;
+      case ExpenseType.others:
+        return Colors.white12;
+
     }
   }
 
