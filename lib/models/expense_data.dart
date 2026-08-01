@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:influx/models/category.dart';
+
 import '../widgets/expenses/expense_type_helpers.dart';
 
 class ExpenseData {
-  final ExpenseType type;
+  final CategoryModel type;
   final String title;
   final String amount;
   final DateTime purchaseDate;
@@ -16,4 +20,15 @@ class ExpenseData {
     required this.purchaseDate,
     this.description,
   });
+
+
+  factory ExpenseData.convertJson(Map<String,dynamic> item){
+    return ExpenseData(
+        type: item['category_id'],
+        title: item['name'],
+        amount: item['amount'],
+        purchaseDate: item['created_at']
+    );
+  }
+
 }

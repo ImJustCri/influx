@@ -9,7 +9,8 @@ enum ExpenseType {
   onlineServices,
   electronics,
   entertainment,
-  others
+  others,
+  pets
 }
 
 extension ExpenseTypeData on ExpenseType {
@@ -31,6 +32,8 @@ extension ExpenseTypeData on ExpenseType {
         return 'Altri';
       case ExpenseType.entertainment:
         return 'Intrattenimento';
+      case ExpenseType.pets:
+        return 'Animali';
     }
   }
 
@@ -52,6 +55,8 @@ extension ExpenseTypeData on ExpenseType {
         return LucideIcons.banknote;
       case ExpenseType.entertainment:
         return LucideIcons.party_popper;
+      case ExpenseType.pets:
+        return LucideIcons.bone;
     }
   }
 
@@ -73,7 +78,8 @@ extension ExpenseTypeData on ExpenseType {
         return Colors.deepOrangeAccent;
       case ExpenseType.others:
         return Colors.white12;
-
+      case ExpenseType.pets:
+        return Color(0xFFFFCA28);
     }
   }
 

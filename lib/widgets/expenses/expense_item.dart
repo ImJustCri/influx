@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:influx/global.dart';
+import 'package:influx/models/category.dart';
+import 'package:influx/models/expense_data.dart';
 import '../../theme.dart';
 import 'expense_type_helpers.dart';
 import 'expense_detail_page.dart';
 
 class ExpenseItem extends StatelessWidget {
-  final ExpenseType type;
-  final String title;
-  final String amount;
-  final DateTime purchaseDate;
-  final String? description;
+  final ExpenseData icon;
+  final ExpenseData color;
+  final ExpenseData title;
+  final ExpenseData amount;
+  final ExpenseData purchaseDate;
+  final ExpenseData? description;
 
   const ExpenseItem({
     super.key,
-    required this.type,
+    required this.icon,
+    required this.color,
     required this.title,
     required this.amount,
     required this.purchaseDate,
@@ -35,7 +39,7 @@ class ExpenseItem extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ExpenseDetailPage(
-                    type: type,
+
                     title: title,
                     amount: amount,
                     purchaseDate: purchaseDate,

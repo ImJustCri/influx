@@ -4,36 +4,39 @@ import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/expense_data.dart';
 import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 import 'expenses/add_expense_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  static final List<ExpenseData> recentExpenses = [
-    ExpenseData(
-      type: ExpenseType.electronics,
-      title: 'Undertale',
-      amount: '2,5',
-      purchaseDate: DateTime.now(),
-      description: "Ciao"
-    ),
-    ExpenseData(
-      type: ExpenseType.clothing,
-      title: 'JD Sport',
-      amount: '50',
-      purchaseDate: DateTime.now(),
-    ),
-    ExpenseData(
-      type: ExpenseType.food,
-      title: 'Carrefour',
-      amount: '18,30',
-      purchaseDate: DateTime.now(),
-    ),
-  ];
+  State<HomePage> createState()=> HomePageState();
+  }
+
+  class HomePageState extends State<HomePage>{
+
+  List<ExpenseData> recentExpenses = [];
+
+  @override
+  void initState(){
+    super.initState();
+    loadExpenses();
+  }
+
+  Future<void> loadExpenses() async{
+    final result= await Supabase.instance.client.from('expense').select();
+
+    print("spese: $result");
+
+    setState(() {
+      recentExpenses= result.map((item)=>ExpenseData.convertJson(item)).toList();
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {

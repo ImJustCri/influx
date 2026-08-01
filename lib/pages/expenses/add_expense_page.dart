@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/models/category.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -27,25 +29,18 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   final OcrService _ocrService = OcrService();
 
   late bool isGroup;
-  String? selectedCategory;
   String? selectedGroupId;
   bool _isLoading = false;
 
-  final List<String> _categories = [
-    'Alimentari',
-    'Servizi Online',
-    'Farmaci',
-    'Elettronica',
-    'Abbigliamento',
-    'Carburante',
-    'Intrattenimento',
-    'Altro',
-  ];
+  List<CategoryModel> categories = [];
+
+  CategoryModel? selectedCategory;
 
   @override
   void initState() {
     super.initState();
     isGroup = widget.initialIsGroup;
+    loadCategoty();
   }
 
   @override
@@ -54,6 +49,14 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     descriptionController.dispose();
     amountController.dispose();
     super.dispose();
+  }
+
+  Future<void> loadCategoty() async{
+    final result= await Supabase.instance.client.from('category').select();
+
+    setState(() {
+      categories= result.map((item)=>CategoryModel.fromJson(item)).toList();
+    });
   }
 
   Future<void> _handleOcrScan() async {
@@ -136,17 +139,16 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       if (user == null) throw Exception('Utente non autenticato');
 
       final expenseData = {
-        'user_id': user.id,
-        'nome': name,
-        'descrizione': descriptionController.text.trim(),
-        'categoria': selectedCategory,
-        'is_group': isGroup,
+        'profile_id': user.id,
+        'name': name,
+        'description': descriptionController.text.trim(),
+        'category_id': selectedCategory!.id,
         'group_id': isGroup ? selectedGroupId : null,
-        'importo': amount,
+        'amount': amount,
         'created_at': DateTime.now().toIso8601String(),
       };
 
-      await Supabase.instance.client.from('spese').insert(expenseData);
+      await Supabase.instance.client.from('expense').insert(expenseData);
 
       if (!mounted) return;
 
@@ -334,7 +336,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
+                              child: DropdownButton<CategoryModel>(
                                 value: selectedCategory,
                                 hint: Text(
                                   'Seleziona Categoria',
@@ -350,16 +352,16 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                   color: Colors.white54,
                                   size: 20,
                                 ),
-                                items: _categories.map((String category) {
-                                  return DropdownMenuItem<String>(
+                                items: categories.map((category) {
+                                  return DropdownMenuItem<CategoryModel>(
                                     value: category,
                                     child: Text(
-                                      category,
+                                      category.name,
                                       style: AppTypography.containerTitle,
                                     ),
                                   );
                                 }).toList(),
-                                onChanged: (String? newValue) {
+                                onChanged: (CategoryModel? newValue) {
                                   setState(() {
                                     selectedCategory = newValue;
                                   });

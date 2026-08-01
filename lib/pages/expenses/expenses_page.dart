@@ -8,11 +8,18 @@ import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
 import '../../widgets/expenses/expense_type_helpers.dart';
 
-class ExpensesPage extends StatelessWidget {
+class ExpensesPage extends StatefulWidget {
   const ExpensesPage({super.key});
 
-  static final List<ExpenseData> _mockExpenses = [
-    ExpenseData(type: ExpenseType.food, title: 'Spesa', amount: '50', purchaseDate: DateTime.now()),
+
+  State<ExpensesPage> createState()=> ExpensensState();
+
+}
+
+
+class ExpensensState extends State<ExpensesPage>{
+  final List<ExpenseData> _mockExpenses = [
+    ExpenseData(type: ExpenseType.pets, title: 'Spesa', amount: '50', purchaseDate: DateTime.now()),
     ExpenseData(type: ExpenseType.food, title: 'Ristorante', amount: '25.00', purchaseDate: DateTime.now()),
     ExpenseData(type: ExpenseType.fuel, title: 'Benzina', amount: '50.00', purchaseDate: DateTime.now()),
     ExpenseData(type: ExpenseType.onlineServices, title: 'Cinema', amount: '12.00', purchaseDate: DateTime.now()),
@@ -22,7 +29,7 @@ class ExpensesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double totalSpent = _mockExpenses.fold(0.0, (sum, item) => sum + item.numericAmount);
+    // final double totalSpent = _mockExpenses.fold(0.0, (sum, item) => sum + item.numericAmount);
 
     return Scaffold(
       appBar: AppBar(
@@ -37,6 +44,7 @@ class ExpensesPage extends StatelessWidget {
       ),
       body: PagePadding(
         child: SingleChildScrollView(
+          padding: const  EdgeInsets.only(bottom: 125),
           child: Column(
             spacing: 48,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,14 +58,14 @@ class ExpensesPage extends StatelessWidget {
               //     iconAlignment: IconAlignment.end,
               //   ),
               // ),
-          
+
               // Text("Per categoria", style: AppTypography.containerBody),
               SimpleTrendChart(
                 firstValue: 200,
                 secondValue: 350,
                 thirdValue: spent,
               ),
-          
+
               Column(
                 spacing: 16,
                 children: [
@@ -66,7 +74,7 @@ class ExpensesPage extends StatelessWidget {
                       final double categorySpent = _mockExpenses
                           .where((item) => item.type == type)
                           .fold(0.0, (sum, item) => sum + item.numericAmount);
-          
+
                       return ExpenseCategoryBar(
                           type: type,
                           amount: amountFor(type, categorySpent),
@@ -75,11 +83,12 @@ class ExpensesPage extends StatelessWidget {
                     },
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
 }
