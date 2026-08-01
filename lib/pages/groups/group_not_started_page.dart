@@ -26,8 +26,8 @@ class GroupNotStartedPage extends ConsumerWidget {
     final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
 
     final String subtitle = isUserGroupOwner
-        ? "Il gruppo non è ancora attivo. Per attivarlo, controlla prima che tutto sia stato impostato correttamente"
-        : "Il gruppo non è ancora attivo. Ti invieremo una notifica quando il proprietario lo avvierà";
+        ? "Il gruppo non è ancora attivo. \n Prima di attivarlo, controlla che tutto sia stato impostato correttamente"
+        : "Il gruppo non è ancora attivo. \n Ti invieremo una notifica quando il proprietario lo avvierà";
 
 
     return Scaffold(
