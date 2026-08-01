@@ -31,7 +31,7 @@ class OcrService extends StatelessWidget {
       text=estraiImporto(testo);
       return text;
     }
-    return "errore";
+    return "C'è stato un errore";
 
 
   }
