@@ -66,7 +66,7 @@ final ThemeData darkTheme = ThemeData(
   ),
 
   bottomSheetTheme: const BottomSheetThemeData(
-    backgroundColor: AppColors.backgroundColor,
+    backgroundColor: AppColors.backgroundAccent,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(bottom: Radius.circular(24), top: Radius.circular(24)),
     ),
