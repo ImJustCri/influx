@@ -5,24 +5,32 @@ import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
 import 'package:influx/widgets/home/budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../providers/get_group_role_provider.dart';
+import '../../providers/group_members_provider.dart';
 import '../../theme.dart';
 import '../../widgets/group/members_expense_list.dart';
-import '../../providers/group_members_provider.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final Group group;
   final bool isUserGroupOwner;
+  final String currentUserId;
 
   const GroupDetailPage({
     super.key,
     required this.group,
-    required this.isUserGroupOwner,
+    required this.isUserGroupOwner, required this.currentUserId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
+
+    final profileGroupAsync = ref.watch(
+      fetchProfileGroupDetailsProvider(
+        (groupId: group.id, profileId: currentUserId),
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -48,20 +56,29 @@ class GroupDetailPage extends ConsumerWidget {
                         Text('Budget condiviso', style: AppTypography.pageSubtitle),
                       ],
                     ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GroupAdminSettings(
-                              members: members,
-                              name: group.name,
-                              groupId: group.id,
-                            ),
-                          ),
+
+                    profileGroupAsync.maybeWhen(
+                      data: (data) {
+                        final isAdmin = data != null && data['role'] == 'admin';
+                        if (!isAdmin) return const SizedBox.shrink();
+
+                        return IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GroupAdminSettings(
+                                  members: members,
+                                  name: group.name,
+                                  groupId: group.id,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(LucideIcons.settings_2),
                         );
                       },
-                      icon: const Icon(LucideIcons.settings_2),
+                      orElse: () => const SizedBox.shrink(),
                     ),
                   ],
                 ),
