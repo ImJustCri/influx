@@ -7,17 +7,19 @@ import 'expense_type_helpers.dart';
 import 'expense_detail_page.dart';
 
 class ExpenseItem extends StatelessWidget {
-  final ExpenseData icon;
-  final ExpenseData color;
-  final ExpenseData title;
-  final ExpenseData amount;
-  final ExpenseData purchaseDate;
-  final ExpenseData? description;
+  final String categoryIcon;
+  final String categoryColor;
+  final String categoryName;
+  final String title;
+  final double amount;
+  final DateTime purchaseDate;
+  final String? description;
 
   const ExpenseItem({
     super.key,
-    required this.icon,
-    required this.color,
+    required this.categoryIcon,
+    required this.categoryColor,
+    required this.categoryName,
     required this.title,
     required this.amount,
     required this.purchaseDate,
@@ -39,7 +41,9 @@ class ExpenseItem extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ExpenseDetailPage(
-
+                    categoryIcon: categoryIcon,
+                    categoryColor: categoryColor,
+                    categoryName: categoryName,
                     title: title,
                     amount: amount,
                     purchaseDate: purchaseDate,
@@ -60,14 +64,14 @@ class ExpenseItem extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: type.backgroundColor,
+                          color: Color(int.parse(categoryColor, radix: 16)).withAlpha(10),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: type.iconColor,
+                            color: Color(int.parse(categoryColor, radix: 16)),
                             width: .5,
                           ),
                         ),
-                        child: Icon(type.icon, color: type.iconColor, size: 22),
+                        child: Icon(getIconFromName(categoryIcon), color: Color(int.parse(categoryColor, radix: 16)), size: 22),
                       ),
                       const SizedBox(width: 16),
                       Column(
@@ -76,14 +80,17 @@ class ExpenseItem extends StatelessWidget {
                         children: [
                           Text(title, style: AppTypography.expenseTitle),
                           Text(
-                            type.subtitle,
+                            categoryName,
                             style: AppTypography.expenseDescription,
                           ),
                         ],
                       ),
                     ],
                   ),
-                  Text(amount + currency, style: AppTypography.expenseTitle),
+                  Text(
+                    '${amount.toStringAsFixed(2)}$currency',
+                    style: AppTypography.expenseTitle,
+                  ),
                 ],
               ),
             ),

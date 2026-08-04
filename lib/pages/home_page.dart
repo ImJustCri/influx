@@ -1,46 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/providers/expenses_provider.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/expense_data.dart';
-import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 import 'expenses/add_expense_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
-  State<HomePage> createState()=> HomePageState();
-  }
+  ConsumerState<HomePage> createState()=> HomePageState();
+}
 
-  class HomePageState extends State<HomePage>{
+  class HomePageState extends ConsumerState<HomePage>{
 
-  List<ExpenseData> recentExpenses = [];
-
-  @override
-  void initState(){
-    super.initState();
-    loadExpenses();
-  }
-
-  Future<void> loadExpenses() async{
-    final result= await Supabase.instance.client.from('expense').select();
-
-    print("spese: $result");
-
-    setState(() {
-      recentExpenses= result.map((item)=>ExpenseData.convertJson(item)).toList();
-    });
-
-  }
 
   @override
   Widget build(BuildContext context) {
     final OcrService s=OcrService();
+
+    final expensesAsync = ref.watch(fetchExpenses);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -61,7 +44,15 @@ class HomePage extends StatefulWidget {
                       resetDate: DateTime(2026, 6, 1),
                     ),
                     const SizedBox(height: 24),
-                    RecentExpensesSection(expenses: recentExpenses),
+
+                    expensesAsync.when(
+                        loading: ()=> const CircularProgressIndicator(),
+
+                        data: (expense){
+                          return RecentExpensesSection(expenses: expense);
+                        },
+                        error: (error, stack)=> Text(error.toString()),
+                    )
                   ],
                 ),
               ),
@@ -75,28 +66,13 @@ class HomePage extends StatefulWidget {
         padding: const EdgeInsets.only(bottom: 136),
         child: FloatingActionButton.extended(
             onPressed: () async {
-              // final a = await s.ocrMethod();
-              // showDialog(
-              //     context: context,
-              //     builder: (builder){
-              //       return AlertDialog(
-              //         title: Text("Ocr"),
-              //         content: Text(a ?? "ciao"),
-              //         actions: [
-              //           ElevatedButton(
-              //               onPressed: (){
-              //                 Navigator.pop(context);
-              //               }, child: Text("chiudi"),
-              //           )
-              //         ],
-              //       );
-              //     }
-              // );
-              Navigator.of(context).push(
+              await Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (context) => AddExpensePage()
                 ),
+
               );
+              ref.invalidate(fetchExpenses);
 
             },
           backgroundColor: AppColors.backgroundAccent,
