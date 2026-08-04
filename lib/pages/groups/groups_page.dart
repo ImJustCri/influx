@@ -88,6 +88,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                                 builder: (context) => GroupDetailPage(
                                   group: group,
                                   isUserGroupOwner: (group.creatorId == userId),
+                                  currentUserId: userId!,
                                 ),
                               ),
                             );
