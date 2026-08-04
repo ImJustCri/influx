@@ -69,9 +69,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 125),
               child: Column(
-                spacing: 24,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SimpleTrendChart(
@@ -80,7 +78,8 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                     thirdValue: totalSpent,
                   ),
 
-                  if (expenses.isEmpty)
+                  if (expenses.isEmpty) ...[
+                    SizedBox(height: 24),
                     AppContainer(
                       padding: EdgeInsetsGeometry.all(48),
                       width: double.infinity,
@@ -94,6 +93,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                         ],
                       ),
                     ),
+                  ],
 
                   SizedBox(height: 24),
                   Column(
