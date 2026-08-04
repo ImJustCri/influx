@@ -5,6 +5,7 @@ import 'expense_type_helpers.dart';
 import '../../pages/expenses/expense_detail_page.dart';
 
 class ExpenseItem extends StatelessWidget {
+  final String expenseId;
   final String categoryIcon;
   final String categoryColor;
   final String categoryName;
@@ -24,6 +25,7 @@ class ExpenseItem extends StatelessWidget {
     required this.purchaseDate,
     this.description,
     required this.groupName,
+    required this.expenseId,
   });
 
   @override
@@ -41,6 +43,7 @@ class ExpenseItem extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ExpenseDetailPage(
+                    expenseId: expenseId,
                     categoryIcon: categoryIcon,
                     categoryColor: categoryColor,
                     categoryName: categoryName,
