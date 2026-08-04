@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:influx/global.dart';
-import 'package:influx/models/category.dart';
-import 'package:influx/models/expense_data.dart';
 import '../../theme.dart';
 import 'expense_type_helpers.dart';
-import 'expense_detail_page.dart';
+import '../../pages/expenses/expense_detail_page.dart';
 
 class ExpenseItem extends StatelessWidget {
   final String categoryIcon;
@@ -14,6 +12,7 @@ class ExpenseItem extends StatelessWidget {
   final double amount;
   final DateTime purchaseDate;
   final String? description;
+  final String? groupName;
 
   const ExpenseItem({
     super.key,
@@ -24,6 +23,7 @@ class ExpenseItem extends StatelessWidget {
     required this.amount,
     required this.purchaseDate,
     this.description,
+    required this.groupName,
   });
 
   @override
@@ -48,11 +48,12 @@ class ExpenseItem extends StatelessWidget {
                     amount: amount,
                     purchaseDate: purchaseDate,
                     description: description,
+                    groupName: groupName,
                   ),
                 ),
               );
             },
-            child: Container(
+            child: SizedBox(
               height: 80,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
