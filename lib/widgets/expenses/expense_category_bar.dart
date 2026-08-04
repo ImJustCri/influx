@@ -31,7 +31,7 @@ class ExpenseCategoryBar extends StatelessWidget {
             Text(categoryName, style: AppTypography.expenseTitle),
             Row(
               children: [
-                Text('${amount.toStringAsFixed(0)}€',
+                Text('${amount.toString()}€',
                     style: AppTypography.expenseTitle),
                 const SizedBox(width: 8),
                 Container(
