@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../providers/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import '../../providers/group_members_provider.dart';
@@ -146,7 +146,48 @@ class GroupNotStartedPage extends ConsumerWidget {
                           SettingsTile(
                             icon: LucideIcons.circle_power,
                             title: "Attiva il gruppo",
-                            onTap: () {},
+                            onTap: () async {
+                              String message;
+                              bool isSuccess = false;
+
+                              try {
+                                await supabase
+                                    .from('group')
+                                    .update({'status': 'active'})
+                                    .eq('id', group.id);
+
+                                message = "Gruppo attivato con successo.";
+                                isSuccess = true;
+                              } catch (error) {
+                                message = "Errore: $error";
+                              }
+
+                              if (context.mounted) {
+                                showDialog(
+                                  context: context,
+                                  builder: (dialogContext) {
+                                    return AlertDialog(
+                                      title: const Text("Risultato"),
+                                      content: Text(message),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            // pop the dialog
+                                            Navigator.of(dialogContext).pop();
+
+                                            // pop the current page if successful
+                                            if (isSuccess && context.mounted) {
+                                              Navigator.of(context).pop();
+                                            }
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
                           ),
                           const SizedBox(height: 8),
                         ],
