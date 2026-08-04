@@ -5,6 +5,7 @@ import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:influx/widgets/settings_tile.dart';
 import '../../../models/group_member.dart';
+import '../../../providers/groups_provider.dart';
 import '../../../theme.dart';
 import '../../../widgets/group/member_tile_admin_view.dart';
 
@@ -41,7 +42,7 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(widget.name, style: AppTypography.pageTitle),
-                  Text('${widget.members.length} membri - budget condiviso',
+                  Text('${widget.members.length} membri',
                       style: AppTypography.pageSubtitle),
                 ],
               ),
@@ -72,6 +73,66 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                         ),
                       );
                     },
+                  ),
+                  Column(
+                    spacing: 16,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Operazioni", style: AppTypography.containerTitle),
+                      SettingsTile(
+                        icon: LucideIcons.clock,
+                        title: "Torna allo stato di creazione",
+                        onTap: () async {
+                          String message;
+                          bool isSuccess = false;
+
+                          try {
+                            await supabase
+                                .from('group')
+                                .update({'status': 'creation'})
+                                .eq('id', widget.groupId);
+
+                            message = "Stato aggiornato con successo.";
+                            isSuccess = true;
+                          } catch (error) {
+                            message = "Errore: $error";
+                          }
+
+                          if (context.mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) {
+                                return AlertDialog(
+                                  title: const Text("Risultato"),
+                                  content: Text(message),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        // dismiss AlertDialog
+                                        Navigator.of(dialogContext).pop();
+
+                                        // dismiss the page if successful
+                                        if (isSuccess && context.mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
+                      ),
+                      SettingsTile(
+                        icon: LucideIcons.trash,
+                        title: "Elimina gruppo",
+                        onTap: () {
+                          // todo: delete group
+                        },
+                      ),
+                    ],
                   )
                 ],
               ),
