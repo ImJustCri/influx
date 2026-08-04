@@ -5,7 +5,7 @@ import 'package:influx/pages/groups/create_group.dart';
 import 'package:influx/pages/groups/group_detail_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
-
+import '../../providers/group_member_count_provider.dart';
 import '../../providers/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/group_tile.dart';
@@ -75,34 +75,52 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
 
                   return Column(
                     children: groups.map((group) {
-                      return GroupTile(
-                        icon: LucideIcons.users,
-                        title: group.name,
-                        members: group.maxMembers,
-                        isUserGroupOwner: (group.creatorId == userId),
-                        onTap: () {
-                          if (group.status == "active") {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => GroupDetailPage(
-                                  group: group,
-                                  isUserGroupOwner: (group.creatorId == userId),
-                                  currentUserId: userId!,
-                                ),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => GroupNotStartedPage(
-                                  group: group,
-                                  isUserGroupOwner: (group.creatorId == userId),
-                                ),
-                              ),
-                            );
-                          }
+                      return Consumer(
+                        builder: (context, ref, child) {
+                          final countAsync = ref.watch(groupMemberCountProvider(group.id));
+
+                          final memberCount = countAsync.maybeWhen(
+                            data: (count) => count,
+                            orElse: () => 0,
+                          );
+
+                          return GroupTile(
+                            icon: LucideIcons.users,
+                            title: group.name,
+                            members: memberCount,
+                            isUserGroupOwner: (group.creatorId == userId),
+                            onTap: () async {
+                              if (group.status == "active") {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GroupDetailPage(
+                                      group: group,
+                                      isUserGroupOwner: (group.creatorId == userId),
+                                      currentUserId: userId!,
+                                      memberCount: memberCount,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GroupNotStartedPage(
+                                      group: group,
+                                      isUserGroupOwner: (group.creatorId == userId),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // refresh the group list upon returning from either page
+                              if (context.mounted) {
+                                ref.invalidate(groupsProvider);
+                                print("invalidated");
+                              }
+                            },
+                          );
                         },
                       );
                     }).toList(),
