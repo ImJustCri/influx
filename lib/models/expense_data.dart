@@ -1,9 +1,3 @@
-import 'dart:convert';
-
-import 'package:influx/models/category.dart';
-
-import '../widgets/expenses/expense_type_helpers.dart';
-
 class ExpenseData {
   final String categoryName;
   final String categoryIcon;
@@ -12,6 +6,7 @@ class ExpenseData {
   final double amount;
   final DateTime purchaseDate;
   final String? description;
+  final String? groupName;
 
   double get numericAmount => amount;
 
@@ -23,17 +18,20 @@ class ExpenseData {
     required this.amount,
     required this.purchaseDate,
     this.description,
+    this.groupName,
   });
 
 
   factory ExpenseData.convertJson(Map<String,dynamic> item){
     return ExpenseData(
-        categoryName: item['category']['name'],
-        categoryColor: item['category']['color'],
-        categoryIcon: item['category']['icon'],
-        title: item['name'],
-        amount: item['amount'],
-        purchaseDate: DateTime.parse(item['created_at']),
+      categoryName: item['category']['name'],
+      categoryColor: item['category']['color'],
+      categoryIcon: item['category']['icon'],
+      title: item['name'],
+      amount: item['amount'],
+      purchaseDate: DateTime.parse(item['created_at']),
+      description: item['description'],
+      groupName: item['group'] != null ? item['group']['name'] : null,
     );
   }
 
