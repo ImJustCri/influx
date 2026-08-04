@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/widgets/app_container.dart';
-
 import '../../theme.dart';
 import '../../models/expense_data.dart';
 import '../expenses/expense_item.dart';
@@ -46,6 +45,7 @@ class RecentExpensesSection extends StatelessWidget {
                   purchaseDate: expense.purchaseDate,
                   description: expense.description,
                   groupName: expense.groupName,
+                  expenseId: expense.id,
             ),
           ),
       ],
