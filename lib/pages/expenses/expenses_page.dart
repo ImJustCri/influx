@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../theme.dart';
 import 'package:influx/providers/expenses_provider.dart';
+import '../../widgets/app_container.dart';
 import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
 
@@ -57,6 +59,9 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
             // Raggruppa le spese per categoria
             final Map<String, List<ExpenseData>> categories = {};
 
+            if (expenses.isEmpty) {
+
+            }
             for (final expense in expenses) {
               categories.putIfAbsent(
                 expense.categoryName, () => [],
@@ -66,7 +71,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
             return SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 125),
               child: Column(
-                spacing: 48,
+                spacing: 24,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SimpleTrendChart(
@@ -75,6 +80,22 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                     thirdValue: totalSpent,
                   ),
 
+                  if (expenses.isEmpty)
+                    AppContainer(
+                      padding: EdgeInsetsGeometry.all(48),
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          Icon(LucideIcons.book_search, size: 32),
+                          SizedBox(height: 24),
+                          Text("Niente da vedere quì", style: AppTypography.containerTitle, textAlign: TextAlign.center),
+                          SizedBox(height: 4),
+                          Text("Che ne dici di aggiungere una nuova spesa?", style: AppTypography.containerBody, textAlign: TextAlign.center),
+                        ],
+                      ),
+                    ),
+
+                  SizedBox(height: 24),
                   Column(
                     spacing: 16,
                     children: [
