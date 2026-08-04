@@ -5,7 +5,7 @@ class Group {
   final String status;
   final int maxMembers;
   final double totalBudget;
-  final double? perCapitaBudget;
+  final double perCapitaBudget;
   final DateTime createdAt;
   final DateTime? startedAt;
   final String creatorId;
@@ -17,7 +17,7 @@ class Group {
     required this.status,
     required this.maxMembers,
     required this.totalBudget,
-    this.perCapitaBudget,
+    required this.perCapitaBudget,
     required this.createdAt,
     this.startedAt,
     required this.creatorId,
@@ -31,9 +31,7 @@ class Group {
       status: json['status'] as String,
       maxMembers: json['max_members'] as int,
       totalBudget: (json['total_budget'] as num).toDouble(),
-      perCapitaBudget: json['per_capita_budget'] != null
-          ? (json['per_capita_budget'] as num).toDouble()
-          : null,
+      perCapitaBudget: (json['per_capita_budget'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
       creatorId: json['created_by'] as String,
       startedAt: json['started_at'] != null
