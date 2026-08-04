@@ -6,6 +6,7 @@ import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
+import '../widgets/app_container.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 import 'expenses/add_expense_page.dart';
@@ -13,6 +14,7 @@ import 'expenses/add_expense_page.dart';
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
+  @override
   ConsumerState<HomePage> createState()=> HomePageState();
 }
 
@@ -21,7 +23,7 @@ class HomePage extends ConsumerStatefulWidget {
 
   @override
   Widget build(BuildContext context) {
-    final OcrService s=OcrService();
+    final OcrService s = OcrService();
 
     final expensesAsync = ref.watch(fetchExpenses);
 
@@ -46,10 +48,22 @@ class HomePage extends ConsumerStatefulWidget {
                     const SizedBox(height: 24),
 
                     expensesAsync.when(
-                        loading: ()=> const CircularProgressIndicator(),
+                        loading: ()=>  AppContainer(
+                          padding: EdgeInsetsGeometry.all(48),
+                          width: double.infinity,
+                          child: Column(
+                            children: [
+                              Icon(LucideIcons.loader, size: 32),
+                              SizedBox(height: 24),
+                              Text("Caricamento...", style: AppTypography.containerTitle, textAlign: TextAlign.center),
+                              SizedBox(height: 4),
+                              Text("Nel frattempo che aspetti, caffè?", style: AppTypography.containerBody, textAlign: TextAlign.center),
+                            ],
+                          ),
+                        ),
 
-                        data: (expense){
-                          return RecentExpensesSection(expenses: expense);
+                        data: (expenses){
+                          return RecentExpensesSection(expenses: expenses);
                         },
                         error: (error, stack)=> Text(error.toString()),
                     )
