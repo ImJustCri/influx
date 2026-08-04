@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:influx/global.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
-import 'expense_type_helpers.dart';
+import '../../widgets/expenses/expense_type_helpers.dart';
 
 class ExpenseDetailPage extends StatelessWidget {
   final String categoryColor;
@@ -14,6 +14,7 @@ class ExpenseDetailPage extends StatelessWidget {
   final double amount;
   final DateTime purchaseDate;
   final String? description;
+  final String? groupName;
 
   const ExpenseDetailPage({
     super.key,
@@ -24,6 +25,7 @@ class ExpenseDetailPage extends StatelessWidget {
     required this.amount,
     required this.purchaseDate,
     this.description,
+    required this.groupName,
   });
 
   String _formatDate(DateTime date) {
@@ -156,23 +158,66 @@ class ExpenseDetailPage extends StatelessWidget {
 
               // description (optional)
               if (description != null && description!.isNotEmpty) ...[
-                AppContainer(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Descrizione',
-                        style: AppTypography.containerTitle,
+                Column(
+                  children: [
+                    AppContainer(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            description!,
+                            style: AppTypography.containerBody,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        description!,
-                        style: AppTypography.containerBody,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+              ],
+
+              // group (optional)
+              if (groupName != null) ...[
+                Column(
+                  children: [
+                    Text(
+                      'Appartiene al gruppo:',
+                      style: AppTypography.containerTitle,
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 16),
+                    AppContainer(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            spacing: 12,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: AppColors.backgroundAccent,
+                                radius: 24,
+                                child: Icon(
+                                  LucideIcons.users_round,
+                                  size: 20,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                              Text(
+                                groupName!,
+                                style: AppTypography.budgetIndicator.copyWith(
+                                  fontSize: 18
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
               ],
 
               const SizedBox(height: 32),
