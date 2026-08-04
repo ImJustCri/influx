@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
-
-
-
   IconData getIconFromName(String icon) {
     switch (icon) {
       case 'pill':
