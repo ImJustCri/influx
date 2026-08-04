@@ -7,15 +7,19 @@ import '../../widgets/app_container.dart';
 import 'expense_type_helpers.dart';
 
 class ExpenseDetailPage extends StatelessWidget {
-  final ExpenseType type;
+  final String categoryColor;
+  final String categoryIcon;
+  final String categoryName;
   final String title;
-  final String amount;
+  final double amount;
   final DateTime purchaseDate;
   final String? description;
 
   const ExpenseDetailPage({
     super.key,
-    required this.type,
+    required this.categoryIcon,
+    required this.categoryName,
+    required this.categoryColor,
     required this.title,
     required this.amount,
     required this.purchaseDate,
@@ -54,16 +58,16 @@ class ExpenseDetailPage extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: type.backgroundColor,
+                    color: Color(int.parse(categoryColor, radix: 16)).withAlpha(10),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: type.iconColor,
+                      color: Color(int.parse(categoryColor, radix: 16)),
                       width: .5,
                     ),
                   ),
                   child: Icon(
-                    type.icon,
-                    color: type.iconColor,
+                    getIconFromName(categoryIcon),
+                    color: Color(int.parse(categoryColor, radix: 16)),
                     size: 50,
                   ),
                 ),
@@ -86,7 +90,7 @@ class ExpenseDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      type.subtitle,
+                      categoryName,
                       style: AppTypography.pageSubtitle.copyWith(
                         color: AppColors.white.withValues(alpha: 0.7),
                       ),

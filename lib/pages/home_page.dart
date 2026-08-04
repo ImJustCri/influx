@@ -1,43 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/providers/expenses_provider.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../models/expense_data.dart';
-import '../widgets/expenses/expense_type_helpers.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 import 'expenses/add_expense_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
-  static final List<ExpenseData> recentExpenses = [
-    ExpenseData(
-      type: ExpenseType.electronics,
-      title: 'Undertale',
-      amount: '2,5',
-      purchaseDate: DateTime.now(),
-      description: "Ciao"
-    ),
-    ExpenseData(
-      type: ExpenseType.clothing,
-      title: 'JD Sport',
-      amount: '50',
-      purchaseDate: DateTime.now(),
-    ),
-    ExpenseData(
-      type: ExpenseType.food,
-      title: 'Carrefour',
-      amount: '18,30',
-      purchaseDate: DateTime.now(),
-    ),
-  ];
+  ConsumerState<HomePage> createState()=> HomePageState();
+}
+
+  class HomePageState extends ConsumerState<HomePage>{
+
 
   @override
   Widget build(BuildContext context) {
     final OcrService s=OcrService();
+
+    final expensesAsync = ref.watch(fetchExpenses);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -58,7 +44,15 @@ class HomePage extends StatelessWidget {
                       resetDate: DateTime(2026, 6, 1),
                     ),
                     const SizedBox(height: 24),
-                    RecentExpensesSection(expenses: recentExpenses),
+
+                    expensesAsync.when(
+                        loading: ()=> const CircularProgressIndicator(),
+
+                        data: (expense){
+                          return RecentExpensesSection(expenses: expense);
+                        },
+                        error: (error, stack)=> Text(error.toString()),
+                    )
                   ],
                 ),
               ),
@@ -72,28 +66,13 @@ class HomePage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 136),
         child: FloatingActionButton.extended(
             onPressed: () async {
-              // final a = await s.ocrMethod();
-              // showDialog(
-              //     context: context,
-              //     builder: (builder){
-              //       return AlertDialog(
-              //         title: Text("Ocr"),
-              //         content: Text(a ?? "ciao"),
-              //         actions: [
-              //           ElevatedButton(
-              //               onPressed: (){
-              //                 Navigator.pop(context);
-              //               }, child: Text("chiudi"),
-              //           )
-              //         ],
-              //       );
-              //     }
-              // );
-              Navigator.of(context).push(
+              await Navigator.of(context).push(
                 MaterialPageRoute(
                     builder: (context) => AddExpensePage()
                 ),
+
               );
+              ref.invalidate(fetchExpenses);
 
             },
           backgroundColor: AppColors.backgroundAccent,

@@ -1,83 +1,109 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:influx/widgets/page_padding.dart';
-import '../../global.dart';
 import '../../models/expense_data.dart';
 import '../../theme.dart';
+import 'package:influx/providers/expenses_provider.dart';
 import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
-import '../../widgets/expenses/expense_type_helpers.dart';
 
-class ExpensesPage extends StatelessWidget {
+
+class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
 
-  static final List<ExpenseData> _mockExpenses = [
-    ExpenseData(type: ExpenseType.food, title: 'Spesa', amount: '50', purchaseDate: DateTime.now()),
-    ExpenseData(type: ExpenseType.food, title: 'Ristorante', amount: '25.00', purchaseDate: DateTime.now()),
-    ExpenseData(type: ExpenseType.fuel, title: 'Benzina', amount: '50.00', purchaseDate: DateTime.now()),
-    ExpenseData(type: ExpenseType.onlineServices, title: 'Cinema', amount: '12.00', purchaseDate: DateTime.now()),
-    ExpenseData(type: ExpenseType.pharmacy, title: 'Bolletta Luce', amount: '85.20', purchaseDate: DateTime.now()),
-    ExpenseData(type: ExpenseType.electronics, title: 'Google Pixel 10a', amount: '500', purchaseDate: DateTime.now()),
-  ];
+  @override
+  ConsumerState<ExpensesPage> createState() => ExpensensState();
+}
+
+
+class ExpensensState extends ConsumerState<ExpensesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double totalSpent = _mockExpenses.fold(0.0, (sum, item) => sum + item.numericAmount);
+
+    final expensesAsync = ref.watch(fetchExpenses);
 
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('Le mie spese', style: AppTypography.pageTitle),
+          child: Text(
+            'Le mie spese',
+            style: AppTypography.pageTitle,
+          ),
         ),
         centerTitle: false,
         elevation: 0,
         foregroundColor: Colors.white,
       ),
+
       body: PagePadding(
-        child: SingleChildScrollView(
-          child: Column(
-            spacing: 48,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: TextButton.icon(
-              //     onPressed: () {},
-              //     label: Text('Maggio', style: AppTypography.pageSubtitle),
-              //     icon: const Icon(LucideIcons.chevron_down),
-              //     iconAlignment: IconAlignment.end,
-              //   ),
-              // ),
-          
-              // Text("Per categoria", style: AppTypography.containerBody),
-              SimpleTrendChart(
-                firstValue: 200,
-                secondValue: 350,
-                thirdValue: spent,
-              ),
-          
-              Column(
-                spacing: 16,
+        child: expensesAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+
+          error: (error, stack) => Center(
+            child: Text(error.toString()),
+          ),
+
+          data: (expenses) {
+            final double totalSpent = expenses.fold(0.0,
+                  (sum, item) => sum + item.numericAmount,
+            );
+
+            // Raggruppa le spese per categoria
+            final Map<String, List<ExpenseData>> categories = {};
+
+            for (final expense in expenses) {
+              categories.putIfAbsent(
+                expense.categoryName, () => [],
+              ).add(expense);
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 125),
+              child: Column(
+                spacing: 48,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...ExpenseType.values.map(
-                        (type) {
-                      final double categorySpent = _mockExpenses
-                          .where((item) => item.type == type)
-                          .fold(0.0, (sum, item) => sum + item.numericAmount);
-          
-                      return ExpenseCategoryBar(
-                          type: type,
-                          amount: amountFor(type, categorySpent),
-                          percentage: percentageFor(type, totalSpent, categorySpent)
-                      );
-                    },
+                  SimpleTrendChart(
+                    firstValue: 200,
+                    secondValue: 350,
+                    thirdValue: totalSpent,
+                  ),
+
+                  Column(
+                    spacing: 16,
+                    children: [
+                      ...categories.entries.map(
+                            (entry) {
+                              final categoryExpenses = entry.value;
+                              final categoryInfo = categoryExpenses.first;
+                              final double categorySpent = categoryExpenses.fold(0.0,
+                                    (sum, item) =>
+                                sum + item.numericAmount,
+                              );
+
+                          return ExpenseCategoryBar(
+                            categoryName: categoryInfo.categoryName,
+                            categoryIcon: categoryInfo.categoryIcon,
+                            categoryColor: categoryInfo.categoryColor,
+                            amount: categorySpent,
+                            percentage: totalSpent == 0 ? 0 : categorySpent / totalSpent,
+                          );
+
+                        },
+                      ),
+
+                    ],
                   ),
                 ],
-              )
-            ],
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

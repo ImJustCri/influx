@@ -5,13 +5,17 @@ import 'expense_item.dart';
 import 'expense_type_helpers.dart';
 
 class ExpenseCategoryBar extends StatelessWidget {
-  final ExpenseType type;
+  final String categoryName;
+  final String categoryIcon;
+  final String categoryColor;
   final double amount;
   final double percentage;
 
   const ExpenseCategoryBar({
     super.key,
-    required this.type,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.categoryColor,
     required this.amount,
     required this.percentage,
   });
@@ -24,7 +28,7 @@ class ExpenseCategoryBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(type.subtitle, style: AppTypography.expenseTitle),
+            Text(categoryName, style: AppTypography.expenseTitle),
             Row(
               children: [
                 Text('${amount.toStringAsFixed(0)}€',
@@ -33,13 +37,13 @@ class ExpenseCategoryBar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: type.baseColor.withAlpha(40),
+                    color: Color(int.parse(categoryColor, radix: 16)).withAlpha(40),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     '${(percentage * 100).round()}%',
                     style: TextStyle(
-                      color: type.iconColor,
+                      color: Color(int.parse(categoryColor, radix: 16)),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -54,7 +58,7 @@ class ExpenseCategoryBar extends StatelessWidget {
           value: percentage,
           minHeight: 14,
           backgroundColor: AppColors.backgroundAccent,
-          valueColor: type.baseColor,
+          valueColor: Color(int.parse(categoryColor, radix: 16)),
         ),
       ],
     );
