@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../models/group_member.dart';
 import '../../pages/groups/settings/group_member_edit.dart';
@@ -17,14 +18,17 @@ class MemberTileAdminView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    final isSelf = userId == member.id ? true : false;
+
     return InkWell(
       borderRadius: BorderRadius.circular(32),
-      onTap: () {
+      onTap: !isSelf ? () {
             Navigator.push(context, MaterialPageRoute(
               builder: (context) => GroupMemberEdit(member: member, groupId: groupId,)
             )
           );
-        },
+        }: null,
       child: Column(
         children: [
           Padding(
@@ -54,9 +58,13 @@ class MemberTileAdminView extends StatelessWidget {
                     )
                   ],
                 ),
-                Icon(
+                isSelf ? Icon(
+                  LucideIcons.users_round,
+                  color: AppColors.white,
+                  size: 20,
+                ) : Icon(
                   LucideIcons.chevron_right,
-                  color: Color(0xFFD1D5DB),
+                  color: AppColors.white,
                   size: 20,
                 ),
               ],
