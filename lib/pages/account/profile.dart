@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/account/security_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../main.dart';
 import '../../models/profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../services/auth_service.dart';
@@ -201,6 +202,8 @@ class ProfilePage extends ConsumerWidget {
                       onTap: () async {
                         await Supabase.instance.client.auth.signOut();
                         if (!context.mounted) return;
+                        RootApp.restartApp(context);
+
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (context) => const AuthService()),
                               (route) => false,

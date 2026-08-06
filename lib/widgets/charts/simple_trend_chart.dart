@@ -17,7 +17,7 @@ class SimpleTrendChart extends StatelessWidget {
     required this.firstValue,
     required this.secondValue,
     required this.thirdValue,
-    this.title = "Spesi questo mese",
+    this.title = "Spesi in questo periodo",
   });
 
   // percentage change from previous period and current period

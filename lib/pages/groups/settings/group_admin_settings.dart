@@ -41,8 +41,8 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.name, style: AppTypography.pageTitle),
-                  Text('${widget.members.length} membri',
+                  Text("Impostazioni admin", style: AppTypography.pageTitle),
+                  Text("${widget.name} - ${widget.members.length} membri",
                       style: AppTypography.pageSubtitle),
                 ],
               ),

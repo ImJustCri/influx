@@ -2,24 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/global.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
-import 'expense_type_helpers.dart';
+import '../../widgets/expenses/expense_type_helpers.dart';
 
 class ExpenseDetailPage extends StatelessWidget {
-  final ExpenseType type;
+  final String expenseId;
+  final String categoryColor;
+  final String categoryIcon;
+  final String categoryName;
   final String title;
-  final String amount;
+  final double amount;
   final DateTime purchaseDate;
   final String? description;
+  final String? groupName;
 
   const ExpenseDetailPage({
     super.key,
-    required this.type,
+    required this.categoryIcon,
+    required this.categoryName,
+    required this.categoryColor,
     required this.title,
     required this.amount,
     required this.purchaseDate,
     this.description,
+    required this.groupName,
+    required this.expenseId,
   });
 
   String _formatDate(DateTime date) {
@@ -40,6 +49,29 @@ class ExpenseDetailPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
+            tooltip: 'Elimina spesa',
+            onPressed: () async {
+              Navigator.of(context).pop();
+
+              try {
+                await Supabase.instance.client
+                    .from('expense')
+                    .delete()
+                    .eq('id', expenseId);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Errore durante l\'eliminazione: $e')),
+                  );
+                }
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
         centerTitle: false,
       ),
       body: SingleChildScrollView(
@@ -54,16 +86,16 @@ class ExpenseDetailPage extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: type.backgroundColor,
+                    color: Color(int.parse(categoryColor, radix: 16)).withAlpha(10),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: type.iconColor,
+                      color: Color(int.parse(categoryColor, radix: 16)),
                       width: .5,
                     ),
                   ),
                   child: Icon(
-                    type.icon,
-                    color: type.iconColor,
+                    getIconFromName(categoryIcon),
+                    color: Color(int.parse(categoryColor, radix: 16)),
                     size: 50,
                   ),
                 ),
@@ -86,7 +118,7 @@ class ExpenseDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      type.subtitle,
+                      categoryName,
                       style: AppTypography.pageSubtitle.copyWith(
                         color: AppColors.white.withValues(alpha: 0.7),
                       ),
@@ -104,11 +136,11 @@ class ExpenseDetailPage extends StatelessWidget {
                 child: Row(
                   spacing: 16,
                   children: [
-                    Icon(LucideIcons.calendar, color: AppColors.white),
+                    const Icon(LucideIcons.calendar, color: AppColors.white),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                             "Data d'acquisto",
                             style: AppTypography.containerTitle
                         ),
@@ -130,11 +162,11 @@ class ExpenseDetailPage extends StatelessWidget {
                 child: Row(
                   spacing: 16,
                   children: [
-                    Icon(LucideIcons.clock, color: AppColors.white),
+                    const Icon(LucideIcons.clock, color: AppColors.white),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                             "Orario d'acquisto",
                             style: AppTypography.containerTitle
                         ),
@@ -152,23 +184,66 @@ class ExpenseDetailPage extends StatelessWidget {
 
               // description (optional)
               if (description != null && description!.isNotEmpty) ...[
-                AppContainer(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Descrizione',
-                        style: AppTypography.containerTitle,
+                Column(
+                  children: [
+                    AppContainer(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            description!,
+                            style: AppTypography.containerBody,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        description!,
-                        style: AppTypography.containerBody,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // group (optional)
+              if (groupName != null) ...[
+                Column(
+                  children: [
+                    const Text(
+                      'Appartiene al gruppo:',
+                      style: AppTypography.containerTitle,
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: 16),
+                    AppContainer(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            spacing: 12,
+                            children: [
+                              const CircleAvatar(
+                                backgroundColor: AppColors.backgroundAccent,
+                                radius: 24,
+                                child: Icon(
+                                  LucideIcons.users_round,
+                                  size: 20,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                              Text(
+                                groupName!,
+                                style: AppTypography.budgetIndicator.copyWith(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
               ],
 
               const SizedBox(height: 32),

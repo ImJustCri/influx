@@ -111,6 +111,7 @@ class GroupSelectionSection extends ConsumerWidget {
                     final isSelected = selectedGroupId == group.id;
 
                     return ListTile(
+                      minTileHeight: 72,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
                       ),
@@ -124,12 +125,6 @@ class GroupSelectionSection extends ConsumerWidget {
                       title: Text(
                         group.name,
                         style: AppTypography.containerTitle,
-                      ),
-                      subtitle: Text(
-                        'Membri: ${group.maxMembers}',
-                        style: AppTypography.containerBody.copyWith(
-                          color: Colors.white54,
-                        ),
                       ),
                       trailing: isSelected
                           ? const Icon(

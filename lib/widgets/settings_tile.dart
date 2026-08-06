@@ -8,6 +8,10 @@ class SettingsTile extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
   final Color? color;
+  final Color? iconColor;
+  final Color? textColor;
+  final Color? splashColor;
+  final Color? highlightColor;
   final double borderRadius;
   final Border? border;
   final List<BoxShadow>? boxShadow;
@@ -20,6 +24,10 @@ class SettingsTile extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.margin = EdgeInsets.zero,
     this.color,
+    this.iconColor,
+    this.textColor,
+    this.splashColor,
+    this.highlightColor,
     this.borderRadius = 32,
     this.border,
     this.boxShadow,
@@ -27,34 +35,43 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(borderRadius),
+    return Material(
+      color: Colors.transparent,
       child: Container(
         margin: margin,
-        padding: padding,
         decoration: BoxDecoration(
           color: color ?? AppColors.containerBackground,
           borderRadius: BorderRadius.circular(borderRadius),
-          border: border ?? Border.all(
-            color: AppColors.containerBorder,
-            width: 1,
-          ),
+          border: border ??
+              Border.all(
+                color: AppColors.containerBorder,
+                width: 1,
+              ),
           boxShadow: boxShadow,
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: AppColors.white),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: AppTypography.containerBody,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: splashColor,
+          highlightColor: highlightColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Padding(
+            padding: padding,
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: iconColor ?? AppColors.white,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: AppTypography.containerBody.copyWith(
+                    color: textColor ?? AppTypography.containerBody.color,
+                  ),
+                ),
+              ],
             ),
-            // Icon(
-            //   Icons.chevron_right,
-            //   color: AppColors.white.withValues(alpha: 0.7),
-            // ),
-          ],
+          ),
         ),
       ),
     );

@@ -129,25 +129,6 @@ class _SecurityPageState extends State<SecurityPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Dispositivi',
-                    style: AppTypography.containerBody,
-                  ),
-                  const SizedBox(height: 4),
-                  SettingsTile(
-                    icon: LucideIcons.smartphone,
-                    title: 'Sessioni attive',
-                    onTap: () {
-                      //todo
-                    },
-                  ),
-                ],
-              ),
-
-              Column(
-                spacing: 8,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
                     'Zona di pericolo',
                     style: AppTypography.containerBody.copyWith(
                       color: AppColors.white.withValues(alpha: 0.6),
@@ -165,28 +146,13 @@ class _SecurityPageState extends State<SecurityPage> {
   }
 
   Widget _buildDeleteAccountTile(BuildContext context) {
-    return AppContainer(
-      width: double.infinity,
-      child: InkWell(
-        onTap: () => _showDeleteConfirmationDialog(context),
-        child: const Row(
-          children: [
-            Icon(LucideIcons.trash_2, color: Color(0xFFFF5252)),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                'Elimina account',
-                style: TextStyle(
-                  color: Color(0xFFFF5252),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Icon(LucideIcons.chevron_right, color: Colors.white54),
-          ],
-        ),
-      ),
+    return SettingsTile(
+      icon: LucideIcons.trash,
+      title: 'Elimina account',
+      onTap: () => _showDeleteConfirmationDialog(context),
+      iconColor: const Color(0xFFFF5252),
+      textColor: const Color(0xFFFF5252),
+      splashColor: const Color(0xFFFF5252).withValues(alpha: 0.15),
     );
   }
 
