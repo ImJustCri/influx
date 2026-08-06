@@ -96,7 +96,57 @@ final ThemeData darkTheme = ThemeData(
     showCheckmark: false,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
   ),
+
+  inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    fillColor: AppColors.inputBackground,
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(
+        color: AppColors.inputBorder,
+        width: 1,
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(
+        color: AppColors.inputBorder,
+        width: 2,
+      ),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(
+        color: Colors.red,
+        width: 1,
+      ),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(
+        color: Colors.red,
+        width: 2,
+      ),
+    ),
+  ),
+
+    dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(AppColors.inputBackground),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+            side: const BorderSide(
+              color: AppColors.inputBorder,
+              width: 1,
+            ),
+          ),
+        ),
+      ),
+    ),
 );
+
+
 
 class AppColors {
   static const Color backgroundColor = Color(0xFF0D1230);
