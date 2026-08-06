@@ -29,7 +29,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   late final TextEditingController _avatarUrlController;
   late final TextEditingController _customUrlController;
   bool _isLoading = false;
-  
+
   final Map<String, List<String>> _avatarCategories = {
     'Pianeti': [
       'https://api.dicebear.com/10.x/planets/png?seed=767jctjk',
