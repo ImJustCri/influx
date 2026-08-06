@@ -6,6 +6,7 @@ import '../../pages/expenses/expense_detail_page.dart';
 
 class ExpenseItem extends StatelessWidget {
   final String expenseId;
+  final String categoryId;
   final String categoryIcon;
   final String categoryColor;
   final String categoryName;
@@ -26,6 +27,7 @@ class ExpenseItem extends StatelessWidget {
     this.description,
     required this.groupName,
     required this.expenseId,
+    required this.categoryId,
   });
 
   @override
