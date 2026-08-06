@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/widgets/app_container.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
@@ -59,31 +60,37 @@ class AllExpensesPage extends ConsumerWidget {
                     final dayExpenses = entry.value;
 
                     return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            dateLabel,
-                            style: AppTypography.containerTitle,
-                          ),
-                        ),
+                        AppContainer(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  dateLabel,
+                                  style: AppTypography.containerTitle,
+                                ),
+                              ),
 
-                        ...dayExpenses.map(
-                              (expense) => ExpenseItem(
-                            categoryColor: expense.categoryColor,
-                            categoryIcon: expense.categoryIcon,
-                            categoryName: expense.categoryName,
-                            title: expense.title,
-                            amount: expense.amount,
-                            purchaseDate: expense.purchaseDate,
-                            description: expense.description,
-                            groupName: expense.groupName,
-                            expenseId: expense.id,
-                            categoryId: expense.categoryId,
+                              ...dayExpenses.map(
+                                    (expense) => ExpenseItem(
+                                  categoryColor: expense.categoryColor,
+                                  categoryIcon: expense.categoryIcon,
+                                  categoryName: expense.categoryName,
+                                  title: expense.title,
+                                  amount: expense.amount,
+                                  purchaseDate: expense.purchaseDate,
+                                  description: expense.description,
+                                  groupName: expense.groupName,
+                                  expenseId: expense.id,
+                                  categoryId: expense.categoryId,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                       ],
                     );
                   }),
