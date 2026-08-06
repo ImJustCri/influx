@@ -15,7 +15,6 @@ class CreateGroupPage extends ConsumerStatefulWidget {
 
 class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
   late TextEditingController groupNameController;
-  late TextEditingController maxMembersController;
   late TextEditingController totalBudgetController;
 
   bool _isModified = false;
@@ -25,18 +24,15 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
   void initState() {
     super.initState();
     groupNameController = TextEditingController();
-    maxMembersController = TextEditingController();
     totalBudgetController = TextEditingController();
 
     groupNameController.addListener(_validateInputs);
-    maxMembersController.addListener(_validateInputs);
     totalBudgetController.addListener(_validateInputs);
   }
 
   void _validateInputs() {
     setState(() {
       _isModified = groupNameController.text.trim().isNotEmpty &&
-          maxMembersController.text.trim().isNotEmpty &&
           totalBudgetController.text.trim().isNotEmpty;
     });
   }
@@ -44,17 +40,15 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
   @override
   void dispose() {
     groupNameController.dispose();
-    maxMembersController.dispose();
     totalBudgetController.dispose();
     super.dispose();
   }
 
   Future<void> _createGroup() async {
     final name = groupNameController.text.trim();
-    final maxMembers = int.tryParse(maxMembersController.text.trim());
     final totalBudget = double.tryParse(totalBudgetController.text.trim().replaceAll(',', '.'));
 
-    if (name.isEmpty || maxMembers == null || totalBudget == null) {
+    if (name.isEmpty || totalBudget == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Inserisci valori validi per tutti i campi.'),
@@ -69,40 +63,36 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
 
     try {
       final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser?.id;
 
-      final response = await supabase.functions.invoke(
-        'create-group',
-        body: {
-          'name': name,
-          'max_members': maxMembers,
-          'total_budget': totalBudget,
-        },
-      );
-
-      if (response.status == 200 || response.status == 201) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gruppo creato con successo!'),
-            ),
-          );
-          Navigator.of(context).pop(true);
-        }
-      } else {
-        final errorMessage =
-            response.data?['error'] ?? 'Errore durante la creazione del gruppo.';
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage.toString())),
-          );
-        }
+      if (userId == null) {
+        throw const AuthException('Utente non autenticato.');
       }
-    } on FunctionException catch (error) {
+
+      // database insert into the 'group' table
+      await supabase.from('group').insert({
+        'name': name,
+        'total_budget': totalBudget,
+        'status': 'creation',
+        'created_by': userId,
+      });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.reasonPhrase ?? 'Errore della funzione.'),
+          const SnackBar(
+            content: Text('Gruppo creato con successo!'),
           ),
+        );
+        Navigator.of(context).pop(true);
+      }
+    } on PostgrestException catch (error) {
+      if (mounted) {
+        final message = error.message.contains('Group limit reached')
+            ? 'Hai raggiunto il limite massimo di 3 gruppi.'
+            : 'Errore durante la creazione del gruppo: ${error.message}';
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
         );
       }
     } catch (error) {
@@ -179,36 +169,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                 controller: groupNameController,
                 decoration: InputDecoration(
                   hintText: "Nome del gruppo",
-                  hintStyle: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.inputBackground,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Max Members Field
-              TextFormField(
-                keyboardType: TextInputType.number,
-                controller: maxMembersController,
-                decoration: InputDecoration(
-                  hintText: "Numero massimo di membri",
                   hintStyle: const TextStyle(
                     color: AppColors.white,
                     fontSize: 14,
