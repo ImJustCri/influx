@@ -46,6 +46,7 @@ class RecentExpensesSection extends StatelessWidget {
                   description: expense.description,
                   groupName: expense.groupName,
                   expenseId: expense.id,
+                  categoryId: expense.categoryId,
             ),
           ),
       ],
