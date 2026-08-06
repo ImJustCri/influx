@@ -38,7 +38,6 @@ class ExpenseItem extends StatelessWidget {
       children: [
         Material(
           color: Colors.transparent,
-          borderRadius: borderRadius,
           child: InkWell(
             borderRadius: borderRadius,
             onTap: () {
@@ -102,10 +101,10 @@ class ExpenseItem extends StatelessWidget {
             ),
           ),
         ),
-        const Divider(
-          color: AppColors.containerBorder,
-          height: .5,
-        ),
+        // const Divider(
+        //   color: AppColors.containerBorder,
+        //   height: .5,
+        // ),
       ],
     );
   }
