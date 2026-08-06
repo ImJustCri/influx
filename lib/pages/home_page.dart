@@ -22,16 +22,16 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage> {
   Future<void> _refreshData() async {
     // invalidate both providers so the total and recent expenses refresh together
-    ref.invalidate(fetchExpenses);
+    ref.invalidate(fetchLatestExpenses);
     ref.invalidate(totalExpensesProvider);
 
-    await ref.read(fetchExpenses.future);
+    await ref.read(fetchLatestExpenses(3).future);
   }
 
   @override
   Widget build(BuildContext context) {
     final OcrService s = OcrService();
-    final expensesAsync = ref.watch(fetchExpenses);
+    final expensesAsync = ref.watch(fetchLatestExpenses(3));
     final totalExpensesAsync = ref.watch(totalExpensesProvider);
 
     return Scaffold(
@@ -110,7 +110,7 @@ class HomePageState extends ConsumerState<HomePage> {
             );
 
             // Refresh both when returning from adding an expense
-            ref.invalidate(fetchExpenses);
+            ref.invalidate(fetchLatestExpenses);
             ref.invalidate(totalExpensesProvider);
           },
           backgroundColor: AppColors.backgroundAccent,
