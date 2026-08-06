@@ -63,12 +63,15 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                 data: (groups) {
                   if (groups.isEmpty) {
                     return const Padding(
-                      padding: EdgeInsets.all(24.0),
-                      child: Center(
-                        child: Text(
-                          "Nessun gruppo trovato",
-                          style: AppTypography.containerBody,
-                        ),
+                      padding: EdgeInsets.all(48.0),
+                      child: Column(
+                        children: [
+                          Icon(LucideIcons.user_search, size: 32),
+                          SizedBox(height: 24),
+                          Text("Deserto totale...", style: AppTypography.containerTitle, textAlign: TextAlign.center),
+                          SizedBox(height: 4),
+                          Text("Dai un senso a questa schermata: crea un gruppo o entra in uno esistente.", style: AppTypography.containerBody, textAlign: TextAlign.center),
+                        ],
                       ),
                     );
                   }
