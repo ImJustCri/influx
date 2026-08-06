@@ -1,5 +1,6 @@
 class ExpenseData {
   final String id;
+  final String categoryId;
   final String categoryName;
   final String categoryIcon;
   final String categoryColor;
@@ -21,12 +22,14 @@ class ExpenseData {
     this.description,
     this.groupName,
     required this.id,
+    required this.categoryId,
   });
 
 
   factory ExpenseData.convertJson(Map<String,dynamic> item){
     return ExpenseData(
       id: item['id'],
+      categoryId: item['category']['id'],
       categoryName: item['category']['name'],
       categoryColor: item['category']['color'],
       categoryIcon: item['category']['icon'],
