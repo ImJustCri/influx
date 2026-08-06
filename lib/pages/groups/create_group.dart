@@ -219,6 +219,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                               hintStyle: AppTypography.budgetIndicator.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.3),
                               ),
+                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
