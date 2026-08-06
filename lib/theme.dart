@@ -85,6 +85,17 @@ final ThemeData darkTheme = ThemeData(
       ),
     ),
   ),
+
+  chipTheme: ChipThemeData(
+    backgroundColor: AppColors.containerBackground,
+    selectedColor: AppColors.btnBackground,
+    side: BorderSide(color: AppColors.containerBorder),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(128),
+    ),
+    showCheckmark: false,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+  ),
 );
 
 class AppColors {
