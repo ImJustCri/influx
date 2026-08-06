@@ -8,6 +8,7 @@ import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/expenses/add/group_selection_section.dart';
+import '../../widgets/expenses/expense_type_helpers.dart';
 import '../../widgets/page_padding.dart';
 
 class AddExpensePage extends ConsumerStatefulWidget {
@@ -228,6 +229,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                       color: AppColors.white
                                           .withValues(alpha: 0.3),
                                     ),
+                                    fillColor: Colors.transparent,
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
@@ -270,6 +272,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                               hintStyle: AppTypography.containerBody.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.3),
                               ),
+                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -304,6 +307,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                               hintStyle: AppTypography.containerBody.copyWith(
                                 color: AppColors.white.withValues(alpha: 0.3),
                               ),
+                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -338,6 +342,8 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<CategoryModel>(
                                 value: selectedCategory,
+                                borderRadius: BorderRadius.circular(32),
+                                dropdownColor: AppColors.backgroundAccent,
                                 hint: Text(
                                   'Seleziona Categoria',
                                   style: AppTypography.containerTitle.copyWith(
@@ -346,7 +352,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                   ),
                                 ),
                                 isExpanded: true,
-                                dropdownColor: AppColors.inputBackground,
                                 icon: const Icon(
                                   LucideIcons.chevron_down,
                                   color: Colors.white54,
@@ -355,9 +360,17 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                 items: categories.map((category) {
                                   return DropdownMenuItem<CategoryModel>(
                                     value: category,
-                                    child: Text(
-                                      category.name,
-                                      style: AppTypography.containerTitle,
+                                    child: Row(
+                                      children: [
+                                        Icon(getIconFromName(category.icon), color: Color(int.parse(category.color, radix: 16))),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          category.name,
+                                          style: AppTypography.containerTitle.copyWith(
+                                            color: AppColors.white
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 }).toList(),
