@@ -29,5 +29,18 @@ final fetchExpenses = FutureProvider<List<ExpenseData>>((ref) async {
   return response.map((item) => ExpenseData.convertJson(item)).toList();
 });
 
+/// Fetch expenses by category
+final fetchExpensesByCategory = FutureProvider.family<List<ExpenseData>, String>((ref, categoryId) async {
+  final userId = Supabase.instance.client.auth.currentUser!.id;
+
+  final response = await Supabase.instance.client
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('profile_id', userId)
+      .eq('category_id', categoryId)
+      .order('created_at', ascending: false);
+
+  return response.map((item) => ExpenseData.convertJson(item)).toList();
+});
 
 
