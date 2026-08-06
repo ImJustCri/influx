@@ -44,7 +44,7 @@ class HomePageState extends ConsumerState<HomePage> {
           physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height + 150,
+              minHeight: MediaQuery.of(context).size.height,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
