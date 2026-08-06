@@ -16,7 +16,7 @@ class SimpleTrendChartPage extends StatelessWidget {
     required this.firstValue,
     required this.secondValue,
     required this.thirdValue,
-    this.title = "Spesi questo mese",
+    this.title = "Spesi in questo periodo",
   });
 
   double get percentChange {
