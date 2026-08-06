@@ -31,7 +31,7 @@ class HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final OcrService s = OcrService();
-    final expensesAsync = ref.watch(fetchLatestExpenses(3));
+    final expensesAsync = ref.watch(fetchLatestExpenses(5));
     final totalExpensesAsync = ref.watch(totalExpensesProvider);
 
     return Scaffold(
@@ -42,6 +42,9 @@ class HomePageState extends ConsumerState<HomePage> {
         backgroundColor: AppColors.backgroundAccent,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.only(
+            bottom: 128
+          ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height,
