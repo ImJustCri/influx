@@ -42,7 +42,7 @@ class BudgetCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Budget mensile rimanente",
+                "Budget rimanente",
                 style: AppTypography.containerBody,
               ),
               SelectableText(
