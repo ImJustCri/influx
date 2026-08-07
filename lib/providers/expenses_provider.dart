@@ -43,4 +43,17 @@ final fetchExpensesByCategory = FutureProvider.family<List<ExpenseData>, String>
   return response.map((item) => ExpenseData.convertJson(item)).toList();
 });
 
+/// Fetch expenses filtered by groupId
+final fetchExpensesByGroupProvider =
+FutureProvider.family<List<ExpenseData>, String>((ref, groupId) async {
 
+  final response = await Supabase.instance.client
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('group_id', groupId)
+      .order('created_at', ascending: false);
+
+  return (response as List)
+      .map((item) => ExpenseData.convertJson(item))
+      .toList();
+});
