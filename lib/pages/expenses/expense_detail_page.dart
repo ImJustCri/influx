@@ -19,6 +19,7 @@ class ExpenseDetailPage extends StatelessWidget {
   final String? groupName;
   final String? expenseUserName;
   final String? expenseUserPfp;
+  final String? expenseUserId;
 
   const ExpenseDetailPage({
     super.key,
@@ -33,6 +34,7 @@ class ExpenseDetailPage extends StatelessWidget {
     required this.expenseId,
     this.expenseUserName,
     this.expenseUserPfp,
+    this.expenseUserId,
   });
 
   String _formatDate(DateTime date) {
@@ -54,26 +56,27 @@ class ExpenseDetailPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
-            tooltip: 'Elimina spesa',
-            onPressed: () async {
-              Navigator.of(context).pop();
+          if (Supabase.instance.client.auth.currentUser?.id == expenseUserId)
+            IconButton(
+              icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
+              tooltip: 'Elimina spesa',
+              onPressed: () async {
+                Navigator.of(context).pop();
 
-              try {
-                await Supabase.instance.client
-                    .from('expense')
-                    .delete()
-                    .eq('id', expenseId);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Errore durante l\'eliminazione: $e')),
-                  );
+                try {
+                  await Supabase.instance.client
+                      .from('expense')
+                      .delete()
+                      .eq('id', expenseId);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Errore durante l\'eliminazione: $e')),
+                    );
+                  }
                 }
-              }
-            },
-          ),
+              },
+            ),
           const SizedBox(width: 8),
         ],
         centerTitle: false,
