@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:influx/global.dart';
 import 'package:influx/widgets/round_linear_progress_bar.dart';
-
+import '../../pages/groups/user_group_expenses.page.dart';
 import '../../theme.dart';
 
 class GroupMemberExpenseTile extends StatelessWidget {
+  final String memberId;
   final String memberName;
   final double amount;
   final String? avatarImageUrl;
   final double progressValue;
   final Color backgroundColor;
   final Color valueColor;
+  final String groupId;
+  final String groupName;
 
   const GroupMemberExpenseTile({
     super.key,
@@ -20,13 +23,27 @@ class GroupMemberExpenseTile extends StatelessWidget {
     required this.progressValue,
     this.backgroundColor = AppColors.backgroundAccent,
     this.valueColor = AppColors.white,
+    required this.memberId,
+    required this.groupId,
+    required this.groupName,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserGroupExpensesPage(
+              userId: memberId,
+              groupId: groupId,
+              userName: memberName,
+              userPfp: avatarImageUrl,
+              groupName: groupName,
+            ),
+          ),
+        );
       },
       child: SizedBox(
         height: 80,
