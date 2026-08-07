@@ -57,3 +57,37 @@ FutureProvider.family<List<ExpenseData>, String>((ref, groupId) async {
       .map((item) => ExpenseData.convertJson(item))
       .toList();
 });
+
+/// Fetch expenses filtered by groupId
+final fetchExpensesByCategoryGroupProvider =
+FutureProvider.family<List<ExpenseData>, (String, String)>((ref, arg) async {
+  final (groupId, categoryId) = arg;
+
+  final response = await Supabase.instance.client
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('category_id', categoryId)
+      .eq('group_id', groupId)
+      .order('created_at', ascending: false);
+
+  return (response as List)
+      .map((item) => ExpenseData.convertJson(item))
+      .toList();
+});
+
+/// Fetch expenses filtered by groupId and profileId
+final fetchExpensesByUserAndGroupProvider =
+FutureProvider.family<List<ExpenseData>, (String, String)>((ref, args) async {
+  final (userId, groupId) = args;
+
+  final response = await Supabase.instance.client
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('profile_id', userId)
+      .eq('group_id', groupId)
+      .order('created_at', ascending: false);
+
+  return (response as List)
+      .map((item) => ExpenseData.convertJson(item))
+      .toList();
+});
