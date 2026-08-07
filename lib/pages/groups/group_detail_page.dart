@@ -7,9 +7,13 @@ import 'package:influx/widgets/group/group_total_budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../providers/get_group_role_provider.dart';
 import '../../providers/group_members_provider.dart';
+import '../../providers/profile_group_expense_sum_profile.dart';
 import '../../theme.dart';
+import '../../widgets/expenses/all_expenses_page.dart';
 import '../../widgets/group/group_budget_card.dart';
 import '../../widgets/group/members_expense_list.dart';
+import '../../widgets/settings_tile.dart';
+import 'group_expenses_page.dart';
 
 class GroupDetailPage extends ConsumerWidget {
   final Group group;
@@ -20,7 +24,8 @@ class GroupDetailPage extends ConsumerWidget {
   const GroupDetailPage({
     super.key,
     required this.group,
-    required this.isUserGroupOwner, required this.currentUserId,
+    required this.isUserGroupOwner,
+    required this.currentUserId,
     required this.memberCount,
   });
 
@@ -34,9 +39,17 @@ class GroupDetailPage extends ConsumerWidget {
       ),
     );
 
+    // Watch the profile group expense sum
+    final profileExpenseSumAsync = ref.watch(
+      profileGroupExpenseSumProvider(
+        (profileId: currentUserId, groupId: group.id),
+      ),
+    );
+
     void refresh() {
       ref.invalidate(fetchGroupMembersProvider);
       ref.invalidate(fetchProfileGroupDetailsProvider);
+      ref.invalidate(profileGroupExpenseSumProvider);
     }
 
     return Scaffold(
@@ -52,7 +65,7 @@ class GroupDetailPage extends ConsumerWidget {
             refresh();
           },
           child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -72,26 +85,48 @@ class GroupDetailPage extends ConsumerWidget {
                       profileGroupAsync.maybeWhen(
                         data: (data) {
                           final isAdmin = data != null && data['role'] == 'admin';
-                          if (!isAdmin) return const SizedBox.shrink();
 
-                          return IconButton(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => GroupAdminSettings(
-                                    members: members,
-                                    name: group.name,
-                                    groupId: group.id,
-                                  ),
-                                ),
-                              );
+                          return Row(
+                            children: [
+                              IconButton(
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GroupExpensesPage(
+                                        groupId: group.id,
+                                        groupName: group.name,
+                                        members: members,
+                                      )
+                                    ),
+                                  );
 
-                              if (context.mounted) {
-                                refresh();
-                              }
-                            },
-                            icon: const Icon(LucideIcons.settings_2),
+                                  if (context.mounted) {
+                                    refresh();
+                                  }
+                                },
+                                icon: const Icon(LucideIcons.chart_column),
+                              ),
+                              isAdmin ? IconButton(
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GroupAdminSettings(
+                                        members: members,
+                                        name: group.name,
+                                        groupId: group.id,
+                                      ),
+                                    ),
+                                  );
+
+                                  if (context.mounted) {
+                                    refresh();
+                                  }
+                                },
+                                icon: const Icon(LucideIcons.settings_2),
+                              ) : const SizedBox.shrink(),
+                            ],
                           );
                         },
                         orElse: () => const SizedBox.shrink(),
@@ -104,7 +139,11 @@ class GroupDetailPage extends ConsumerWidget {
                     spacing: 24,
                     children: [
                       GroupBudgetCard(
-                        totalExpenses: 200,
+                        totalExpenses: profileExpenseSumAsync.when(
+                          data: (sum) => sum,
+                          loading: () => 0.0,
+                          error: (_, _) => 0.0,
+                        ),
                         resetDate: group.startedAt ?? DateTime.now(),
                         isGroup: true,
                         groupBudget: group.totalBudget,
@@ -115,12 +154,27 @@ class GroupDetailPage extends ConsumerWidget {
                         groupBudget: group.totalBudget,
                         totalGroupExpenses: 10,
                       ),
+                      SettingsTile(
+                        icon: LucideIcons.list_collapse,
+                        title: "Vedi tutte le spese del periodo",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AllExpensesPage(
+                                members: members,
+                                groupId: group.id,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 16,
                         children: [
                           Text('Spese per membro', style: AppTypography.containerBody),
-                          MembersExpenseList(members: members),
+                          MembersExpenseList(members: members, groupId: group.id, perCapitaBudget: group.perCapitaBudget),
                         ],
                       ),
                     ],
