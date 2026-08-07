@@ -13,12 +13,14 @@ class CategoryExpensesPage extends ConsumerWidget {
   final String categoryId;
   final String? categoryName;
   final List<GroupMember>? groupMembers;
+  final String? groupId;
 
   const CategoryExpensesPage({
     super.key,
     required this.categoryId,
     this.categoryName,
     this.groupMembers,
+    this.groupId,
   });
 
   /// Helper function to group expenses by formatted date string
@@ -49,7 +51,10 @@ class CategoryExpensesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = ref.watch(fetchExpensesByCategory(categoryId));
+    final expensesAsync = ref.watch(
+        groupId != null ? fetchExpensesByCategoryGroupProvider((groupId!, categoryId)) :
+        fetchExpensesByCategory(categoryId)
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -111,6 +116,7 @@ class CategoryExpensesPage extends ConsumerWidget {
                                   categoryId: categoryId,
                                   userName: matchingMember?.name,
                                   userPfp: matchingMember?.avatarImageUrl,
+                                  profileId: expense.profileId,
                                 );
                               }),
                             ],
