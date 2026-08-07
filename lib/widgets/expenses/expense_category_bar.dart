@@ -12,6 +12,7 @@ class ExpenseCategoryBar extends StatelessWidget {
   final double amount;
   final double percentage;
   final List<GroupMember>? groupMembers;
+  final String? groupId;
 
   const ExpenseCategoryBar({
     super.key,
@@ -22,13 +23,14 @@ class ExpenseCategoryBar extends StatelessWidget {
     required this.amount,
     required this.percentage,
     this.groupMembers,
+    this.groupId
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryExpensesPage(categoryId: categoryId, categoryName: categoryName, groupMembers: groupMembers)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryExpensesPage(categoryId: categoryId, categoryName: categoryName, groupMembers: groupMembers, groupId: groupId,)));
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
