@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
+import 'package:influx/pages/groups/user_group_expenses.page.dart';
 import 'package:influx/widgets/group/group_total_budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../providers/get_group_role_provider.dart';
@@ -97,7 +98,7 @@ class GroupDetailPage extends ConsumerWidget {
                                         groupId: group.id,
                                         groupName: group.name,
                                         members: members,
-                                      )
+                                      ),
                                     ),
                                   );
 
@@ -107,7 +108,8 @@ class GroupDetailPage extends ConsumerWidget {
                                 },
                                 icon: const Icon(LucideIcons.chart_column),
                               ),
-                              isAdmin ? IconButton(
+                              isAdmin
+                                  ? IconButton(
                                 onPressed: () async {
                                   await Navigator.push(
                                     context,
@@ -125,7 +127,8 @@ class GroupDetailPage extends ConsumerWidget {
                                   }
                                 },
                                 icon: const Icon(LucideIcons.settings_2),
-                              ) : const SizedBox.shrink(),
+                              )
+                                  : const SizedBox.shrink(),
                             ],
                           );
                         },
@@ -169,12 +172,33 @@ class GroupDetailPage extends ConsumerWidget {
                           );
                         },
                       ),
+
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 16,
                         children: [
                           Text('Spese per membro', style: AppTypography.containerBody),
-                          MembersExpenseList(members: members, groupId: group.id, perCapitaBudget: group.perCapitaBudget),
+
+                          // Inside MembersExpenseList, pass an onTap callback or handle tap to open UserGroupExpensesPage:
+                          /*
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UserGroupExpensesPage(
+                                userId: selectedMember.id,
+                                groupId: group.id,
+                                userName: selectedMember.name,
+                                userPfp: selectedMember.avatarImageUrl,
+                              ),
+                            ),
+                          );
+                          */
+                          MembersExpenseList(
+                            members: members,
+                            groupId: group.id,
+                            perCapitaBudget: group.perCapitaBudget,
+                            groupName: group.name,
+                          ),
                         ],
                       ),
                     ],
