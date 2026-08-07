@@ -17,6 +17,7 @@ class ExpenseItem extends StatelessWidget {
   final String? groupName;
   final String? userName;
   final String? userPfp;
+  final String? profileId;
 
   const ExpenseItem({
     super.key,
@@ -31,7 +32,8 @@ class ExpenseItem extends StatelessWidget {
     required this.expenseId,
     required this.categoryId,
     this.userName,
-    this.userPfp
+    this.userPfp,
+    this.profileId
   });
 
   @override
@@ -59,6 +61,7 @@ class ExpenseItem extends StatelessWidget {
                     groupName: groupName,
                     expenseUserName: userName,
                     expenseUserPfp: userPfp,
+                    expenseUserId: profileId,
                   ),
                 ),
               );
