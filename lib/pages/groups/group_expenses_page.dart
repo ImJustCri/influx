@@ -132,6 +132,7 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
                                   : categorySpent / totalSpent,
                               categoryId: categoryInfo.categoryId,
                               groupMembers: widget.members,
+                              groupId: widget.groupId,
                             );
                           },
                         ).toList(),
