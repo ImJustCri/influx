@@ -17,6 +17,8 @@ class ExpenseDetailPage extends StatelessWidget {
   final DateTime purchaseDate;
   final String? description;
   final String? groupName;
+  final String? expenseUserName;
+  final String? expenseUserPfp;
 
   const ExpenseDetailPage({
     super.key,
@@ -29,6 +31,8 @@ class ExpenseDetailPage extends StatelessWidget {
     this.description,
     required this.groupName,
     required this.expenseId,
+    this.expenseUserName,
+    this.expenseUserPfp,
   });
 
   String _formatDate(DateTime date) {
@@ -200,18 +204,49 @@ class ExpenseDetailPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
               ],
+
+              if (groupName != null || expenseUserPfp != null) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Appartiene a:',
+                  style: AppTypography.containerTitle,
+                  textAlign: TextAlign.left,
+                ),
+              ],
+
+
+              // expense owner
+              expenseUserPfp != null ? Column(
+                children: [
+                  const SizedBox(height: 16),
+                  AppContainer(
+                    width: double.infinity,
+                    child: Row(
+                      spacing: 16,
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(expenseUserPfp!),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                expenseUserName!,
+                                style: AppTypography.containerTitle
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
 
               // group (optional)
               if (groupName != null) ...[
                 Column(
                   children: [
-                    const Text(
-                      'Appartiene al gruppo:',
-                      style: AppTypography.containerTitle,
-                      textAlign: TextAlign.left,
-                    ),
                     const SizedBox(height: 16),
                     AppContainer(
                       width: double.infinity,
@@ -232,9 +267,7 @@ class ExpenseDetailPage extends StatelessWidget {
                               ),
                               Text(
                                 groupName!,
-                                style: AppTypography.budgetIndicator.copyWith(
-                                  fontSize: 18,
-                                ),
+                                style: AppTypography.containerTitle
                               ),
                             ],
                           ),
