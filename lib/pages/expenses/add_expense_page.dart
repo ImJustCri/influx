@@ -65,45 +65,54 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
     if (!mounted) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Risultato OCR",
-                style: AppTypography.containerBody,
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Text(
-                    result ?? "Nessun testo rilevato",
-                    style: AppTypography.budgetIndicator.copyWith(
-                      fontSize: 24
+    if(result!.contains('C\'è stato un errore') || result.contains('Prezzo non trovato') ){
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Risultato OCR",
+                  style: AppTypography.containerBody,
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      result,
+                      style: AppTypography.budgetIndicator.copyWith(
+                          fontSize: 24
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("Chiudi"),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("Chiudi"),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        );
-      },
-    );
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        },
+      );
+
+    }else{
+      amountController.text=result;
+    }
+
+
+
+
   }
 
   Future<void> _saveExpense() async {
