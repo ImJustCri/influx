@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:influx/pages/expenses/category_expenses_page.dart';
+import '../../models/group_member.dart';
 import '../../theme.dart';
 import '../round_linear_progress_bar.dart';
 
@@ -10,6 +11,8 @@ class ExpenseCategoryBar extends StatelessWidget {
   final String categoryColor;
   final double amount;
   final double percentage;
+  final List<GroupMember>? groupMembers;
+  final String? groupId;
 
   const ExpenseCategoryBar({
     super.key,
@@ -19,13 +22,15 @@ class ExpenseCategoryBar extends StatelessWidget {
     required this.categoryColor,
     required this.amount,
     required this.percentage,
+    this.groupMembers,
+    this.groupId
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryExpensesPage(categoryId: categoryId, categoryName: categoryName)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryExpensesPage(categoryId: categoryId, categoryName: categoryName, groupMembers: groupMembers, groupId: groupId,)));
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

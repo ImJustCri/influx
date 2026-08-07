@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
-import '../../models/group_member.dart';
 import '../../providers/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
 
-class AllExpensesPage extends ConsumerWidget {
-  final List<GroupMember>? members;
-  final String? groupId;
+class UserGroupExpensesPage extends ConsumerWidget {
+  final String userId;
+  final String groupId;
+  final String groupName;
+  final String userName;
+  final String? userPfp;
 
-  const AllExpensesPage({super.key, this.members, this.groupId});
+  const UserGroupExpensesPage({
+    super.key,
+    required this.userId,
+    required this.groupId,
+    required this.userName,
+    this.userPfp,
+    required this.groupName,
+  });
 
   /// Helper function to group expenses by formatted date string
   Map<String, List<ExpenseData>> _groupExpensesByDate(List<ExpenseData> expenses) {
@@ -29,21 +39,11 @@ class AllExpensesPage extends ConsumerWidget {
     return grouped;
   }
 
-  /// Helper function to find a member by profileId
-  GroupMember? _findMember(String? profileId) {
-    if (members == null || profileId == null) return null;
-
-    for (final member in members!) {
-      if (member.id == profileId) {
-        return member;
-      }
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = groupId != null ? ref.watch(fetchExpensesByGroupProvider(groupId!)) : ref.watch(fetchExpenses);
+    final expensesAsync = ref.watch(
+      fetchExpensesByUserAndGroupProvider((userId, groupId)),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -64,11 +64,34 @@ class AllExpensesPage extends ConsumerWidget {
               final groupedExpenses = _groupExpensesByDate(expenses);
 
               return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('Tutte le spese', style: AppTypography.pageTitle),
-                  Text('Aggiunte in questo periodo', style: AppTypography.pageSubtitle),
-                  const SizedBox(height: 24),
+                  Column(
+                    spacing: 24,
+                    children: [
+                      CircleAvatar(
+                        radius: 48,
+                        backgroundImage: NetworkImage(
+                          userPfp!
+                        ),
+                      ),
+                      Column(
+                        spacing: 8,
+                        children: [
+                          Text(userName, style: AppTypography.username, textAlign: TextAlign.center),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 8,
+                            children: [
+                              Icon(LucideIcons.users, size: 16),
+                              Text(groupName, style: AppTypography.userEmailSubtitle, textAlign: TextAlign.center),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 48),
 
                   ...groupedExpenses.entries.map((entry) {
                     final dateLabel = entry.key;
@@ -90,9 +113,6 @@ class AllExpensesPage extends ConsumerWidget {
 
                               ...dayExpenses.map(
                                     (expense) {
-                                  // Look up the member using the expense's profileId
-                                  final matchingMember = _findMember(expense.profileId);
-
                                   return ExpenseItem(
                                     categoryColor: expense.categoryColor,
                                     categoryIcon: expense.categoryIcon,
@@ -105,9 +125,9 @@ class AllExpensesPage extends ConsumerWidget {
                                     expenseId: expense.id,
                                     categoryId: expense.categoryId,
 
-                                    // Pass properties safely using null-aware operators
-                                    userName: matchingMember?.name,
-                                    userPfp: matchingMember?.avatarImageUrl,
+                                    // Direct input user data
+                                    userName: userName,
+                                    userPfp: userPfp,
                                   );
                                 },
                               ),

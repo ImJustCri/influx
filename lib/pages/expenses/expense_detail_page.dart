@@ -17,6 +17,9 @@ class ExpenseDetailPage extends StatelessWidget {
   final DateTime purchaseDate;
   final String? description;
   final String? groupName;
+  final String? expenseUserName;
+  final String? expenseUserPfp;
+  final String? expenseUserId;
 
   const ExpenseDetailPage({
     super.key,
@@ -29,6 +32,9 @@ class ExpenseDetailPage extends StatelessWidget {
     this.description,
     required this.groupName,
     required this.expenseId,
+    this.expenseUserName,
+    this.expenseUserPfp,
+    this.expenseUserId,
   });
 
   String _formatDate(DateTime date) {
@@ -50,26 +56,27 @@ class ExpenseDetailPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
-            tooltip: 'Elimina spesa',
-            onPressed: () async {
-              Navigator.of(context).pop();
+          if (Supabase.instance.client.auth.currentUser?.id == expenseUserId)
+            IconButton(
+              icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
+              tooltip: 'Elimina spesa',
+              onPressed: () async {
+                Navigator.of(context).pop();
 
-              try {
-                await Supabase.instance.client
-                    .from('expense')
-                    .delete()
-                    .eq('id', expenseId);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Errore durante l\'eliminazione: $e')),
-                  );
+                try {
+                  await Supabase.instance.client
+                      .from('expense')
+                      .delete()
+                      .eq('id', expenseId);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Errore durante l\'eliminazione: $e')),
+                    );
+                  }
                 }
-              }
-            },
-          ),
+              },
+            ),
           const SizedBox(width: 8),
         ],
         centerTitle: false,
@@ -200,18 +207,49 @@ class ExpenseDetailPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
               ],
+
+              if (groupName != null || expenseUserPfp != null) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Appartiene a:',
+                  style: AppTypography.containerTitle,
+                  textAlign: TextAlign.left,
+                ),
+              ],
+
+
+              // expense owner
+              expenseUserPfp != null ? Column(
+                children: [
+                  const SizedBox(height: 16),
+                  AppContainer(
+                    width: double.infinity,
+                    child: Row(
+                      spacing: 16,
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(expenseUserPfp!),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                expenseUserName!,
+                                style: AppTypography.containerTitle
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
 
               // group (optional)
               if (groupName != null) ...[
                 Column(
                   children: [
-                    const Text(
-                      'Appartiene al gruppo:',
-                      style: AppTypography.containerTitle,
-                      textAlign: TextAlign.left,
-                    ),
                     const SizedBox(height: 16),
                     AppContainer(
                       width: double.infinity,
@@ -232,9 +270,7 @@ class ExpenseDetailPage extends StatelessWidget {
                               ),
                               Text(
                                 groupName!,
-                                style: AppTypography.budgetIndicator.copyWith(
-                                  fontSize: 18,
-                                ),
+                                style: AppTypography.containerTitle
                               ),
                             ],
                           ),
