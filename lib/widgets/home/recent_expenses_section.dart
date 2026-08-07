@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:influx/widgets/app_container.dart';
 import '../../theme.dart';
 import '../../models/expense_data.dart';
+import '../expenses/all_expenses_page.dart';
 import '../expenses/expense_item.dart';
+import '../settings_tile.dart';
 
 class RecentExpensesSection extends StatefulWidget {
   final List<ExpenseData> expenses;
@@ -133,6 +135,14 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
                   ],
                 );
               }),
+
+              SettingsTile(
+                  icon: LucideIcons.list_collapse,
+                  title: "Vedi di più",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AllExpensesPage()));
+                  }
+              ),
             ],
           )
       ],
