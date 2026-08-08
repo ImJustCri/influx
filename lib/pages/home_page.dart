@@ -7,9 +7,9 @@ import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../providers/total_expenses_provider.dart';
-import '../widgets/app_container.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
+import '../widgets/status_container.dart';
 import 'expenses/add_expense_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -62,32 +62,11 @@ class HomePageState extends ConsumerState<HomePage> {
                           data: (total) => total,
                           orElse: () => 0.0,
                         ),
-                        resetDate: DateTime(2026, 6, 1),
                       ),
                       const SizedBox(height: 24),
 
                       expensesAsync.when(
-                        loading: () => AppContainer(
-                          padding: const EdgeInsets.all(48),
-                          width: double.infinity,
-                          child: Column(
-                            children: const [
-                              Icon(LucideIcons.loader, size: 32),
-                              SizedBox(height: 24),
-                              Text(
-                                "Caricamento...",
-                                style: AppTypography.containerTitle,
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "Nel frattempo che aspetti, caffè?",
-                                style: AppTypography.containerBody,
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
+                        loading: () => StatusContainer(),
                         data: (expenses) {
                           return RecentExpensesSection(expenses: expenses);
                         },
