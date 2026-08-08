@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/account/security_page.dart';
+import 'package:influx/pages/initial_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
@@ -217,7 +218,7 @@ class ProfilePage extends ConsumerWidget {
                         RootApp.restartApp(context);
 
                         Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const AuthService()),
+                          MaterialPageRoute(builder: (context) => InitialPage()),
                               (route) => false,
                         );
                       },
