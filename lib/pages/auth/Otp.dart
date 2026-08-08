@@ -1,19 +1,20 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:influx/pages/main_shell_screen.dart';
 import 'package:influx/services/auth_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
 
+import '../initial_page.dart';
+
 class OtpPage extends StatefulWidget {
-  final email;
+  final String email;
 
   const OtpPage({
     super.key,
-    this.email
+    required this.email
   });
 
+  @override
   State<OtpPage> createState()=> OtpState();
 }
 
@@ -22,6 +23,7 @@ class OtpState extends State<OtpPage>{
   final otpCodeContent= TextEditingController();
   AuthService auth= AuthService();
 
+  @override
   Widget build(BuildContext context){
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -148,7 +150,7 @@ class OtpState extends State<OtpPage>{
                             }
                         );
                       }else{
-                        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const MainShellScreen()), (route)=>false);
+                        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const InitialPage()), (route)=>false);
                       }
 
                     }
