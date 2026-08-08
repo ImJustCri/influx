@@ -12,6 +12,7 @@ import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
 import '../../widgets/user_qr_dialog.dart';
+import '../periods/periods_overview_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -183,6 +184,17 @@ class ProfilePage extends ConsumerWidget {
                         );
                         // reload user profile
                         ref.invalidate(profileProvider);
+                      },
+                    ),
+                    SettingsTile(
+                      icon: LucideIcons.calendar,
+                      title: "Periodi precedenti",
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const PeriodsOverviewPage(),
+                          ),
+                        );
                       },
                     ),
                     SettingsTile(
