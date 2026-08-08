@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/pages/auth/otp.dart';
-import 'package:influx/pages/main_shell_screen.dart';
+import 'package:influx/pages/initial_page.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
@@ -120,12 +119,12 @@ class LoginPage extends StatefulWidget {
                                                   onPressed: (){
                                                     Navigator.pop(context);
                                                   },
-                                                  child: Text(
-                                                      "Chiudi",
-                                                  ),
                                                 style: ElevatedButton.styleFrom(
                                                   padding: EdgeInsets.all(0)
                                                 ),
+                                                  child: Text(
+                                                      "Chiudi",
+                                                  ),
                                               ),
                                             )
                                           ],
@@ -196,7 +195,7 @@ class LoginPage extends StatefulWidget {
                                     final session=data.session;
 
                                     if(session!=null){
-                                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const MainShellScreen()), (route)=>false);
+                                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const InitialPage()), (route)=>false);
                                     }
                                   });
                                 },
