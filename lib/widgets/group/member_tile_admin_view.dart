@@ -9,30 +9,44 @@ import '../../pages/groups/settings/group_member_edit.dart';
 class MemberTileAdminView extends StatelessWidget {
   final GroupMember member;
   final String groupId;
+  final bool isCurrentUserGroupOwner;
+  final bool isOwner;
 
   const MemberTileAdminView({
     super.key,
     required this.member,
     required this.groupId,
+    required this.isCurrentUserGroupOwner,
+    this.isOwner = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final userId = Supabase.instance.client.auth.currentUser?.id;
-    final isSelf = userId == member.id ? true : false;
+    final isSelf = userId == member.id;
+
+    final bool canEdit = !isSelf && !isOwner;
 
     return InkWell(
       borderRadius: BorderRadius.circular(32),
-      onTap: !isSelf ? () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) => GroupMemberEdit(member: member, groupId: groupId,)
-            )
-          );
-        }: null,
+      onTap: canEdit
+          ? () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GroupMemberEdit(
+              member: member,
+              groupId: groupId,
+              isCurrentUserGroupOwner: isCurrentUserGroupOwner,
+            ),
+          ),
+        );
+      }
+          : null,
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -41,7 +55,7 @@ class MemberTileAdminView extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 24,
-                      backgroundColor: Color(0xFFE5E7EB),
+                      backgroundColor: const Color(0xFFE5E7EB),
                       backgroundImage: member.avatarImageUrl != null
                           ? NetworkImage(member.avatarImageUrl!)
                           : null,
@@ -58,15 +72,13 @@ class MemberTileAdminView extends StatelessWidget {
                     )
                   ],
                 ),
-                isSelf ? Icon(
-                  LucideIcons.users_round,
-                  color: AppColors.white,
-                  size: 20,
-                ) : Icon(
-                  LucideIcons.chevron_right,
-                  color: AppColors.white,
-                  size: 20,
-                ),
+                // Show the chevron only if the profile is editable
+                if (canEdit)
+                  Icon(
+                    LucideIcons.settings_2,
+                    color: AppColors.white,
+                    size: 20,
+                  )
               ],
             ),
           ),
