@@ -255,7 +255,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                       ),
                     ),
                   ),
-                  
+
                   const Spacer(),
                   const SizedBox(height: 24),
 
