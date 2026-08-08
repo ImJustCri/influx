@@ -118,6 +118,7 @@ class GroupDetailPage extends ConsumerWidget {
                                         members: members,
                                         name: group.name,
                                         groupId: group.id,
+                                        groupCreator: group.creatorId,
                                       ),
                                     ),
                                   );

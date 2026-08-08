@@ -4,6 +4,7 @@ import 'package:influx/pages/groups/settings/permissions_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:influx/widgets/settings_tile.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/group_member.dart';
 import '../../../providers/groups_provider.dart';
 import '../../../theme.dart';
@@ -12,8 +13,15 @@ import '../../../widgets/group/member_tile_admin_view.dart';
 class GroupAdminSettings extends StatefulWidget {
   final String name;
   final String groupId;
+  final String groupCreator;
   final List<GroupMember> members;
-  const GroupAdminSettings({super.key, required this.members, required this.name, required this.groupId});
+  const GroupAdminSettings({
+    super.key,
+    required this.members,
+    required this.name,
+    required this.groupId,
+    required this.groupCreator,
+  });
 
   @override
   State<GroupAdminSettings> createState() => _GroupAdminSettingsState();
@@ -22,8 +30,10 @@ class GroupAdminSettings extends StatefulWidget {
 class _GroupAdminSettingsState extends State<GroupAdminSettings> {
   @override
   Widget build(BuildContext context) {
-    final adminMembers = widget.members.where((m) => m.isAdmin).toList();
-    final regularMembers = widget.members.where((m) => !m.isAdmin).toList();
+    final groupOwner = widget.members.where((m) => m.id == widget.groupCreator).toList();
+    final adminMembers = widget.members.where((m) => m.isAdmin && m.id != widget.groupCreator).toList();
+    final regularMembers = widget.members.where((m) => !m.isAdmin && m.id != widget.groupCreator).toList();
+    final userId = Supabase.instance.client.auth.currentUser!.id;
 
     return Scaffold(
       appBar: AppBar(
@@ -51,16 +61,27 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
               child: Column(
                 spacing: 32,
                 children: [
-                  _buildMemberSection(
-                    title: "Admin",
-                    badgeColor: Colors.red,
-                    members: adminMembers,
-                  ),
+                  if (groupOwner.isNotEmpty)
+                    _buildMemberSection(
+                      title: "Proprietario",
+                      badgeColor: Colors.deepPurple,
+                      members: groupOwner,
+                      userId: userId,
+                      isOwnerSection: true,
+                    ),
+                  if (adminMembers.isNotEmpty)
+                    _buildMemberSection(
+                      title: "Admin",
+                      badgeColor: Colors.red,
+                      members: adminMembers,
+                      userId: userId,
+                    ),
                   if (regularMembers.isNotEmpty)
                     _buildMemberSection(
                       title: "Membro",
                       badgeColor: Colors.indigoAccent,
                       members: regularMembers,
+                      userId: userId,
                     ),
                   SettingsTile(
                     icon: LucideIcons.info,
@@ -108,10 +129,8 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        // dismiss AlertDialog
                                         Navigator.of(dialogContext).pop();
 
-                                        // dismiss the page if successful
                                         if (isSuccess && context.mounted) {
                                           Navigator.of(context).pop();
                                         }
@@ -128,8 +147,54 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                       SettingsTile(
                         icon: LucideIcons.trash,
                         title: "Elimina gruppo",
-                        onTap: () {
-                          // todo: delete group
+                        onTap: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Elimina gruppo"),
+                              content: const Text("Sei sicuro di voler eliminare questo gruppo?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(false),
+                                  child: const Text("Annulla"),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(true),
+                                  child: const Text("Elimina", style: TextStyle(color: Colors.redAccent)),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm != true) return;
+
+                          if (context.mounted && !(userId == widget.groupCreator)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Solo il creatore del gruppo può eliminarlo"),
+                              ),
+                            );
+                            return;
+                          }
+
+                          try {
+                            await Supabase.instance.client
+                                .from('group')
+                                .delete()
+                                .eq('id', widget.groupId);
+
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                            }
+                          } catch (error) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Errore: $error"),
+                                ),
+                              );
+                            }
+                          }
                         },
                       ),
                     ],
@@ -145,22 +210,24 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
 
   Widget _buildMemberSection({
     required String title,
+    required String userId,
     required Color badgeColor,
     required List<GroupMember> members,
+    bool isOwnerSection = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 12,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           decoration: BoxDecoration(
             color: badgeColor,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Text(
             title,
-            style: AppTypography.containerTitle
+            style: AppTypography.containerTitle,
           ),
         ),
         AppContainer(
@@ -169,7 +236,10 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
             children: List.generate(
               members.length,
                   (index) => MemberTileAdminView(
-                member: members[index], groupId: widget.groupId,
+                member: members[index],
+                groupId: widget.groupId,
+                isOwner: isOwnerSection,
+                isCurrentUserGroupOwner: (userId == widget.groupCreator),
               ),
             ),
           ),
