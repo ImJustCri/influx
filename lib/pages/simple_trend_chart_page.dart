@@ -6,22 +6,24 @@ import '../../theme.dart';
 import '../widgets/page_padding.dart';
 
 class SimpleTrendChartPage extends StatelessWidget {
-  final double firstValue;
-  final double secondValue;
-  final double thirdValue;
+  final List<double> values;
   final String title;
 
   const SimpleTrendChartPage({
     super.key,
-    required this.firstValue,
-    required this.secondValue,
-    required this.thirdValue,
+    required this.values,
     this.title = "Spesi in questo periodo",
-  });
+  }) : assert(
+  values.length >= 2 && values.length <= 3,
+  'I valori devono essere 2 o 3.',
+  );
 
   double get percentChange {
-    if (secondValue == 0) return 0;
-    return ((thirdValue - secondValue) / secondValue) * 100;
+    final previousValue = values[values.length - 2];
+    final currentValue = values.last;
+
+    if (previousValue == 0) return 0;
+    return ((currentValue - previousValue) / previousValue) * 100;
   }
 
   @override
@@ -29,13 +31,23 @@ class SimpleTrendChartPage extends StatelessWidget {
     final isUp = percentChange >= 0;
     final color = isUp ? Colors.redAccent : Colors.greenAccent;
 
-    final minY = math.min(math.min(firstValue, secondValue), thirdValue);
-    final maxY = math.max(math.max(firstValue, secondValue), thirdValue);
-    final padding = (maxY - minY) * 0.25 == 0 ? 1 : (maxY - minY) * 0.25;
+    final minY = values.reduce(math.min);
+    final maxY = values.reduce(math.max);
+    final range = maxY - minY;
+    final padding = range == 0 ? 1.0 : range * 0.25;
 
-    final average = (firstValue + secondValue + thirdValue) / 3;
-    final highest = math.max(math.max(firstValue, secondValue), thirdValue);
-    final lowest = math.min(math.min(firstValue, secondValue), thirdValue);
+    final average = (values.reduce((a, b) => a + b) / values.length);
+    final highest = maxY;
+    final lowest = minY;
+
+    // Map list to chart spots
+    final spots = values
+        .asMap()
+        .entries
+        .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+        .toList();
+
+    final maxX = (values.length - 1).toDouble();
 
     return Scaffold(
       appBar: AppBar(
@@ -71,12 +83,12 @@ class SimpleTrendChartPage extends StatelessWidget {
                 child: LineChart(
                   LineChartData(
                     minX: 0,
-                    maxX: 2,
+                    maxX: maxX,
                     minY: minY - padding,
                     maxY: maxY + padding,
                     gridData: FlGridData(
                       show: true,
-                      horizontalInterval: (maxY - minY) / 4,
+                      horizontalInterval: range == 0 ? 1 : range / 4,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
                           color: Colors.white.withAlpha(30),
@@ -85,7 +97,7 @@ class SimpleTrendChartPage extends StatelessWidget {
                       },
                       drawVerticalLine: false,
                     ),
-                    titlesData: FlTitlesData(
+                    titlesData: const FlTitlesData(
                       show: false,
                     ),
                     borderData: FlBorderData(
@@ -103,11 +115,7 @@ class SimpleTrendChartPage extends StatelessWidget {
                     ),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: [
-                          FlSpot(0, firstValue),
-                          FlSpot(1, secondValue),
-                          FlSpot(2, thirdValue),
-                        ],
+                        spots: spots,
                         isCurved: true,
                         barWidth: 3,
                         color: color,
@@ -134,10 +142,11 @@ class SimpleTrendChartPage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // Average Line
                       LineChartBarData(
                         spots: [
-                          FlSpot(0, average),
-                          FlSpot(2, average),
+                          FlSpot(0, average.roundToDouble()),
+                          FlSpot(maxX, average.roundToDouble()),
                         ],
                         isCurved: false,
                         barWidth: 2,
@@ -176,7 +185,7 @@ class SimpleTrendChartPage extends StatelessWidget {
                     const SizedBox(height: 12),
                     _StatRow(
                       label: 'Minimo',
-                      value: lowest.toStringAsFixed(2),
+                      value: lowest.toStringAsFixed(1),
                       color: Colors.greenAccent,
                     ),
                   ],
@@ -210,7 +219,7 @@ class _StatRow extends StatelessWidget {
         Text(
           label,
           style: AppTypography.containerBody.copyWith(
-            color: Colors.white.withAlpha(180),
+            color: AppColors.white.withAlpha(180),
           ),
         ),
         Text(
