@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/category.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:influx/widgets/settings_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/expenses/add/group_selection_section.dart';
+import '../../widgets/expenses/add/scan_instructions_modal.dart';
 import '../../widgets/expenses/expense_type_helpers.dart';
 import '../../widgets/page_padding.dart';
 
@@ -39,7 +41,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   void initState() {
     super.initState();
     isGroup = widget.initialIsGroup;
-    loadCategoty();
+    loadCategory();
   }
 
   @override
@@ -50,12 +52,20 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     super.dispose();
   }
 
-  Future<void> loadCategoty() async {
+  Future<void> loadCategory() async {
     final result = await Supabase.instance.client.from('category').select();
 
     setState(() {
       categories = result.map((item) => CategoryModel.fromJson(item)).toList();
     });
+  }
+
+  void _showScanInstructions() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => const ScanInstructionsModal(),
+    );
   }
 
   Future<void> _handleOcrScan() async {
@@ -81,7 +91,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                 Flexible(
                   child: SingleChildScrollView(
                     child: Text(
-                      "Impossibile leggere lo scontrino. Riprova assicurandoti che sia ben illuminato.",
+                      "Impossibile leggere lo scontrino. Riprova.",
                       style: AppTypography.budgetIndicator.copyWith(
                         fontSize: 18,
                       ),
@@ -193,17 +203,11 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Aggiungi Spesa'),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(LucideIcons.x),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.qr_code),
-            onPressed: _handleOcrScan,
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: PagePadding(
         child: Column(
@@ -452,6 +456,21 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(child: SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona scontrino', onTap: _handleOcrScan)),
+                AppContainer(
+                  padding: EdgeInsetsGeometry.all(4),
+                  child: IconButton(
+                    icon: const Icon(LucideIcons.info),
+                    onPressed: _showScanInstructions,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
