@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +33,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   bool _isLoading = false;
 
   List<CategoryModel> categories = [];
-
   CategoryModel? selectedCategory;
 
   @override
@@ -52,20 +50,20 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     super.dispose();
   }
 
-  Future<void> loadCategoty() async{
-    final result= await Supabase.instance.client.from('category').select();
+  Future<void> loadCategoty() async {
+    final result = await Supabase.instance.client.from('category').select();
 
     setState(() {
-      categories= result.map((item)=>CategoryModel.fromJson(item)).toList();
+      categories = result.map((item) => CategoryModel.fromJson(item)).toList();
     });
   }
 
   Future<void> _handleOcrScan() async {
-    final result = await _ocrService.ocrMethod();
+    final result = await _ocrService.extractTotalFromReceipt();
 
     if (!mounted) return;
 
-    if(result!.contains('C\'è stato un errore') || result.contains('Prezzo non trovato') ){
+    if (result == null || (result.total == null && result.title == null)) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -83,9 +81,9 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                 Flexible(
                   child: SingleChildScrollView(
                     child: Text(
-                      result,
+                      "Impossibile leggere lo scontrino. Riprova assicurandoti che sia ben illuminato.",
                       style: AppTypography.budgetIndicator.copyWith(
-                          fontSize: 24
+                        fontSize: 18,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -105,14 +103,21 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
           );
         },
       );
+    } else {
+      // Popola i campi con i dati estratti dallo scontrino
+      if (result.total != null) {
+        amountController.text = result.total!;
+      }
+      if (result.title != null) {
+        nameController.text = result.title!;
+      }
 
-    }else{
-      amountController.text=result;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dati estratti con successo dallo scontrino!'),
+        ),
+      );
     }
-
-
-
-
   }
 
   Future<void> _saveExpense() async {
@@ -371,12 +376,17 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                     value: category,
                                     child: Row(
                                       children: [
-                                        Icon(getIconFromName(category.icon), color: Color(int.parse(category.color, radix: 16))),
-                                        SizedBox(width: 12),
+                                        Icon(
+                                          getIconFromName(category.icon),
+                                          color: Color(
+                                            int.parse(category.color, radix: 16),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
                                         Text(
                                           category.name,
                                           style: AppTypography.containerTitle.copyWith(
-                                            color: AppColors.white
+                                            color: AppColors.white,
                                           ),
                                         ),
                                       ],
