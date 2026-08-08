@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../main.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../main_shell_screen.dart';
@@ -86,6 +87,8 @@ class _CreatePeriodPageState extends State<CreatePeriodPage> {
 
       if (!mounted) return;
 
+      RootApp.restartApp(context);
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -110,22 +113,16 @@ class _CreatePeriodPageState extends State<CreatePeriodPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nuovo Periodo'),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.x),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: PagePadding(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('Stabilisci un periodo', style: AppTypography.pageTitle),
+              Text('Gestisci le tue spese fino alla scadenza', style: AppTypography.pageSubtitle),
+              SizedBox(height: 24),
               // Budget Input Section
-              Text(
-                'Importo budget',
-                style: AppTypography.containerTitle,
-              ),
               const SizedBox(height: 16),
               AppContainer(
                 width: double.infinity,
