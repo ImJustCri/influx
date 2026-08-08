@@ -97,11 +97,11 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                           final List<double> chartValues = [];
 
                           if (periods.length == 1) {
-                            chartValues.add(periods[1].spent);
+                            chartValues.add(periods[0].spent);
                             chartValues.add(totalSpent);
                           } else {
-                            chartValues.add(periods[0].spent);
                             chartValues.add(periods[1].spent);
+                            chartValues.add(periods[0].spent);
                             chartValues.add(totalSpent);
                           }
 
