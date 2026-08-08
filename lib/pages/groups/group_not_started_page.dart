@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../providers/get_group_role_provider.dart';
+import '../../providers/group_members_provider.dart';
 import '../../providers/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
-import '../../providers/group_members_provider.dart';
 import '../../widgets/group/members_tile_view.dart';
 import '../../widgets/settings_tile.dart';
 
@@ -23,12 +25,26 @@ class GroupNotStartedPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
+
+    final profileGroupAsync = ref.watch(
+      fetchProfileGroupDetailsProvider(
+        (groupId: group.id, profileId: currentUserId),
+      ),
+    );
+
     final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
 
-    final String subtitle = isUserGroupOwner
-        ? "Il gruppo non è ancora attivo. \n Prima di attivarlo, controlla che tutto sia stato impostato correttamente"
-        : "Il gruppo non è ancora attivo. \n Ti invieremo una notifica quando il proprietario lo avvierà";
+    final isAdmin = profileGroupAsync.maybeWhen(
+      data: (data) => data != null && data['role'] == 'admin',
+      orElse: () => false,
+    );
 
+    final bool canManageGroup = isUserGroupOwner || isAdmin;
+
+    final String subtitle = canManageGroup
+        ? "Il gruppo non è ancora attivo. \n Prima di attivarlo, controlla che tutto sia stato impostato correttamente"
+        : "Il gruppo non è ancora attivo. \n Ti invieremo una notifica quando verrà avviato";
 
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +74,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                                 child: CircleAvatar(
                                   backgroundColor: AppColors.backgroundAccent,
                                   radius: 48,
-                                  child: Icon(
+                                  child: const Icon(
                                     LucideIcons.clock,
                                     color: AppColors.white,
                                     size: 32,
@@ -73,8 +89,8 @@ class GroupNotStartedPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                textAlign: TextAlign.center,
                                 subtitle,
+                                textAlign: TextAlign.center,
                                 style: AppTypography.pageSubtitle.copyWith(
                                   color: AppColors.white.withValues(alpha: 0.7),
                                 ),
@@ -84,7 +100,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 24),
 
-                        if (isUserGroupOwner) ...[
+                        if (canManageGroup) ...[
                           SettingsTile(
                             icon: LucideIcons.key,
                             title: "Vedi codice di ingresso",
@@ -105,18 +121,18 @@ class GroupNotStartedPage extends ConsumerWidget {
                                         Text(
                                           "${group.inviteCode}",
                                           style: AppTypography.budgetIndicator.copyWith(
-                                            color: Colors.white
+                                            color: Colors.white,
                                           ),
                                         ),
                                         QrImageView(
                                           data: "${group.inviteCode}",
-                                          eyeStyle: QrEyeStyle(
-                                              eyeShape: QrEyeShape.square,
-                                              color: Colors.white
+                                          eyeStyle: const QrEyeStyle(
+                                            eyeShape: QrEyeShape.square,
+                                            color: Colors.white,
                                           ),
-                                          dataModuleStyle: QrDataModuleStyle(
-                                              dataModuleShape: QrDataModuleShape.square,
-                                              color: Colors.white
+                                          dataModuleStyle: const QrDataModuleStyle(
+                                            dataModuleShape: QrDataModuleShape.square,
+                                            color: Colors.white,
                                           ),
                                           size: 192,
                                         ),
@@ -172,10 +188,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                                       actions: [
                                         TextButton(
                                           onPressed: () {
-                                            // pop the dialog
                                             Navigator.of(dialogContext).pop();
-
-                                            // pop the current page if successful
                                             if (isSuccess && context.mounted) {
                                               Navigator.of(context).pop();
                                             }
@@ -198,7 +211,9 @@ class GroupNotStartedPage extends ConsumerWidget {
                             children: List.generate(
                               members.length,
                                   (index) => MemberTileView(
-                                member: members[index], groupId: group.id, creatorId: group.creatorId,
+                                member: members[index],
+                                groupId: group.id,
+                                creatorId: group.creatorId,
                               ),
                             ),
                           ),
