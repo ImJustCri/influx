@@ -2,37 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/edit_budget_page.dart';
 import '../../global.dart';
-import '../../providers/profile_provider.dart';
+import '../../providers/user_period_providers.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
 
 class BudgetCard extends ConsumerWidget {
   final double totalExpenses;
-  final DateTime resetDate;
   final bool isNotAuthorized;
   final bool isGroup;
 
   const BudgetCard({
     super.key,
     required this.totalExpenses,
-    required this.resetDate,
     this.isNotAuthorized = false,
     this.isGroup = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncProfile = ref.watch(profileProvider);
+    final asyncActivePeriod = ref.watch(activeUserPeriodProvider);
 
-    return asyncProfile.when(
-      data: (profile) {
-        final double totalBudget = profile?.budget ?? 0.0;
-        final remaining = totalBudget - totalExpenses;
+    return asyncActivePeriod.when(
+      data: (period) {
+        final double totalBudget = period?.budget ?? 0.0;
+        final double actualSpent = totalExpenses;
+        final DateTime resetDate = period!.endDate;
+
+        final remaining = totalBudget - actualSpent;
         final progressValue = totalBudget > 0
-            ? (totalExpenses / totalBudget).clamp(0.0, 1.0)
+            ? (actualSpent / totalBudget).clamp(0.0, 1.0)
             : 0.0;
-        final resetDateFormatted = "${resetDate.day} ${_getMonthName(resetDate.month)}";
+        final resetDateFormatted =
+            "${resetDate.day} ${_getMonthName(resetDate.month)}";
 
         return AppContainer(
           padding: const EdgeInsets.all(24),
@@ -60,8 +62,10 @@ class BudgetCard extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Spesi: $totalExpenses$currency", style: AppTypography.containerBody),
-                  Text("Totale: $totalBudget$currency", style: AppTypography.containerBody),
+                  Text("Spesi: $actualSpent$currency",
+                      style: AppTypography.containerBody),
+                  Text("Totale: $totalBudget$currency",
+                      style: AppTypography.containerBody),
                 ],
               ),
               const Divider(
@@ -72,7 +76,8 @@ class BudgetCard extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Reset: $resetDateFormatted", style: AppTypography.containerBody),
+                  Text("Reset: $resetDateFormatted",
+                      style: AppTypography.containerBody),
                   if (!isNotAuthorized)
                     GestureDetector(
                       onTap: () async {
@@ -80,14 +85,12 @@ class BudgetCard extends ConsumerWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EditBudgetPage(
-                              initialBudget: totalBudget,
-                              initialResetDate: resetDate,
+                              initialBudget: totalBudget, totalExpenses: totalExpenses,
                             ),
                           ),
                         );
 
-                        // Refreshes the provider when returning to this page
-                        ref.invalidate(profileProvider);
+                        ref.invalidate(activeUserPeriodProvider);
                       },
                       child: Text("Modifica ->", style: AppTypography.containerBody),
                     ),
@@ -97,7 +100,6 @@ class BudgetCard extends ConsumerWidget {
           ),
         );
       },
-
       loading: () => const AppContainer(
         padding: EdgeInsets.all(24),
         width: double.infinity,
@@ -109,7 +111,7 @@ class BudgetCard extends ConsumerWidget {
         width: double.infinity,
         child: Center(
           child: Text(
-            "Errore nel caricamento del budget",
+            "Errore nel caricamento del budget $err",
             style: AppTypography.containerBody,
           ),
         ),
