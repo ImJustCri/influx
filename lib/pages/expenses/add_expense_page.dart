@@ -433,6 +433,21 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
             ),
             const SizedBox(height: 24),
 
+            // Scan receipt
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(child: SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona scontrino', onTap: _handleOcrScan)),
+                AppContainer(
+                  padding: EdgeInsetsGeometry.all(4),
+                  child: IconButton(
+                    icon: const Icon(LucideIcons.info),
+                    onPressed: _showScanInstructions,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Save Button
             SizedBox(
               width: double.infinity,
@@ -455,20 +470,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              spacing: 8,
-              children: [
-                Expanded(child: SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona scontrino', onTap: _handleOcrScan)),
-                AppContainer(
-                  padding: EdgeInsetsGeometry.all(4),
-                  child: IconButton(
-                    icon: const Icon(LucideIcons.info),
-                    onPressed: _showScanInstructions,
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 16),
           ],
