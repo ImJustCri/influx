@@ -1,13 +1,14 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/category.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:influx/widgets/settings_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../widgets/expenses/add/group_selection_section.dart';
+import '../../widgets/expenses/add/scan_instructions_modal.dart';
 import '../../widgets/expenses/expense_type_helpers.dart';
 import '../../widgets/page_padding.dart';
 
@@ -34,14 +35,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   bool _isLoading = false;
 
   List<CategoryModel> categories = [];
-
   CategoryModel? selectedCategory;
 
   @override
   void initState() {
     super.initState();
     isGroup = widget.initialIsGroup;
-    loadCategoty();
+    loadCategory();
   }
 
   @override
@@ -52,58 +52,82 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     super.dispose();
   }
 
-  Future<void> loadCategoty() async{
-    final result= await Supabase.instance.client.from('category').select();
+  Future<void> loadCategory() async {
+    final result = await Supabase.instance.client.from('category').select();
 
     setState(() {
-      categories= result.map((item)=>CategoryModel.fromJson(item)).toList();
+      categories = result.map((item) => CategoryModel.fromJson(item)).toList();
     });
   }
 
-  Future<void> _handleOcrScan() async {
-    final result = await _ocrService.ocrMethod();
-
-    if (!mounted) return;
-
+  void _showScanInstructions() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Risultato OCR",
-                style: AppTypography.containerBody,
-              ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Text(
-                    result ?? "Nessun testo rilevato",
-                    style: AppTypography.budgetIndicator.copyWith(
-                      fontSize: 24
+      builder: (context) => const ScanInstructionsModal(),
+    );
+  }
+
+  Future<void> _handleOcrScan() async {
+    final result = await _ocrService.extractTotalFromReceipt();
+
+    if (!mounted) return;
+
+    if (result == null || (result.total == null && result.title == null)) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Risultato OCR",
+                  style: AppTypography.containerBody,
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      "Impossibile leggere lo scontrino. Riprova.",
+                      style: AppTypography.budgetIndicator.copyWith(
+                        fontSize: 18,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("Chiudi"),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("Chiudi"),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
-          ),
-        );
-      },
-    );
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      // Popola i campi con i dati estratti dallo scontrino
+      if (result.total != null) {
+        amountController.text = result.total!;
+      }
+      if (result.title != null) {
+        nameController.text = result.title!;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Dati estratti con successo dallo scontrino!'),
+        ),
+      );
+    }
   }
 
   Future<void> _saveExpense() async {
@@ -179,17 +203,11 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Aggiungi Spesa'),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(LucideIcons.x),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.qr_code),
-            onPressed: _handleOcrScan,
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: PagePadding(
         child: Column(
@@ -362,12 +380,17 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                                     value: category,
                                     child: Row(
                                       children: [
-                                        Icon(getIconFromName(category.icon), color: Color(int.parse(category.color, radix: 16))),
-                                        SizedBox(width: 12),
+                                        Icon(
+                                          getIconFromName(category.icon),
+                                          color: Color(
+                                            int.parse(category.color, radix: 16),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
                                         Text(
                                           category.name,
                                           style: AppTypography.containerTitle.copyWith(
-                                            color: AppColors.white
+                                            color: AppColors.white,
                                           ),
                                         ),
                                       ],
@@ -410,6 +433,21 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
             ),
             const SizedBox(height: 24),
 
+            // Scan receipt
+            Row(
+              spacing: 8,
+              children: [
+                Expanded(child: SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona scontrino', onTap: _handleOcrScan)),
+                AppContainer(
+                  padding: EdgeInsetsGeometry.all(4),
+                  child: IconButton(
+                    icon: const Icon(LucideIcons.info),
+                    onPressed: _showScanInstructions,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Save Button
             SizedBox(
               width: double.infinity,
@@ -433,6 +471,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

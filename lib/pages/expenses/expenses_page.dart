@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/expenses/all_expenses_page.dart';
-
 import 'package:influx/widgets/page_padding.dart';
 import 'package:influx/widgets/settings_tile.dart';
 import '../../models/expense_data.dart';
+import '../../providers/user_period_providers.dart';
 import '../../theme.dart';
 import 'package:influx/providers/expenses_provider.dart';
 import '../../widgets/app_container.dart';
 import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
-import 'category_expenses_page.dart';
+import '../../widgets/status_container.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -24,6 +24,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
   @override
   Widget build(BuildContext context) {
     final expensesAsync = ref.watch(fetchExpenses);
+    final userPeriodsAsync = ref.watch(userPeriodProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,9 +43,10 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(fetchExpenses);
+          ref.invalidate(userPeriodProvider);
         },
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             bottom: 124,
           ),
           physics: const AlwaysScrollableScrollPhysics(),
@@ -74,44 +76,64 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
-                    if (expenses.isEmpty) ...[
-                      AppContainer(
-                        padding: const EdgeInsets.all(48),
-                        width: double.infinity,
-                        child: Column(
-                          children: [
-                            const Icon(LucideIcons.book_search, size: 32),
-                            const SizedBox(height: 24),
-                            Text(
-                              "Niente da vedere qui",
-                              style: AppTypography.containerTitle,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Che ne dici di aggiungere una nuova spesa?",
-                              style: AppTypography.containerBody,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
+                    if (expenses.isEmpty)
+                      StatusContainer(
+                        icon: LucideIcons.book_search,
+                        title: "Niente da vedere qui",
+                        description: "Che ne dici di aggiungere una nuova spesa?",
                       ),
-                    ],
 
                     if (expenses.isNotEmpty) ...[
-                      SimpleTrendChart(
-                        firstValue: 200,
-                        secondValue: 350,
-                        thirdValue: totalSpent,
+                      userPeriodsAsync.when(
+                        data: (periods) {
+                          if (periods.isEmpty) {
+                            return StatusContainer(
+                              icon: LucideIcons.chart_column,
+                              title: "Troppo presto per fare i conti",
+                              description: "Per vedere quanto hai speso rispetto al periodo scorso, servono almeno due periodi registrati.",
+                            );
+                          }
+
+                          final List<double> chartValues = [];
+
+                          if (periods.length == 1) {
+                            chartValues.add(periods[0].spent);
+                            chartValues.add(totalSpent);
+                          } else {
+                            chartValues.add(periods[1].spent);
+                            chartValues.add(periods[0].spent);
+                            chartValues.add(totalSpent);
+                          }
+
+                          debugPrint(chartValues.toString());
+
+                          return SimpleTrendChart(
+                            values: chartValues,
+                          );
+                        },
+                        loading: () => const SizedBox(
+                          height: 150,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (_, _) => StatusContainer(
+                          icon: LucideIcons.cross,
+                          title: "Errore",
+                          description: "Qualcosa non è andato a buon fine durante il caricamento",
+                        )
                       ),
+
                       const SizedBox(height: 24),
                       SettingsTile(
-                          icon: LucideIcons.list_collapse,
-                          title: "Vedi tutte le spese del periodo",
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AllExpensesPage()));
-                          }
+                        icon: LucideIcons.list_collapse,
+                        title: "Vedi tutte le spese del periodo",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AllExpensesPage(),
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 24),

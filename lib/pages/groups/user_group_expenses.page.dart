@@ -8,6 +8,7 @@ import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../providers/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
+import '../../widgets/status_container.dart';
 
 class UserGroupExpensesPage extends ConsumerWidget {
   final String userId;
@@ -55,11 +56,13 @@ class UserGroupExpensesPage extends ConsumerWidget {
         child: PagePadding(
           child: expensesAsync.when(
             data: (expenses) {
-              if (expenses.isEmpty) {
-                return const Center(
-                  child: Text('Nessuna spesa trovata.'),
-                );
-              }
+              // if (expenses.isEmpty) {
+              //   return const StatusContainer(
+              //     icon: LucideIcons.sparkles,
+              //     title: "Niente da dichiarare!",
+              //     description: "O non ha speso un centesimo, o sta nascondendo le ricevute.",
+              //   );
+              // }
 
               final groupedExpenses = _groupExpensesByDate(expenses);
 
@@ -93,7 +96,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
                   ),
                   SizedBox(height: 48),
 
-                  ...groupedExpenses.entries.map((entry) {
+                  if (expenses.isNotEmpty) ...groupedExpenses.entries.map((entry) {
                     final dateLabel = entry.key;
                     final dayExpenses = entry.value;
 
@@ -137,7 +140,12 @@ class UserGroupExpensesPage extends ConsumerWidget {
                         const SizedBox(height: 16),
                       ],
                     );
-                  }),
+                  })
+                  else StatusContainer(
+                    icon: LucideIcons.sparkles,
+                    title: "Niente da vedere qui",
+                    description: "O $userName non ha speso un centesimo, o sta nascondendo le ricevute.",
+                  ),
                 ],
               );
             },

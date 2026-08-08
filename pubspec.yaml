@@ -44,9 +44,9 @@ dependencies:
   flutter_riverpod: ^3.3.2
   qr_flutter: ^4.1.0
   mobile_scanner: ^7.4.0
-  flutter_tesseract_ocr: ^0.4.28
   image_picker: ^1.2.0
-  flutter_native_ocr: ^0.1.0
+  google_mlkit_text_recognition: ^0.16.0
+  refresh_rate: ^1.0.2
 
 dev_dependencies:
   flutter_test:
@@ -75,8 +75,6 @@ flutter:
     - assets/logo/
     - assets/icon/
     - .env
-    - assets/tessdata/
-    - assets/tessdata_config.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

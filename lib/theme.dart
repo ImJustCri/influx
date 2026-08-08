@@ -237,7 +237,7 @@ class AppTypography {
 
   // Large Indicators
   static const TextStyle budgetIndicator = TextStyle(
-    fontSize: 48,
+    fontSize: 40,
     fontWeight: FontWeight.bold,
     color: AppColors.white,
   );

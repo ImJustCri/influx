@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/pages/periods/period_ended_page.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:influx/widgets/settings_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../widgets/page_padding.dart';
 
 class EditBudgetPage extends StatefulWidget {
+  final double totalExpenses;
   final double initialBudget;
-  final DateTime initialResetDate;
   final bool isGroup;
 
   const EditBudgetPage({
     super.key,
     required this.initialBudget,
-    required this.initialResetDate,
     this.isGroup = false,
+    required this.totalExpenses,
   });
 
   @override
@@ -23,19 +25,16 @@ class EditBudgetPage extends StatefulWidget {
 
 class _EditBudgetPageState extends State<EditBudgetPage> {
   late TextEditingController budgetController;
-  late DateTime selectedResetDate;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Mostra 0 decimali se la cifra è tonda, altrimenti ne mostra 2
     final formattedInitial = widget.initialBudget % 1 == 0
         ? widget.initialBudget.toInt().toString()
         : widget.initialBudget.toStringAsFixed(2);
 
     budgetController = TextEditingController(text: formattedInitial);
-    selectedResetDate = widget.initialResetDate;
   }
 
   @override
@@ -44,37 +43,107 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
     super.dispose();
   }
 
-  void _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: selectedResetDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.btnBackground,
-              onPrimary: AppColors.white,
-              surface: AppColors.inputBackground,
-              onSurface: AppColors.white,
-            ),
-            dialogTheme: const DialogThemeData(
-              backgroundColor: AppColors.inputBackground,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        selectedResetDate = picked;
+  /// Updates only the budget amount
+  Future<void> _saveBudget(double newBudget) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw Exception('Utente non autenticato');
+
+      await Supabase.instance.client
+          .from('userPeriod')
+          .update({'budget': newBudget})
+          .eq('profile_id', user.id)
+          .eq('isActive', true);
+
+      if (!mounted) return;
+
+      Navigator.pop(context, {
+        'action': 'update_amount',
+        'budget': newBudget,
       });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Errore durante il salvataggio: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _saveBudget() async {
+  /// Sets isActive to false and clears navigation tree
+  Future<void> _endPeriod() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) throw Exception('Utente non autenticato');
+
+      await Supabase.instance.client
+          .from('userPeriod')
+          .update({'isActive': false, 'spent': widget.totalExpenses, 'endDate': DateTime.now().toIso8601String()})
+          .eq('profile_id', user.id)
+          .eq('isActive', true);
+
+      if (!mounted) return;
+
+      // Clears the entire navigation stack and navigates to PeriodEndedPage
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const PeriodEndedPage()),
+            (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Errore durante la chiusura del periodo: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Dialog confirmation for ending the active period
+  void _showEndPeriodConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Conferma chiusura'),
+          content: const Text(
+            'Sei sicuro di voler terminare il periodo corrente? Questa azione non può essere annullata.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annulla'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _endPeriod();
+              },
+              child: const Text(
+                'Continua',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Submits budget updates
+  void _onSubmitBudget() {
     final cleanText = budgetController.text.replaceAll(',', '.');
     final newBudget = double.tryParse(cleanText);
 
@@ -88,42 +157,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception('Utente non autenticato');
-
-      // Update budget_personale column in 'profilo' table
-      await Supabase.instance.client
-          .from('profilo')
-          .update({'budget_personale': newBudget})
-          .eq('id', user.id);
-
-      if (!mounted) return;
-
-      Navigator.pop(context, {
-        'budget': newBudget,
-        'resetDate': selectedResetDate,
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Errore durante il salvataggio: ${e.toString()}'),
-          backgroundColor: const Color(0xFFFF5252),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    _saveBudget(newBudget);
   }
 
   @override
@@ -137,13 +171,18 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
         ),
       ),
       body: PagePadding(
-        child: Column(
-          children: [
-            SingleChildScrollView(
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
               child: Column(
-                spacing: 24,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    'Importo budget',
+                    style: AppTypography.containerTitle,
+                  ),
+                  const SizedBox(height: 16),
                   AppContainer(
                     width: double.infinity,
                     child: Column(
@@ -167,8 +206,8 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                                 style: AppTypography.budgetIndicator,
                                 decoration: InputDecoration(
                                   hintText: '0',
-                                  hintStyle: AppTypography.budgetIndicator
-                                      .copyWith(
+                                  hintStyle:
+                                  AppTypography.budgetIndicator.copyWith(
                                     color:
                                     AppColors.white.withValues(alpha: 0.3),
                                   ),
@@ -192,101 +231,48 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 8,
-                    children: [
-                      InkWell(
-                        onTap: _selectDate,
-                        borderRadius: BorderRadius.circular(32),
-                        child: AppContainer(
-                          width: double.infinity,
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.btnBackground
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  LucideIcons.calendar,
-                                  size: 20,
-                                  color: AppColors.btnBackground,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  spacing: 2,
-                                  children: [
-                                    Text(
-                                      'Rinnovo ogni mese il',
-                                      style:
-                                      AppTypography.containerBody.copyWith(
-                                        fontSize: 12,
-                                        color: AppColors.white
-                                            .withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                    Text(
-                                      '${selectedResetDate.day} ${_getMonthName(selectedResetDate.month)}',
-                                      style: AppTypography.containerTitle,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                LucideIcons.chevron_right,
-                                color: Colors.white54,
-                                size: 20,
-                              ),
-                            ],
-                          ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _onSubmitBudget,
+                      child: _isLoading
+                          ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.white,
+                        ),
+                      )
+                          : Text(
+                        'Salva budget',
+                        style: AppTypography.containerTitle.copyWith(
+                          fontSize: 14,
+                          color: AppColors.white,
                         ),
                       ),
-                    ],
+                    ),
                   ),
+
+                  const Spacer(),
+                  const SizedBox(height: 24),
+
+                  SettingsTile(
+                    icon: LucideIcons.trash_2,
+                    title: 'Termina periodo',
+                    iconColor: Colors.redAccent,
+                    textColor: Colors.redAccent,
+                    onTap: _isLoading ? () {} : _showEndPeriodConfirmation,
+                  ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _saveBudget,
-                child: _isLoading
-                    ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.white,
-                  ),
-                )
-                    : Text(
-                  'Salva modifiche',
-                  style: AppTypography.containerTitle.copyWith(
-                    color: AppColors.white,
-                  ),
-                ),
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
-      'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
-    ];
-    return months[month - 1];
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/pages/initial_page.dart';
 import 'package:influx/services/auth_service.dart';
 import 'package:influx/pages/account/profile.dart';
 import 'package:influx/theme.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
             ],
           );
         },
-        home: const AuthService(),
+        home: const InitialPage(),
         routes: {
           '/profile': (context) => ProfilePage(),
         },

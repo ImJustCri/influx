@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +9,7 @@ import '../../models/expense_data.dart';
 import '../../models/group_member.dart';
 import '../../providers/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
+import '../status_container.dart';
 
 class AllExpensesPage extends ConsumerWidget {
   final List<GroupMember>? members;
@@ -56,8 +58,10 @@ class AllExpensesPage extends ConsumerWidget {
           child: expensesAsync.when(
             data: (expenses) {
               if (expenses.isEmpty) {
-                return const Center(
-                  child: Text('Nessuna spesa trovata.'),
+                return StatusContainer(
+                  icon: LucideIcons.book_search,
+                  title: "Niente da vedere qui",
+                  description: "Che ne dici di aggiungere una nuova spesa?",
                 );
               }
 

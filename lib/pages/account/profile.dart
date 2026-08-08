@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/account/security_page.dart';
+import 'package:influx/pages/initial_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
@@ -12,6 +13,7 @@ import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
 import '../../widgets/user_qr_dialog.dart';
+import '../periods/periods_overview_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -186,6 +188,17 @@ class ProfilePage extends ConsumerWidget {
                       },
                     ),
                     SettingsTile(
+                      icon: LucideIcons.calendar,
+                      title: "Periodi precedenti",
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const PeriodsOverviewPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    SettingsTile(
                       icon: LucideIcons.lock,
                       title: "Sicurezza Account",
                       onTap: () {
@@ -205,7 +218,7 @@ class ProfilePage extends ConsumerWidget {
                         RootApp.restartApp(context);
 
                         Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => const AuthService()),
+                          MaterialPageRoute(builder: (context) => InitialPage()),
                               (route) => false,
                         );
                       },

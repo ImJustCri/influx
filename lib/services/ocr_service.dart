@@ -1,74 +1,107 @@
-import "package:flutter/material.dart";
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
-import 'package:flutter_native_ocr/flutter_native_ocr.dart';
+import '../models/receipt_data.dart';
 
+class OcrService {
+  final ImagePicker _imagePicker = ImagePicker();
 
-class OcrService extends StatelessWidget {
-  const OcrService({super.key});
+  Future<ReceiptData?> extractTotalFromReceipt() async {
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
 
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-  Future<String?> ocrMethod() async{
-    final ImagePicker imagePicker = ImagePicker();
-    String? text;
-    final XFile? image= await imagePicker.pickImage(source: ImageSource.camera, imageQuality: 100);
+    if (image == null) return null;
 
-    if(image!=null){
-      String path= image.path;
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
 
+    try {
+      final InputImage inputImage = InputImage.fromFilePath(image.path);
+      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
-      final testo= await FlutterTesseractOcr.extractText(
-          path,
-          language: "ita",
-          args: {
-            "psm" : "4"
-          }
+      final List<TextLine> allLines = recognizedText.blocks
+          .expand((block) => block.lines)
+          .toList();
+
+      if (allLines.isEmpty) return null;
+
+      // 1. Extract Title (Usually the first non-empty line at the top)
+      String? extractedTitle = _extractTitle(allLines);
+
+      // 2. Extract Total Price
+      String? extractedTotal = _extractTotal(allLines);
+
+      return ReceiptData(
+        title: extractedTitle,
+        total: extractedTotal,
       );
-
-      text=estraiImporto(testo);
-      return text;
+    } catch (e) {
+      debugPrint('OCR Error: $e');
+      return null;
+    } finally {
+      await textRecognizer.close();
     }
-    return "C'è stato un errore";
-
-
   }
-  String? estraiImporto(String testo) {
 
-    List<String> righe = testo.split("\n");
+  /// Extracts the main title/merchant name from top lines
+  String? _extractTitle(List<TextLine> lines) {
+    for (final line in lines) {
+      final text = line.text.trim();
+      // Skip very short text, dates, or common headers
+      if (text.length > 2 && !_isNumericOrDate(text)) {
+        return text;
+      }
+    }
+    return null;
+  }
 
-    for (String riga in righe) {
+  /// Extracts the total amount
+  String? _extractTotal(List<TextLine> lines) {
+    final RegExp priceRegex = RegExp(r'\d+[,.]\s*\d{2}');
 
-      String pulita = riga.toUpperCase();
+    for (final targetLine in lines) {
+      final String text = targetLine.text.toUpperCase().trim();
 
-      if (pulita.contains("IMPORTO") || pulita.contains("PAGATO") || pulita.contains("TOTALE") || pulita.contains("COMPLESSIVO")) {
+      if (text.contains('TOTALE COMPLESSIVO') || text.contains('TOTALE')) {
+        // Check same line
+        final Match? sameLineMatch = priceRegex.firstMatch(text);
+        if (sameLineMatch != null) {
+          return _cleanPrice(sameLineMatch.group(0)!);
+        }
 
-        RegExp regex = RegExp(r'\d+[,.]\d{2}');
+        // Check neighboring lines
+        final Rect targetBox = targetLine.boundingBox;
+        final double targetCenterY = targetBox.top + (targetBox.height / 2);
 
-        Match? match = regex.firstMatch(pulita);
+        for (final candidateLine in lines) {
+          if (candidateLine == targetLine) continue;
 
-        if (match != null) {
-          return match.group(0);
+          final Rect box = candidateLine.boundingBox;
+          final double centerY = box.top + (box.height / 2);
+
+          final bool isSameRow = (centerY - targetCenterY).abs() < 20;
+          final bool isToTheRight = box.left >= (targetBox.left + 50);
+
+          if (isSameRow && isToTheRight) {
+            final Match? candidateMatch = priceRegex.firstMatch(candidateLine.text);
+            if (candidateMatch != null) {
+              return _cleanPrice(candidateMatch.group(0)!);
+            }
+          }
         }
       }
     }
-
     return null;
   }
+
+  bool _isNumericOrDate(String text) {
+    // Basic check to skip dates/numbers when identifying the store title
+    return RegExp(r'^[\d\s./:-]+$').hasMatch(text);
+  }
+
+  String _cleanPrice(String rawPrice) {
+    return rawPrice.replaceAll(' ', '').replaceAll(',', '.');
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

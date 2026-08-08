@@ -178,21 +178,6 @@ class GroupDetailPage extends ConsumerWidget {
                         spacing: 16,
                         children: [
                           Text('Spese per membro', style: AppTypography.containerBody),
-
-                          // Inside MembersExpenseList, pass an onTap callback or handle tap to open UserGroupExpensesPage:
-                          /*
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserGroupExpensesPage(
-                                userId: selectedMember.id,
-                                groupId: group.id,
-                                userName: selectedMember.name,
-                                userPfp: selectedMember.avatarImageUrl,
-                              ),
-                            ),
-                          );
-                          */
                           MembersExpenseList(
                             members: members,
                             groupId: group.id,
