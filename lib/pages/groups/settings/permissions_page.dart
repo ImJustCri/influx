@@ -11,7 +11,7 @@ class PermissionsPage extends StatelessWidget {
 
   static const List<PermissionItem> _permissions = [
     PermissionItem(
-      title: 'Vedere le proprie spese',
+      title: 'Vedere tutte le spese',
       icon: LucideIcons.eye,
       iconBackgroundColor: Color(0xFF38BDF8),
       isAdminAllowed: true,
@@ -25,13 +25,6 @@ class PermissionsPage extends StatelessWidget {
       isMemberAllowed: true,
     ),
     PermissionItem(
-      title: 'Aggiungere e modificare spese altrui',
-      icon: LucideIcons.pencil,
-      iconBackgroundColor: Color(0xFFEAB308),
-      isAdminAllowed: true,
-      isMemberAllowed: false,
-    ),
-    PermissionItem(
       title: 'Vedere budget totale',
       icon: LucideIcons.dollar_sign,
       iconBackgroundColor: Color(0xFF6366F1),
@@ -39,9 +32,23 @@ class PermissionsPage extends StatelessWidget {
       isMemberAllowed: true,
     ),
     PermissionItem(
+      title: 'Modificare o rimuovere spese altrui',
+      icon: LucideIcons.pencil,
+      iconBackgroundColor: Color(0xFFEAB308),
+      isAdminAllowed: true,
+      isMemberAllowed: false,
+    ),
+    PermissionItem(
       title: 'Modificare il budget',
-      icon: LucideIcons.dollar_sign,
+      icon: LucideIcons.piggy_bank,
       iconBackgroundColor: Color(0xFF6366F1),
+      isAdminAllowed: true,
+      isMemberAllowed: false,
+    ),
+    PermissionItem(
+      title: 'Terminare i periodi',
+      icon: LucideIcons.calendar_range,
+      iconBackgroundColor: Color(0xff1a8383),
       isAdminAllowed: true,
       isMemberAllowed: false,
     ),
@@ -49,13 +56,6 @@ class PermissionsPage extends StatelessWidget {
       title: 'Gestire ruoli e permessi',
       icon: LucideIcons.users,
       iconBackgroundColor: Color(0xFFFF5252),
-      isAdminAllowed: true,
-      isMemberAllowed: false,
-    ),
-    PermissionItem(
-      title: 'Vedere spese private altrui',
-      icon: LucideIcons.lock,
-      iconBackgroundColor: Color(0xFFA855F7),
       isAdminAllowed: true,
       isMemberAllowed: false,
     ),
