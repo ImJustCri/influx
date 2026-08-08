@@ -7,6 +7,7 @@ import '../../models/expense_data.dart';
 import '../expenses/all_expenses_page.dart';
 import '../expenses/expense_item.dart';
 import '../settings_tile.dart';
+import '../status_container.dart';
 
 class RecentExpensesSection extends StatefulWidget {
   final List<ExpenseData> expenses;
@@ -47,26 +48,10 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.expenses.isEmpty)
-          AppContainer(
-            padding: const EdgeInsets.all(48),
-            width: double.infinity,
-            child: Column(
-              children: [
-                const Icon(LucideIcons.book_search, size: 32),
-                const SizedBox(height: 24),
-                Text(
-                  "Niente da vedere qui",
-                  style: AppTypography.containerTitle,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Che ne dici di aggiungere una nuova spesa?",
-                  style: AppTypography.containerBody,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+          StatusContainer(
+            icon: LucideIcons.book_search,
+            title: "Niente da vedere qui",
+            description: "Che ne dici di aggiungere una nuova spesa?",
           )
         else
           Column(

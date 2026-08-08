@@ -369,15 +369,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    backgroundColor: AppColors.btnBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
-                      side: const BorderSide(
-                        color: AppColors.btnBorder,
-                        width: 1,
-                      ),
-                    ),
+                    minimumSize: const Size.fromHeight(48),
                   ),
                   child: _isLoading
                       ? Text('Salvataggio...', style: AppTypography.containerTitle)
