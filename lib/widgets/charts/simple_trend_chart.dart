@@ -49,9 +49,7 @@ class SimpleTrendChart extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => SimpleTrendChartPage(
-              firstValue: values[0],
-              secondValue: values[1],
-              thirdValue: values.length == 3 ? values[2] : 0,
+              values: values,
               title: title,
             ),
           ),
