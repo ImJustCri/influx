@@ -54,7 +54,3 @@ flutter run
 ```
 
 ---
-
-## Licenza
-
-[MIT](LICENSE)
