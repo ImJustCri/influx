@@ -26,7 +26,7 @@ final userPeriodProvider = FutureProvider<List<UserPeriod>>((ref) async {
       .from('userPeriod')
       .select()
       .eq('isActive', false)
-      .order('created_at', ascending: true)
+      .order('created_at', ascending: false)
       .limit(2);
 
   return (response as List)
