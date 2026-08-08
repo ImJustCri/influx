@@ -24,7 +24,6 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
   @override
   Widget build(BuildContext context) {
     final expensesAsync = ref.watch(fetchExpenses);
-    // 1. Watch userPeriodProvider which returns List<UserPeriod>
     final userPeriodsAsync = ref.watch(userPeriodProvider);
 
     return Scaffold(
@@ -87,7 +86,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                     if (expenses.isNotEmpty) ...[
                       userPeriodsAsync.when(
                         data: (periods) {
-                          if (periods.length < 2) {
+                          if (periods.isEmpty) {
                             return StatusContainer(
                               icon: LucideIcons.chart_column,
                               title: "Troppo presto per fare i conti",
@@ -97,14 +96,16 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
 
                           final List<double> chartValues = [];
 
-                          if (periods.length == 2) {
-                            chartValues.add(periods[0].spent);
+                          if (periods.length == 1) {
+                            chartValues.add(periods[1].spent);
                             chartValues.add(totalSpent);
                           } else {
                             chartValues.add(periods[0].spent);
                             chartValues.add(periods[1].spent);
                             chartValues.add(totalSpent);
                           }
+
+                          debugPrint(chartValues.toString());
 
                           return SimpleTrendChart(
                             values: chartValues,
