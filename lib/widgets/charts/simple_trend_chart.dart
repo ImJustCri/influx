@@ -43,7 +43,8 @@ class SimpleTrendChart extends StatelessWidget {
         .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
         .toList();
 
-    return GestureDetector(
+    return InkWell(
+      borderRadius: BorderRadius.circular(32),
       onTap: () {
         Navigator.push(
           context,
