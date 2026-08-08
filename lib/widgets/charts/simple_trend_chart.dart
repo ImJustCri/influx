@@ -7,23 +7,24 @@ import '../../pages/simple_trend_chart_page.dart';
 import '../app_container.dart';
 
 class SimpleTrendChart extends StatelessWidget {
-  final double firstValue;
-  final double secondValue;
-  final double thirdValue;
+  final List<double> values;
   final String title;
 
   const SimpleTrendChart({
     super.key,
-    required this.firstValue,
-    required this.secondValue,
-    required this.thirdValue,
+    required this.values,
     this.title = "Spesi in questo periodo",
-  });
+  }) : assert(
+  values.length >= 2 && values.length <= 3,
+  'I valori devono essere 2 o 3.',
+  );
 
-  // percentage change from previous period and current period
   double get percentChange {
-    if (secondValue == 0) return 0;
-    return ((thirdValue - secondValue) / secondValue) * 100;
+    final previousValue = values[values.length - 2];
+    final currentValue = values.last;
+
+    if (previousValue == 0) return 0;
+    return ((currentValue - previousValue) / previousValue) * 100;
   }
 
   @override
@@ -31,9 +32,16 @@ class SimpleTrendChart extends StatelessWidget {
     final isUp = percentChange >= 0;
     final color = isUp ? Colors.redAccent : Colors.greenAccent;
 
-    final minY = math.min(math.min(firstValue, secondValue), thirdValue);
-    final maxY = math.max(math.max(firstValue, secondValue), thirdValue);
-    final padding = (maxY - minY) * 0.25 == 0 ? 1 : (maxY - minY) * 0.25;
+    final minY = values.reduce(math.min);
+    final maxY = values.reduce(math.max);
+    final range = maxY - minY;
+    final padding = range == 0 ? 1.0 : range * 0.25;
+
+    final spots = values
+        .asMap()
+        .entries
+        .map((entry) => FlSpot(entry.key.toDouble(), entry.value))
+        .toList();
 
     return GestureDetector(
       onTap: () {
@@ -41,9 +49,9 @@ class SimpleTrendChart extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => SimpleTrendChartPage(
-              firstValue: firstValue,
-              secondValue: secondValue,
-              thirdValue: thirdValue,
+              firstValue: values[0],
+              secondValue: values[1],
+              thirdValue: values.length == 3 ? values[2] : 0,
               title: title,
             ),
           ),
@@ -72,7 +80,7 @@ class SimpleTrendChart extends StatelessWidget {
               child: LineChart(
                 LineChartData(
                   minX: 0,
-                  maxX: 2,
+                  maxX: (values.length - 1).toDouble(),
                   minY: minY - padding,
                   maxY: maxY + padding,
                   gridData: const FlGridData(show: false),
@@ -80,11 +88,7 @@ class SimpleTrendChart extends StatelessWidget {
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
-                      spots: [
-                        FlSpot(0, firstValue),
-                        FlSpot(1, secondValue),
-                        FlSpot(2, thirdValue),
-                      ],
+                      spots: spots,
                       isCurved: false,
                       barWidth: 5,
                       color: color,
