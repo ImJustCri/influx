@@ -223,6 +223,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
 
             if (context.mounted) {
               ref.invalidate(groupsProvider);
+              ref.invalidate(groupMemberCountProvider);
             }
           },
         );
