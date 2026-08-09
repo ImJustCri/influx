@@ -14,6 +14,7 @@ class GroupAdminSettings extends StatefulWidget {
   final String name;
   final String groupId;
   final String groupCreator;
+  final bool isCurrentUserAdmin;
   final List<GroupMember> members;
   const GroupAdminSettings({
     super.key,
@@ -21,6 +22,7 @@ class GroupAdminSettings extends StatefulWidget {
     required this.name,
     required this.groupId,
     required this.groupCreator,
+    required this.isCurrentUserAdmin,
   });
 
   @override
