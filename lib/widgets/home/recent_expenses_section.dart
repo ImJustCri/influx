@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
 import '../../models/expense_data.dart';
 import '../expenses/all_expenses_page.dart';
@@ -111,6 +112,7 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
                               groupName: expense.groupName,
                               expenseId: expense.id,
                               categoryId: expense.categoryId,
+                                  profileId: Supabase.instance.client.auth.currentUser!.id,
                             ),
                           ),
                         ],
