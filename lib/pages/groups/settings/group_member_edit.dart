@@ -108,7 +108,7 @@ class GroupMemberEdit extends StatelessWidget {
                   ],
                 ),
               ),
-              RoleSelectionGroup(isAdmin: member.isAdmin),
+              RoleSelectionGroup(isAdmin: member.isAdmin, groupId: groupId, memberId: member.id, isCurrentUserGroupOwner: isCurrentUserGroupOwner),
               SettingsTile(
                 icon: LucideIcons.x,
                 title: "Rimuovi dal gruppo",
