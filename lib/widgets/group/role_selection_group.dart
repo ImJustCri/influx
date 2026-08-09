@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:influx/theme.dart';
 import 'package:influx/widgets/group/role_option_type.dart';
 import '../app_container.dart';
 
-enum RoleType { admin, member }
+enum RoleType { admin, user }
 
 class RoleSelectionGroup extends StatefulWidget {
-  final RoleType? initialSelection;
+  final String groupId;
+  final String memberId;
   final bool isAdmin;
-  final ValueChanged<RoleType>? onRoleSelected;
+  final bool isCurrentUserGroupOwner;
+  final ValueChanged<RoleType>? onRoleChanged;
 
   const RoleSelectionGroup({
     super.key,
-    this.initialSelection,
+    required this.groupId,
+    required this.memberId,
     required this.isAdmin,
-    this.onRoleSelected,
+    required this.isCurrentUserGroupOwner,
+    this.onRoleChanged,
   });
 
   @override
@@ -23,33 +29,100 @@ class RoleSelectionGroup extends StatefulWidget {
 
 class _RoleSelectionGroupState extends State<RoleSelectionGroup> {
   late RoleType selectedRole;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Logic: If initialSelection is provided, use it.
-    // Otherwise, select admin if isAdmin is true, else select member.
-    selectedRole = widget.initialSelection ??
-        (widget.isAdmin ? RoleType.admin : RoleType.member);
+    selectedRole = widget.isAdmin ? RoleType.admin : RoleType.user;
   }
 
   @override
   void didUpdateWidget(covariant RoleSelectionGroup oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update selected role if the parent passes a new `isAdmin` value
     if (oldWidget.isAdmin != widget.isAdmin) {
       setState(() {
-        selectedRole = widget.isAdmin ? RoleType.admin : RoleType.member;
+        selectedRole = widget.isAdmin ? RoleType.admin : RoleType.user;
       });
     }
   }
 
-  void _selectRole(RoleType role) {
+  /// Handles role change and updates Supabase database
+  Future<void> _selectRole(RoleType newRole) async {
+    // Return early if role hasn't changed or an update is already in progress
+    if (selectedRole == newRole || _isLoading) return;
+
+    // Permission Check: Prevent non-owners from modifying another admin's role
+    if (widget.isAdmin && !widget.isCurrentUserGroupOwner) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Non puoi modificare il ruolo di un altro admin."),
+        ),
+      );
+      return;
+    }
+
+    final previousRole = selectedRole;
+
+    // Optimistically update the UI
     setState(() {
-      selectedRole = role;
+      selectedRole = newRole;
+      _isLoading = true;
     });
-    if (widget.onRoleSelected != null) {
-      widget.onRoleSelected!(role);
+
+    final roleString = newRole == RoleType.admin ? 'admin' : 'user';
+
+    try {
+      await Supabase.instance.client
+          .from('profile_group')
+          .update({'role': roleString})
+          .eq('group_id', widget.groupId)
+          .eq('profile_id', widget.memberId);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Ruolo aggiornato con successo.")),
+      );
+
+      // Notify parent widget if callback exists
+      if (widget.onRoleChanged != null) {
+        widget.onRoleChanged!(newRole);
+      }
+    } on PostgrestException catch (error) {
+      if (!mounted) return;
+
+      // Revert local state on error
+      setState(() {
+        selectedRole = previousRole;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Errore durante l'aggiornamento: ${error.message}"),
+          backgroundColor: AppColors.btnBackground,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      // Revert local state on error
+      setState(() {
+        selectedRole = previousRole;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Si è verificato un errore imprevisto."),
+          backgroundColor: AppColors.btnBackground,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -73,8 +146,8 @@ class _RoleSelectionGroupState extends State<RoleSelectionGroup> {
             subtitle: 'Accesso parziale',
             icon: LucideIcons.user,
             iconBackgroundColor: Colors.indigoAccent,
-            isSelected: selectedRole == RoleType.member,
-            onTap: () => _selectRole(RoleType.member),
+            isSelected: selectedRole == RoleType.user,
+            onTap: () => _selectRole(RoleType.user),
           ),
         ],
       ),
