@@ -25,7 +25,7 @@ class MemberTileAdminView extends StatelessWidget {
     final userId = Supabase.instance.client.auth.currentUser?.id;
     final isSelf = userId == member.id;
 
-    final bool canEdit = !isSelf && !isOwner;
+    final bool canEdit = !isSelf && !isOwner && (!member.isAdmin || isCurrentUserGroupOwner);
 
     return InkWell(
       borderRadius: BorderRadius.circular(32),
