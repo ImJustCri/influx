@@ -30,6 +30,9 @@ class GroupMemberExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isOverBudget = progressValue >= 1.0;
+    final Color activeValueColor = isOverBudget ? Colors.red : valueColor;
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -65,13 +68,18 @@ class GroupMemberExpenseTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(memberName, style: AppTypography.containerTitle),
-                      Text("$amount$currency", style: AppTypography.containerBody),
+                      Text(
+                        "${amount.toStringAsFixed(2)}$currency",
+                        style: AppTypography.containerBody.copyWith(
+                          color: isOverBudget ? Colors.red : null,
+                        ),
+                      ),
                     ],
                   ),
                   RoundedLinearProgressBar(
-                    value: progressValue,
+                    value: progressValue.clamp(0.0, 1.0),
                     backgroundColor: backgroundColor,
-                    valueColor: valueColor,
+                    valueColor: activeValueColor,
                   ),
                 ],
               ),
