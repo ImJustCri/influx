@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/groups/settings/permissions_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:influx/widgets/settings_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/group_member.dart';
-import '../../../providers/groups_provider.dart';
+import '../../../providers/expenses/total_expenses_provider.dart';
+import '../../../providers/groups/groups_provider.dart';
+import '../../../providers/periods/group_period_providers.dart';
 import '../../../theme.dart';
 import '../../../widgets/group/member_tile_admin_view.dart';
 
-class GroupAdminSettings extends StatefulWidget {
+class GroupAdminSettings extends ConsumerStatefulWidget {
   final String name;
   final String groupId;
   final String groupCreator;
   final bool isCurrentUserAdmin;
   final List<GroupMember> members;
+
   const GroupAdminSettings({
     super.key,
     required this.members,
@@ -26,12 +30,13 @@ class GroupAdminSettings extends StatefulWidget {
   });
 
   @override
-  State<GroupAdminSettings> createState() => _GroupAdminSettingsState();
+  ConsumerState<GroupAdminSettings> createState() => _GroupAdminSettingsState();
 }
 
-class _GroupAdminSettingsState extends State<GroupAdminSettings> {
+class _GroupAdminSettingsState extends ConsumerState<GroupAdminSettings> {
   @override
   Widget build(BuildContext context) {
+
     final groupOwner = widget.members.where((m) => m.id == widget.groupCreator).toList();
     final adminMembers = widget.members.where((m) => m.isAdmin && m.id != widget.groupCreator).toList();
     final regularMembers = widget.members.where((m) => !m.isAdmin && m.id != widget.groupCreator).toList();
@@ -54,8 +59,10 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Impostazioni admin", style: AppTypography.pageTitle),
-                  Text("${widget.name} - ${widget.members.length} membri",
-                      style: AppTypography.pageSubtitle),
+                  Text(
+                    "${widget.name} - ${widget.members.length} membri",
+                    style: AppTypography.pageSubtitle,
+                  ),
                 ],
               ),
             ),
@@ -110,10 +117,26 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                           bool isSuccess = false;
 
                           try {
+                            final totalSpent = await ref.read(
+                              totalGroupExpensesProvider(widget.groupId).future,
+                            );
+
+                            await supabase
+                                .from('groupPeriod')
+                                .update({
+                                  'spent': totalSpent,
+                                  'isActive': false,
+                            })
+                                .eq('group_id', widget.groupId)
+                                .eq('isActive', true);
+
                             await supabase
                                 .from('group')
                                 .update({'status': 'creation'})
                                 .eq('id', widget.groupId);
+
+                            ref.invalidate(totalGroupExpensesProvider(widget.groupId));
+                            ref.invalidate(activeGroupPeriodProvider(widget.groupId));
 
                             message = "Stato aggiornato con successo.";
                             isSuccess = true;
@@ -134,7 +157,8 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                                         Navigator.of(dialogContext).pop();
 
                                         if (isSuccess && context.mounted) {
-                                          Navigator.of(context).pop();
+                                          int count = 0;
+                                          Navigator.of(context).popUntil((_) => count++ >= 2);
                                         }
                                       },
                                       child: const Text('OK'),
@@ -154,7 +178,9 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text("Elimina gruppo"),
-                              content: const Text("Sei sicuro di voler eliminare questo gruppo?"),
+                              content: const Text(
+                                "Sei sicuro di voler eliminare questo gruppo?",
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(false),
@@ -162,7 +188,10 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text("Elimina", style: TextStyle(color: Colors.redAccent)),
+                                  child: const Text(
+                                    "Elimina",
+                                    style: TextStyle(color: Colors.redAccent),
+                                  ),
                                 ),
                               ],
                             ),
@@ -173,7 +202,9 @@ class _GroupAdminSettingsState extends State<GroupAdminSettings> {
                           if (context.mounted && !(userId == widget.groupCreator)) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text("Solo il creatore del gruppo può eliminarlo"),
+                                content: Text(
+                                  "Solo il creatore del gruppo può eliminarlo",
+                                ),
                               ),
                             );
                             return;
