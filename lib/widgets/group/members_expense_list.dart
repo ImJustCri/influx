@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/profile_group_expense_sum_profile.dart';
 import '../../providers/expenses/profile_group_expense_sum_profile.dart';
 import 'group_member_expense_tile.dart';
 import '../../models/group_member.dart';
@@ -33,8 +32,8 @@ class MembersExpenseList extends StatelessWidget {
           builder: (context, ref, child) {
             final expenseAsync = ref.watch(
               profileGroupExpenseSumProvider((
-              profileId: member.id,
-              groupId: groupId,
+                profileId: member.id,
+                groupId: groupId,
               )),
             );
 
