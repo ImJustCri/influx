@@ -3,12 +3,14 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
-import 'package:influx/pages/groups/user_group_expenses.page.dart';
 import 'package:influx/widgets/group/group_total_budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../../providers/get_group_role_provider.dart';
-import '../../providers/group_members_provider.dart';
-import '../../providers/profile_group_expense_sum_profile.dart';
+import '../../providers/expenses/expenses_provider.dart';
+import '../../providers/expenses/profile_group_expense_sum_profile.dart';
+import '../../providers/expenses/total_expenses_provider.dart';
+import '../../providers/groups/get_group_role_provider.dart';
+import '../../providers/groups/group_members_provider.dart';
+import '../../providers/periods/group_period_providers.dart';
 import '../../theme.dart';
 import '../../widgets/expenses/all_expenses_page.dart';
 import '../../widgets/group/group_budget_card.dart';
@@ -40,18 +42,38 @@ class GroupDetailPage extends ConsumerWidget {
       ),
     );
 
-    // Watch the profile group expense sum
     final profileExpenseSumAsync = ref.watch(
       profileGroupExpenseSumProvider(
         (profileId: currentUserId, groupId: group.id),
       ),
     );
 
+    final totalGroupExpensesAsync = ref.watch(totalGroupExpensesProvider(group.id));
+
+    // Watch the active group period provider
+    final activePeriodAsync = ref.watch(activeGroupPeriodProvider(group.id));
+
     void refresh() {
-      ref.invalidate(fetchGroupMembersProvider);
+      ref.invalidate(fetchGroupMembersProvider(group.id));
       ref.invalidate(fetchProfileGroupDetailsProvider);
       ref.invalidate(profileGroupExpenseSumProvider);
+      ref.invalidate(totalGroupExpensesProvider(group.id));
+      ref.invalidate(activeGroupPeriodProvider(group.id));
+      ref.invalidate(fetchExpensesByUserAndGroupProvider);
     }
+
+    // Extract budgets from active period
+    final double activeTotalBudget = activePeriodAsync.when(
+      data: (period) => period?.budget ?? 0.0,
+      loading: () => 0.0,
+      error: (_, _) => 0.0,
+    );
+
+    final double activePerCapitaBudget = activePeriodAsync.when(
+      data: (period) => period?.perCapitaBudget ?? 0.0,
+      loading: () => 0.0,
+      error: (_, _) => 0.0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -82,7 +104,6 @@ class GroupDetailPage extends ConsumerWidget {
                           Text('Budget condiviso', style: AppTypography.pageSubtitle),
                         ],
                       ),
-
                       profileGroupAsync.maybeWhen(
                         data: (data) {
                           final isAdmin = data != null && data['role'] == 'admin';
@@ -149,15 +170,16 @@ class GroupDetailPage extends ConsumerWidget {
                           loading: () => 0.0,
                           error: (_, _) => 0.0,
                         ),
-                        resetDate: group.startedAt ?? DateTime.now(),
-                        isGroup: true,
-                        groupBudget: group.totalBudget,
-                        perCapitaBudget: group.perCapitaBudget,
+                        groupId: group.id,
                       ),
                       GroupTotalBudgetCard(
                         resetDate: group.startedAt ?? DateTime.now(),
-                        groupBudget: group.totalBudget,
-                        totalGroupExpenses: 10,
+                        groupBudget: activeTotalBudget,
+                        totalGroupExpenses: totalGroupExpensesAsync.when(
+                          data: (expenses) => expenses,
+                          loading: () => 0.0,
+                          error: (_, _) => 0.0,
+                        ),
                       ),
                       SettingsTile(
                         icon: LucideIcons.list_collapse,
@@ -174,7 +196,6 @@ class GroupDetailPage extends ConsumerWidget {
                           );
                         },
                       ),
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 16,
@@ -183,7 +204,7 @@ class GroupDetailPage extends ConsumerWidget {
                           MembersExpenseList(
                             members: members,
                             groupId: group.id,
-                            perCapitaBudget: group.perCapitaBudget,
+                            perCapitaBudget: activePerCapitaBudget,
                             groupName: group.name,
                           ),
                         ],
