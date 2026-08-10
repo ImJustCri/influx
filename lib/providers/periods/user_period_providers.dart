@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/user_period.dart';
+import '../../models/periods/user_period.dart';
 
 /// Active period provider for the user
 final activeUserPeriodProvider =
