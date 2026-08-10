@@ -94,6 +94,21 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
                     const SizedBox(height: 24),
 
                     if (expenses.isEmpty) ...[
+                      SettingsTile(
+                        icon: LucideIcons.calendar,
+                        title: "Periodi precedenti",
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PeriodsOverviewPage(groupId: widget.groupId),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
                       AppContainer(
                         padding: const EdgeInsets.all(48),
                         width: double.infinity,
