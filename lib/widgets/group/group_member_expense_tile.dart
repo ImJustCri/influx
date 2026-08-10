@@ -14,6 +14,7 @@ class GroupMemberExpenseTile extends StatelessWidget {
   final Color valueColor;
   final String groupId;
   final String groupName;
+  final bool isCurrentUserGroupAdmin;
 
   const GroupMemberExpenseTile({
     super.key,
@@ -25,11 +26,14 @@ class GroupMemberExpenseTile extends StatelessWidget {
     this.valueColor = AppColors.white,
     required this.memberId,
     required this.groupId,
-    required this.groupName,
+    required this.groupName, required this.isCurrentUserGroupAdmin,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isOverBudget = progressValue >= 1.0;
+    final Color activeValueColor = isOverBudget ? Colors.red : valueColor;
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -41,6 +45,7 @@ class GroupMemberExpenseTile extends StatelessWidget {
               userName: memberName,
               userPfp: avatarImageUrl,
               groupName: groupName,
+              isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
             ),
           ),
         );
@@ -65,13 +70,18 @@ class GroupMemberExpenseTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(memberName, style: AppTypography.containerTitle),
-                      Text("$amount$currency", style: AppTypography.containerBody),
+                      Text(
+                        "${amount.toStringAsFixed(2)}$currency",
+                        style: AppTypography.containerBody.copyWith(
+                          color: isOverBudget ? Colors.red : null,
+                        ),
+                      ),
                     ],
                   ),
                   RoundedLinearProgressBar(
-                    value: progressValue,
+                    value: progressValue.clamp(0.0, 1.0),
                     backgroundColor: backgroundColor,
-                    valueColor: valueColor,
+                    valueColor: activeValueColor,
                   ),
                 ],
               ),

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
-import '../../providers/expenses_provider.dart';
+import '../../providers/expenses/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
 import '../../widgets/status_container.dart';
 
@@ -16,6 +16,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
   final String groupName;
   final String userName;
   final String? userPfp;
+  final bool isCurrentUserGroupAdmin;
 
   const UserGroupExpensesPage({
     super.key,
@@ -24,6 +25,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
     required this.userName,
     this.userPfp,
     required this.groupName,
+    required this.isCurrentUserGroupAdmin,
   });
 
   /// Helper function to group expenses by formatted date string
@@ -127,10 +129,10 @@ class UserGroupExpensesPage extends ConsumerWidget {
                                     groupName: expense.groupName,
                                     expenseId: expense.id,
                                     categoryId: expense.categoryId,
-
-                                    // Direct input user data
                                     userName: userName,
                                     userPfp: userPfp,
+                                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                    isGroupView: true,
                                   );
                                 },
                               ),

@@ -5,8 +5,8 @@ import 'package:influx/pages/groups/create_group.dart';
 import 'package:influx/pages/groups/group_detail_page.dart';
 import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../../providers/group_member_count_provider.dart';
-import '../../providers/groups_provider.dart';
+import '../../providers/groups/group_member_count_provider.dart';
+import '../../providers/groups/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/group_tile.dart';
 import '../../widgets/settings_tile.dart';
@@ -216,6 +216,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                   builder: (context) => GroupNotStartedPage(
                     group: group,
                     isUserGroupOwner: (group.creatorId == userId),
+                    memberCount: memberCount,
                   ),
                 ),
               );
@@ -223,6 +224,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
 
             if (context.mounted) {
               ref.invalidate(groupsProvider);
+              ref.invalidate(groupMemberCountProvider);
             }
           },
         );

@@ -11,7 +11,8 @@ import '../../../widgets/settings_tile.dart';
 class GroupMemberEdit extends StatelessWidget {
   final String groupId;
   final GroupMember member;
-  const GroupMemberEdit({super.key, required this.member, required this.groupId});
+  final bool isCurrentUserGroupOwner;
+  const GroupMemberEdit({super.key, required this.member, required this.groupId, required this.isCurrentUserGroupOwner});
 
   /// Function to remove member from database
   Future<void> _removeMember(BuildContext context) async {
@@ -45,6 +46,13 @@ class GroupMemberEdit extends StatelessWidget {
           .eq('profile_id', member.id);
 
       if (!context.mounted) return;
+
+      if (member.isAdmin && !isCurrentUserGroupOwner) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Che fai, provi a rimuovere un altro admin?")),
+        );
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Membro rimosso con successo.")),
@@ -100,12 +108,12 @@ class GroupMemberEdit extends StatelessWidget {
                   ],
                 ),
               ),
-              RoleSelectionGroup(isAdmin: member.isAdmin),
+              RoleSelectionGroup(isAdmin: member.isAdmin, groupId: groupId, memberId: member.id, isCurrentUserGroupOwner: isCurrentUserGroupOwner),
               SettingsTile(
                 icon: LucideIcons.x,
                 title: "Rimuovi dal gruppo",
                 onTap: () => _removeMember(context),
-              )
+              ),
             ],
           ),
         ),

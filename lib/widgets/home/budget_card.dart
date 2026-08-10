@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/edit_budget_page.dart';
 import '../../global.dart';
-import '../../providers/user_period_providers.dart';
+import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
@@ -29,12 +29,15 @@ class BudgetCard extends ConsumerWidget {
         final double actualSpent = totalExpenses;
         final DateTime resetDate = period!.endDate;
 
-        final remaining = totalBudget - actualSpent;
+        final bool isOverBudget = actualSpent > totalBudget;
+        final remaining = (totalBudget - actualSpent).toStringAsFixed(2);
         final progressValue = totalBudget > 0
             ? (actualSpent / totalBudget).clamp(0.0, 1.0)
             : 0.0;
         final resetDateFormatted =
             "${resetDate.day} ${_getMonthName(resetDate.month)}";
+
+        final Color alertColor = isOverBudget ? Colors.red : AppColors.btnBackground;
 
         return AppContainer(
           padding: const EdgeInsets.all(24),
@@ -49,23 +52,31 @@ class BudgetCard extends ConsumerWidget {
               ),
               SelectableText(
                 "$remaining$currency",
-                style: AppTypography.budgetIndicator,
+                style: AppTypography.budgetIndicator.copyWith(
+                  color: isOverBudget ? Colors.red : null,
+                ),
               ),
               const SizedBox(height: 8),
               RoundedLinearProgressBar(
                 value: progressValue,
                 minHeight: 8,
                 backgroundColor: AppColors.backgroundAccent,
-                valueColor: AppColors.btnBackground,
+                valueColor: alertColor,
               ),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Spesi: $actualSpent$currency",
-                      style: AppTypography.containerBody),
-                  Text("Totale: $totalBudget$currency",
-                      style: AppTypography.containerBody),
+                  Text(
+                    "Spesi: ${actualSpent.toStringAsFixed(2)}$currency",
+                    style: AppTypography.containerBody.copyWith(
+                      color: isOverBudget ? Colors.red : null,
+                    ),
+                  ),
+                  Text(
+                    "Totale: ${totalBudget.toStringAsFixed(2)}$currency",
+                    style: AppTypography.containerBody,
+                  ),
                 ],
               ),
               const Divider(
@@ -76,8 +87,10 @@ class BudgetCard extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Reset: $resetDateFormatted",
-                      style: AppTypography.containerBody),
+                  Text(
+                    "Reset: $resetDateFormatted",
+                    style: AppTypography.containerBody,
+                  ),
                   if (!isNotAuthorized)
                     GestureDetector(
                       onTap: () async {
@@ -85,7 +98,8 @@ class BudgetCard extends ConsumerWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => EditBudgetPage(
-                              initialBudget: totalBudget, totalExpenses: totalExpenses,
+                              initialBudget: totalBudget,
+                              totalExpenses: totalExpenses,
                             ),
                           ),
                         );

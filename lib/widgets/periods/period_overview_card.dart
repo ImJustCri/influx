@@ -34,7 +34,9 @@ class PeriodOverviewCard extends StatelessWidget {
             children: [
               Text(
                 spent.toStringAsFixed(0),
-                style: AppTypography.budgetIndicator,
+                style: AppTypography.budgetIndicator.copyWith(
+                  color: isOverBudget ? Colors.red : AppColors.white
+                ),
               ),
               Text(
                 "/",
@@ -137,37 +139,6 @@ class PeriodOverviewCard extends StatelessWidget {
               ),
             ],
           ),
-
-          if (isOverBudget)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.4),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    LucideIcons.triangle_alert,
-                    size: 18,
-                    color: Colors.redAccent,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      "Budget superato per questo periodo",
-                      style: AppTypography.containerTitle.copyWith(
-                          color: Colors.redAccent
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );

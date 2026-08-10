@@ -18,6 +18,9 @@ class ExpenseItem extends StatelessWidget {
   final String? userName;
   final String? userPfp;
   final String? profileId;
+  final bool? isCurrentUserGroupAdmin;
+  final bool isGroupView;
+
 
   const ExpenseItem({
     super.key,
@@ -33,7 +36,7 @@ class ExpenseItem extends StatelessWidget {
     required this.categoryId,
     this.userName,
     this.userPfp,
-    this.profileId
+    this.profileId, this.isCurrentUserGroupAdmin, required this.isGroupView
   });
 
   @override
@@ -62,6 +65,8 @@ class ExpenseItem extends StatelessWidget {
                     expenseUserName: userName,
                     expenseUserPfp: userPfp,
                     expenseUserId: profileId,
+                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                    isGroupView: isGroupView,
                   ),
                 ),
               );

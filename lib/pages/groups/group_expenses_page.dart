@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/providers/periods/group_period_providers.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../models/group_member.dart';
-import '../../providers/expenses_provider.dart';
+import '../../providers/expenses/expenses_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
+import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
+import '../../widgets/settings_tile.dart';
+import '../../widgets/status_container.dart';
+import '../periods/periods_overview_page.dart';
 
 class GroupExpensesPage extends ConsumerStatefulWidget {
   final String groupId;
@@ -28,14 +33,14 @@ class GroupExpensesPage extends ConsumerStatefulWidget {
 class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
   @override
   Widget build(BuildContext context) {
-    // Watch group-filtered expenses
     final expensesAsync = ref.watch(fetchExpensesByGroupProvider(widget.groupId));
+    final userPeriodsAsync = ref.watch(groupPeriodProvider(widget.groupId));
 
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        title: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
         ),
         centerTitle: false,
         elevation: 0,
@@ -44,6 +49,7 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(fetchExpensesByGroupProvider(widget.groupId));
+          ref.invalidate(groupPeriodProvider(widget.groupId));
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.only(
@@ -64,7 +70,6 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
                       (sum, item) => sum + item.numericAmount,
                 );
 
-                // Group expenses by categories
                 final Map<String, List<ExpenseData>> categories = {};
                 for (final expense in expenses) {
                   categories
@@ -86,8 +91,24 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
                       widget.groupName,
                       style: AppTypography.pageSubtitle,
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
+
                     if (expenses.isEmpty) ...[
+                      SettingsTile(
+                        icon: LucideIcons.calendar,
+                        title: "Periodi precedenti",
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PeriodsOverviewPage(groupId: widget.groupId),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
                       AppContainer(
                         padding: const EdgeInsets.all(48),
                         width: double.infinity,
@@ -110,7 +131,66 @@ class _GroupExpensesPageState extends ConsumerState<GroupExpensesPage> {
                         ),
                       ),
                     ],
+
                     if (expenses.isNotEmpty) ...[
+                      userPeriodsAsync.when(
+                        data: (periods) {
+                          if (periods.isEmpty) {
+                            return StatusContainer(
+                              icon: LucideIcons.chart_column,
+                              title: "Troppo presto per fare i conti",
+                              description:
+                              "Per vedere quanto hai speso rispetto al periodo scorso, servono almeno due periodi registrati.",
+                            );
+                          }
+
+                          final List<double> chartValues = [];
+
+                          if (periods.length == 1) {
+                            chartValues.add(periods[0].spent);
+                            chartValues.add(totalSpent);
+                          } else {
+                            chartValues.add(periods[1].spent);
+                            chartValues.add(periods[0].spent);
+                            chartValues.add(totalSpent);
+                          }
+
+                          debugPrint(chartValues.toString());
+
+                          return SimpleTrendChart(
+                            values: chartValues,
+                          );
+                        },
+                        loading: () => const SizedBox(
+                          height: 150,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (_, _) => StatusContainer(
+                          icon: LucideIcons.cross,
+                          title: "Errore",
+                          description:
+                          "Qualcosa non è andato a buon fine durante il caricamento",
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      SettingsTile(
+                        icon: LucideIcons.calendar,
+                        title: "Periodi precedenti",
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PeriodsOverviewPage(groupId: widget.groupId),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Category breakdown
                       Column(
                         spacing: 16,
                         children: categories.entries.map(

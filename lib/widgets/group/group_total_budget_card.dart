@@ -18,9 +18,14 @@ class GroupTotalBudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isOverBudget = totalGroupExpenses > groupBudget;
+
     final progressValue = groupBudget > 0
         ? (totalGroupExpenses / groupBudget).clamp(0.0, 1.0)
         : 0.0;
+
+    final Color progressColor =
+    isOverBudget ? Colors.red : AppColors.btnBackground;
 
     return AppContainer(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -39,19 +44,22 @@ class GroupTotalBudgetCard extends StatelessWidget {
           RoundedLinearProgressBar(
             value: progressValue,
             backgroundColor: AppColors.backgroundAccent,
-            valueColor: AppColors.btnBackground,
+            valueColor: progressColor,
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "$totalGroupExpenses$currency",
-                style: AppTypography.containerBody
+                "${totalGroupExpenses.toStringAsFixed(2)}$currency",
+                style: AppTypography.containerBody.copyWith(
+                  color: isOverBudget ? Colors.red : null,
+                  fontWeight: isOverBudget ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
               Text(
-                "$groupBudget$currency",
-                style: AppTypography.containerBody
+                "${groupBudget.toStringAsFixed(2)}$currency",
+                style: AppTypography.containerBody,
               ),
             ],
           ),

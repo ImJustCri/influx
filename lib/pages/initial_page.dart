@@ -7,7 +7,7 @@ import 'auth/login.dart';
 import 'main_shell_screen.dart';
 import 'periods/create_period_page.dart';
 import 'periods/period_ended_page.dart';
-import '../providers/user_period_providers.dart';
+import '../providers/periods/user_period_providers.dart';
 
 class InitialPage extends ConsumerWidget {
   const InitialPage({super.key});

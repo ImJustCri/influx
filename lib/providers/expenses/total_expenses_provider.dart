@@ -15,3 +15,16 @@ final totalExpensesProvider = FutureProvider<double>((ref) async {
 
   return (result as num?)?.toDouble() ?? 0.0;
 });
+
+/// total expenses for groups
+final totalGroupExpensesProvider =
+FutureProvider.family<double, String>((ref, groupId) async {
+  final result = await Supabase.instance.client.rpc(
+    'sum_group_expenses_in_period',
+    params: {
+      'p_group_id': groupId,
+    },
+  );
+
+  return (result as num?)?.toDouble() ?? 0.0;
+});

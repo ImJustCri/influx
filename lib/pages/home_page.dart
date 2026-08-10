@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:influx/providers/expenses_provider.dart';
+import 'package:influx/providers/expenses/expenses_provider.dart';
 import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../providers/total_expenses_provider.dart';
+import '../providers/expenses/total_expenses_provider.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
 import '../widgets/status_container.dart';

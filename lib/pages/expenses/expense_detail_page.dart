@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/widgets/status_container.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/global.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,6 +21,8 @@ class ExpenseDetailPage extends StatelessWidget {
   final String? expenseUserName;
   final String? expenseUserPfp;
   final String? expenseUserId;
+  final bool? isCurrentUserGroupAdmin;
+  final bool isGroupView;
 
   const ExpenseDetailPage({
     super.key,
@@ -35,6 +38,8 @@ class ExpenseDetailPage extends StatelessWidget {
     this.expenseUserName,
     this.expenseUserPfp,
     this.expenseUserId,
+    this.isCurrentUserGroupAdmin,
+    required this.isGroupView,
   });
 
   String _formatDate(DateTime date) {
@@ -47,6 +52,10 @@ class ExpenseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isAdmin = isCurrentUserGroupAdmin ?? false;
+
+    print(isGroupView);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -56,7 +65,7 @@ class ExpenseDetailPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (Supabase.instance.client.auth.currentUser?.id == expenseUserId)
+          if (groupName == null || isAdmin ) ...[
             IconButton(
               icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
               tooltip: 'Elimina spesa',
@@ -75,6 +84,62 @@ class ExpenseDetailPage extends StatelessWidget {
                     );
                   }
                 }
+              },
+            ),
+          ]
+          else if (!isGroupView)
+            ...[ IconButton(
+              icon: const Icon(LucideIcons.info),
+              tooltip: 'Elimina spesa',
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          StatusContainer(
+                            title: "Vuoi eliminare questa spesa?!",
+                            icon: LucideIcons.shield_alert,
+                            description: "Se sei un admin di $groupName e vuoi rimuovere questa spesa, passa dalla sezione dedicata al gruppo.",
+                          ),
+                          SizedBox(height: 24),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ]
+          else
+            IconButton(
+              icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
+              tooltip: 'Elimina spesa',
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          StatusContainer(
+                            title: "Alt! Zona riservata",
+                            icon: LucideIcons.shield_alert,
+                            description: "Solo gli admin del gruppo possono eliminare le spese!",
+                          ),
+                          SizedBox(height: 24),
+                        ],
+                      ),
+                    );
+                  },
+                );
               },
             ),
           const SizedBox(width: 8),
