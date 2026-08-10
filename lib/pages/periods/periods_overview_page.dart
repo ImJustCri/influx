@@ -26,7 +26,9 @@ class PeriodsOverviewPage extends ConsumerWidget {
     final AsyncValue<List<BasePeriod>> periodsAsync = ref.watch(provider);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        toolbarHeight: 72,
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(provider);
