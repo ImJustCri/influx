@@ -3,7 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../../providers/user_period_providers.dart';
+import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import '../../widgets/periods/period_overview_card.dart';
 import '../../widgets/status_container.dart';

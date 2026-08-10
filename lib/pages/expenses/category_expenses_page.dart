@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
-import '../../providers/expenses_provider.dart';
+import '../../providers/expenses/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
 
 class CategoryExpensesPage extends ConsumerWidget {

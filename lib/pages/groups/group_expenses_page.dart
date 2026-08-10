@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../models/group_member.dart';
-import '../../providers/expenses_provider.dart';
+import '../../providers/expenses/expenses_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import '../../widgets/expenses/expense_category_bar.dart';

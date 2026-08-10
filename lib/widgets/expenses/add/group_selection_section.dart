@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/app_container.dart';
-import '../../../providers/groups_provider.dart';
+import '../../../providers/groups/groups_provider.dart';
 import '../../../theme.dart';
 
 class GroupSelectionSection extends ConsumerWidget {

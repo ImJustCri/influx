@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/edit_budget_page.dart';
 import '../../global.dart';
 import '../../providers/user_period_providers.dart';
+import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';

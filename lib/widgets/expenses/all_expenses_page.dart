@@ -7,7 +7,7 @@ import 'package:influx/theme.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/expense_data.dart';
 import '../../models/group_member.dart';
-import '../../providers/expenses_provider.dart';
+import '../../providers/expenses/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
 import '../status_container.dart';
 
