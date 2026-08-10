@@ -42,6 +42,12 @@ class GroupDetailPage extends ConsumerWidget {
       ),
     );
 
+    // Calculate isAdmin at the build level so it can be accessed anywhere in the widget
+    final bool isAdmin = profileGroupAsync.maybeWhen(
+      data: (data) => data != null && data['role'] == 'admin',
+      orElse: () => false,
+    );
+
     final profileExpenseSumAsync = ref.watch(
       profileGroupExpenseSumProvider(
         (profileId: currentUserId, groupId: group.id),
@@ -60,6 +66,8 @@ class GroupDetailPage extends ConsumerWidget {
       ref.invalidate(totalGroupExpensesProvider(group.id));
       ref.invalidate(activeGroupPeriodProvider(group.id));
       ref.invalidate(fetchExpensesByUserAndGroupProvider);
+      ref.invalidate(fetchExpensesByGroupProvider);
+      ref.invalidate(groupPeriodProvider);
     }
 
     // Extract budgets from active period
@@ -104,58 +112,50 @@ class GroupDetailPage extends ConsumerWidget {
                           Text('Budget condiviso', style: AppTypography.pageSubtitle),
                         ],
                       ),
-                      profileGroupAsync.maybeWhen(
-                        data: (data) {
-                          final isAdmin = data != null && data['role'] == 'admin';
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => GroupExpensesPage(
+                                    groupId: group.id,
+                                    groupName: group.name,
+                                    members: members,
+                                  ),
+                                ),
+                              );
 
-                          return Row(
-                            children: [
-                              IconButton(
-                                onPressed: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GroupExpensesPage(
-                                        groupId: group.id,
-                                        groupName: group.name,
-                                        members: members,
-                                      ),
+                              if (context.mounted) {
+                                refresh();
+                              }
+                            },
+                            icon: const Icon(LucideIcons.chart_column),
+                          ),
+                          if (isAdmin)
+                            IconButton(
+                              onPressed: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => GroupAdminSettings(
+                                      members: members,
+                                      name: group.name,
+                                      groupId: group.id,
+                                      groupCreator: group.creatorId,
+                                      isCurrentUserAdmin: isAdmin,
                                     ),
-                                  );
+                                  ),
+                                );
 
-                                  if (context.mounted) {
-                                    refresh();
-                                  }
-                                },
-                                icon: const Icon(LucideIcons.chart_column),
-                              ),
-                              isAdmin
-                                  ? IconButton(
-                                onPressed: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GroupAdminSettings(
-                                        members: members,
-                                        name: group.name,
-                                        groupId: group.id,
-                                        groupCreator: group.creatorId,
-                                        isCurrentUserAdmin: isAdmin,
-                                      ),
-                                    ),
-                                  );
-
-                                  if (context.mounted) {
-                                    refresh();
-                                  }
-                                },
-                                icon: const Icon(LucideIcons.settings_2),
-                              )
-                                  : const SizedBox.shrink(),
-                            ],
-                          );
-                        },
-                        orElse: () => const SizedBox.shrink(),
+                                if (context.mounted) {
+                                  refresh();
+                                }
+                              },
+                              icon: const Icon(LucideIcons.settings_2),
+                            ),
+                        ],
                       ),
                     ],
                   ),
@@ -191,6 +191,8 @@ class GroupDetailPage extends ConsumerWidget {
                               builder: (context) => AllExpensesPage(
                                 members: members,
                                 groupId: group.id,
+                                isGroupView: true,
+                                isCurrentUserGroupAdmin: isAdmin,
                               ),
                             ),
                           );
@@ -206,6 +208,7 @@ class GroupDetailPage extends ConsumerWidget {
                             groupId: group.id,
                             perCapitaBudget: activePerCapitaBudget,
                             groupName: group.name,
+                            isCurrentUserGroupAdmin: isAdmin,
                           ),
                         ],
                       ),
