@@ -117,6 +117,7 @@ class CategoryExpensesPage extends ConsumerWidget {
                                   userName: matchingMember?.name,
                                   userPfp: matchingMember?.avatarImageUrl,
                                   profileId: expense.profileId,
+                                  isGroupView: (groupId != null) ? true : false,
                                 );
                               }),
                             ],
