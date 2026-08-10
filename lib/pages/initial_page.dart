@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:influx/pages/simple_loading_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../main.dart';
@@ -36,9 +37,7 @@ class InitialPage extends ConsumerWidget {
             }
             return const PeriodEndedPage();
           },
-          loading: () => const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () => const PulsingLogoLoadingScreen(),
           error: (error, stack) => Scaffold(
             body: Center(
               child: Text('Errore nel caricamento dei periodi: $error'),
@@ -46,9 +45,7 @@ class InitialPage extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const PulsingLogoLoadingScreen(),
       error: (error, stack) => Scaffold(
         body: Center(
           child: Text('Errore nel caricamento del periodo attivo: $error'),
