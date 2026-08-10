@@ -14,8 +14,11 @@ import '../status_container.dart';
 class AllExpensesPage extends ConsumerWidget {
   final List<GroupMember>? members;
   final String? groupId;
+  final bool? isCurrentUserGroupAdmin;
+  final bool isGroupView;
 
-  const AllExpensesPage({super.key, this.members, this.groupId});
+
+  const AllExpensesPage({super.key, this.members, this.groupId, this.isCurrentUserGroupAdmin, required this.isGroupView});
 
   /// Helper function to group expenses by formatted date string
   Map<String, List<ExpenseData>> _groupExpensesByDate(List<ExpenseData> expenses) {
@@ -108,10 +111,12 @@ class AllExpensesPage extends ConsumerWidget {
                                     groupName: expense.groupName,
                                     expenseId: expense.id,
                                     categoryId: expense.categoryId,
+                                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
 
                                     // Pass properties safely using null-aware operators
                                     userName: matchingMember?.name,
                                     userPfp: matchingMember?.avatarImageUrl,
+                                    isGroupView: isGroupView,
                                   );
                                 },
                               ),

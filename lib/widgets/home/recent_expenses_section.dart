@@ -113,6 +113,7 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
                               expenseId: expense.id,
                               categoryId: expense.categoryId,
                                   profileId: Supabase.instance.client.auth.currentUser!.id,
+                                  isGroupView: false,
                             ),
                           ),
                         ],
@@ -127,7 +128,7 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
                   icon: LucideIcons.list_collapse,
                   title: "Vedi di più",
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AllExpensesPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AllExpensesPage(isGroupView: false)));
                   }
               ),
             ],

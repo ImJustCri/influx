@@ -8,7 +8,6 @@ import '../../models/expense_data.dart';
 import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import 'package:influx/providers/expenses/expenses_provider.dart';
-import '../../widgets/app_container.dart';
 import '../../widgets/charts/simple_trend_chart.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
 import '../../widgets/status_container.dart';
@@ -130,7 +129,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AllExpensesPage(),
+                              builder: (context) => const AllExpensesPage(isGroupView: false),
                             ),
                           );
                         },

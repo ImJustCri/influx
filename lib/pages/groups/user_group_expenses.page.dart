@@ -16,6 +16,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
   final String groupName;
   final String userName;
   final String? userPfp;
+  final bool isCurrentUserGroupAdmin;
 
   const UserGroupExpensesPage({
     super.key,
@@ -24,6 +25,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
     required this.userName,
     this.userPfp,
     required this.groupName,
+    required this.isCurrentUserGroupAdmin,
   });
 
   /// Helper function to group expenses by formatted date string
@@ -129,6 +131,8 @@ class UserGroupExpensesPage extends ConsumerWidget {
                                     categoryId: expense.categoryId,
                                     userName: userName,
                                     userPfp: userPfp,
+                                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                    isGroupView: true,
                                   );
                                 },
                               ),

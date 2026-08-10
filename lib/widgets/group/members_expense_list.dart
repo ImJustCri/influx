@@ -9,6 +9,7 @@ class MembersExpenseList extends StatelessWidget {
   final String groupId;
   final double perCapitaBudget;
   final String groupName;
+  final bool isCurrentUserGroupAdmin;
 
   const MembersExpenseList({
     super.key,
@@ -16,6 +17,7 @@ class MembersExpenseList extends StatelessWidget {
     required this.groupId,
     required this.perCapitaBudget,
     required this.groupName,
+    required this.isCurrentUserGroupAdmin,
   });
 
   @override
@@ -49,6 +51,7 @@ class MembersExpenseList extends StatelessWidget {
               backgroundColor: member.backgroundColor,
               valueColor: member.valueColor,
               groupName: groupName,
+              isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
             );
           },
         );

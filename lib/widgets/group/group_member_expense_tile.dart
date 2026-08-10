@@ -14,6 +14,7 @@ class GroupMemberExpenseTile extends StatelessWidget {
   final Color valueColor;
   final String groupId;
   final String groupName;
+  final bool isCurrentUserGroupAdmin;
 
   const GroupMemberExpenseTile({
     super.key,
@@ -25,7 +26,7 @@ class GroupMemberExpenseTile extends StatelessWidget {
     this.valueColor = AppColors.white,
     required this.memberId,
     required this.groupId,
-    required this.groupName,
+    required this.groupName, required this.isCurrentUserGroupAdmin,
   });
 
   @override
@@ -44,6 +45,7 @@ class GroupMemberExpenseTile extends StatelessWidget {
               userName: memberName,
               userPfp: avatarImageUrl,
               groupName: groupName,
+              isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
             ),
           ),
         );
