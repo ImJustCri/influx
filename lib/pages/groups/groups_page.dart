@@ -216,6 +216,7 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
                   builder: (context) => GroupNotStartedPage(
                     group: group,
                     isUserGroupOwner: (group.creatorId == userId),
+                    memberCount: memberCount,
                   ),
                 ),
               );
