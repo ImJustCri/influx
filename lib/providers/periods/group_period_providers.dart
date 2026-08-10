@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../models/group_period.dart';
+import '../../models/periods/group_period.dart';
 
 /// Active period provider for a specific group
 final activeGroupPeriodProvider =
