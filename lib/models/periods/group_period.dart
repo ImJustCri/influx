@@ -1,10 +1,20 @@
-class GroupPeriod {
+import 'base_period.dart';
+
+class GroupPeriod implements BasePeriod {
+  @override
   final int id;
+  @override
   final DateTime createdAt;
+  @override
   final DateTime endDate;
+  @override
   final bool isActive;
+  @override
   final double spent;
+  @override
   final double budget;
+
+  // Class-specific fields
   final double perCapitaBudget;
   final String groupId;
 
