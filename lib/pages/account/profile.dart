@@ -193,7 +193,7 @@ class ProfilePage extends ConsumerWidget {
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const PeriodsOverviewPage(),
+                            builder: (context) => PeriodsOverviewPage(),
                           ),
                         );
                       },
