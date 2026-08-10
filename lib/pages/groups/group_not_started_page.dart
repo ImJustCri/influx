@@ -2,45 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
+import 'package:influx/pages/groups/edit_group_page.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../providers/get_group_role_provider.dart';
-import '../../providers/group_members_provider.dart';
-import '../../providers/groups_provider.dart';
+import '../../providers/groups/get_group_role_provider.dart';
+import '../../providers/groups/group_members_provider.dart';
+import '../../providers/groups/groups_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import '../../widgets/group/members_tile_view.dart';
 import '../../widgets/settings_tile.dart';
 
-class GroupNotStartedPage extends ConsumerWidget {
+class GroupNotStartedPage extends ConsumerStatefulWidget {
   final Group group;
   final bool isUserGroupOwner;
+  final int memberCount;
 
   const GroupNotStartedPage({
     super.key,
     required this.group,
     required this.isUserGroupOwner,
+    required this.memberCount,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GroupNotStartedPage> createState() => _GroupNotStartedPageState();
+}
+
+class _GroupNotStartedPageState extends ConsumerState<GroupNotStartedPage> {
+  double totalBudget = 0;
+  double perCapitaBudget = 0;
+  DateTime? selectedEndDate;
+
+  @override
+  Widget build(BuildContext context) {
     final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
 
     final profileGroupAsync = ref.watch(
       fetchProfileGroupDetailsProvider(
-        (groupId: group.id, profileId: currentUserId),
+        (groupId: widget.group.id, profileId: currentUserId),
       ),
     );
 
-    final membersAsync = ref.watch(fetchGroupMembersProvider(group.id));
+    final membersAsync = ref.watch(fetchGroupMembersProvider(widget.group.id));
 
     final isAdmin = profileGroupAsync.maybeWhen(
       data: (data) => data != null && data['role'] == 'admin',
       orElse: () => false,
     );
 
-    final bool canManageGroup = isUserGroupOwner || isAdmin;
+    final bool canManageGroup = widget.isUserGroupOwner || isAdmin;
 
     final String subtitle = canManageGroup
         ? "Il gruppo non è ancora attivo. \n Prima di attivarlo, controlla che tutto sia stato impostato correttamente"
@@ -83,7 +95,7 @@ class GroupNotStartedPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 32),
                               Text(
-                                group.name,
+                                widget.group.name,
                                 style: AppTypography.pageTitle,
                                 textAlign: TextAlign.center,
                               ),
@@ -119,13 +131,13 @@ class GroupNotStartedPage extends ConsumerWidget {
                                           style: AppTypography.containerTitle,
                                         ),
                                         Text(
-                                          "${group.inviteCode}",
+                                          "${widget.group.inviteCode}",
                                           style: AppTypography.budgetIndicator.copyWith(
                                             color: Colors.white,
                                           ),
                                         ),
                                         QrImageView(
-                                          data: "${group.inviteCode}",
+                                          data: "${widget.group.inviteCode}",
                                           eyeStyle: const QrEyeStyle(
                                             eyeShape: QrEyeShape.square,
                                             color: Colors.white,
@@ -156,13 +168,56 @@ class GroupNotStartedPage extends ConsumerWidget {
                           SettingsTile(
                             icon: LucideIcons.pencil,
                             title: "Modifica gruppo",
-                            onTap: () {},
+                            onTap: () async {
+                              final result = await Navigator.push<Map<String, dynamic>>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditGroupPage(
+                                    groupId: widget.group.id,
+                                    initialName: widget.group.name,
+                                    memberCount: widget.memberCount,
+                                  ),
+                                ),
+                              );
+
+                              if (result != null) {
+                                setState(() {
+                                  totalBudget = result['totalBudget'] ?? 0.0;
+                                  perCapitaBudget = result['perCapitaBudget'] ?? 0.0;
+                                  selectedEndDate = result['endDate'];
+                                });
+                              }
+                            },
                           ),
 
                           SettingsTile(
                             icon: LucideIcons.circle_power,
-                            title: "Attiva il gruppo",
+                            title: "Attiva gruppo",
                             onTap: () async {
+                              if (totalBudget <= 0 || perCapitaBudget <= 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Imposta un budget valido nella pagina "Modifica gruppo" prima di attivare.',
+                                    ),
+                                    backgroundColor: Colors.redAccent,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              if (selectedEndDate == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Seleziona la data di fine periodo nella pagina "Modifica gruppo".',
+                                    ),
+                                    backgroundColor: Colors.redAccent,
+                                  ),
+                                );
+                                return;
+                              }
+
                               String message;
                               bool isSuccess = false;
 
@@ -170,7 +225,15 @@ class GroupNotStartedPage extends ConsumerWidget {
                                 await supabase
                                     .from('group')
                                     .update({'status': 'active'})
-                                    .eq('id', group.id);
+                                    .eq('id', widget.group.id);
+
+                                await supabase.from('groupPeriod').insert({
+                                  'group_id': widget.group.id,
+                                  'budget': totalBudget,
+                                  'perCapitaBudget': perCapitaBudget,
+                                  'endDate': selectedEndDate!.toIso8601String(),
+                                  'isActive': true,
+                                });
 
                                 message = "Gruppo attivato con successo.";
                                 isSuccess = true;
@@ -212,8 +275,8 @@ class GroupNotStartedPage extends ConsumerWidget {
                               members.length,
                                   (index) => MemberTileView(
                                 member: members[index],
-                                groupId: group.id,
-                                creatorId: group.creatorId,
+                                groupId: widget.group.id,
+                                creatorId: widget.group.creatorId,
                               ),
                             ),
                           ),
