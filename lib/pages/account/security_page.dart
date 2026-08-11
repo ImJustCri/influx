@@ -29,6 +29,7 @@ class SecurityPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sicurezza Account'),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(LucideIcons.arrow_left),
           onPressed: () => Navigator.of(context).pop(),

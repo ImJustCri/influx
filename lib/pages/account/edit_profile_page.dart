@@ -311,6 +311,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Modifica profilo"),
+        centerTitle: true,
       ),
       body: PagePadding(
         child: SingleChildScrollView(

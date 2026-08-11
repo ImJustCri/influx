@@ -26,6 +26,7 @@ class ProfilePage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Il tuo profilo"),
+        centerTitle: true,
       ),
       body: userProfileAsyncValue.when(
         loading: () => _buildLoadingScreen(context),

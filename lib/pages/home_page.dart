@@ -35,6 +35,8 @@ class HomePageState extends ConsumerState<HomePage> {
     final totalExpensesAsync = ref.watch(totalExpensesProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
+
       // Pull to refresh
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -42,8 +44,8 @@ class HomePageState extends ConsumerState<HomePage> {
         backgroundColor: AppColors.backgroundAccent,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.only(
-            bottom: 128
+          padding: const EdgeInsets.only(
+            bottom: 128,
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -66,7 +68,7 @@ class HomePageState extends ConsumerState<HomePage> {
                       const SizedBox(height: 24),
 
                       expensesAsync.when(
-                        loading: () => StatusContainer(),
+                        loading: () => const StatusContainer(),
                         data: (expenses) {
                           return RecentExpensesSection(expenses: expenses);
                         },

@@ -84,6 +84,7 @@ class GroupMemberEdit extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Modifica membro"),
+        centerTitle: true,
       ),
       body: PagePadding(
         child: SingleChildScrollView(

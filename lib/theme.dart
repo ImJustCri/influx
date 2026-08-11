@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
   useMaterial3: true,
-  scaffoldBackgroundColor: Colors.transparent,
+  scaffoldBackgroundColor: const Color(0xFF0D1230),
   fontFamily: 'Inter',
   colorScheme: ColorScheme.fromSeed(
     seedColor: const Color(0xFF0D1230),

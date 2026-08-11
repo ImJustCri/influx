@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/initial_page.dart';
-import 'package:influx/services/auth_service.dart';
 import 'package:influx/pages/account/profile.dart';
 import 'package:influx/theme.dart';
-import 'package:influx/widgets/global_background.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -15,17 +13,9 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'INFLUX',
         theme: darkTheme,
-        builder: (context, child) {
-          return Stack(
-            children: [
-              const Positioned.fill(child: GlobalBackground()),
-              child!,
-            ],
-          );
-        },
         home: const InitialPage(),
         routes: {
-          '/profile': (context) => ProfilePage(),
+          '/profile': (context) => const ProfilePage(),
         },
       ),
     );

@@ -27,13 +27,14 @@ class _GroupsPageState extends ConsumerState<GroupsPage> {
     final userId = supabase.auth.currentUser?.id;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: 72,
         title: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text('I miei gruppi', style: AppTypography.pageTitle),
+          child: Text('I miei gruppi', style: AppTypography.pageTitle, textAlign: TextAlign.center),
         ),
-        centerTitle: false,
+        centerTitle: true,
         elevation: 0,
         foregroundColor: Colors.white,
       ),

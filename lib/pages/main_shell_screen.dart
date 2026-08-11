@@ -3,6 +3,8 @@ import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
 import 'expenses/expenses_page.dart';
 import 'groups/groups_page.dart';
 import 'home_page.dart';
+// Import your GlobalBackground or AppGradients here
+import '../widgets/global_background.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -23,19 +25,42 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF0D1230),
+            Color(0xFF190B28),
+          ],
+        ),
       ),
-      extendBody: true,
-      bottomNavigationBar: MainBottomNav(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: RepaintBoundary(
+              child: GlobalBackground(),
+            ),
+          ),
+
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: IndexedStack(
+              index: _currentIndex,
+              children: _pages,
+            ),
+            extendBody: true,
+            bottomNavigationBar: MainBottomNav(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

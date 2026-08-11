@@ -28,6 +28,8 @@ class PeriodsOverviewPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 72,
+        title: const Text("Storico dei periodi", style: AppTypography.pageTitle),
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -40,9 +42,6 @@ class PeriodsOverviewPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Storico dei periodi", style: AppTypography.pageTitle),
-                const SizedBox(height: 24),
-
                 periodsAsync.when(
                   data: (periods) {
                     final inactivePeriods = periods.where((p) => !p.isActive).toList();

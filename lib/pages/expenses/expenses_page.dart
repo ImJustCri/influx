@@ -26,6 +26,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
     final userPeriodsAsync = ref.watch(userPeriodProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: 72,
         title: Padding(
@@ -35,7 +36,7 @@ class ExpensensState extends ConsumerState<ExpensesPage> {
             style: AppTypography.pageTitle,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
         elevation: 0,
         foregroundColor: Colors.white,
       ),
