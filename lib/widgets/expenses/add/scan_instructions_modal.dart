@@ -21,11 +21,7 @@ class ScanInstructionsModal extends StatelessWidget {
         children: [
           Text(
             'Scansione dello scontrino',
-            style: AppTypography.containerTitle.copyWith(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.white,
-            ),
+            style: AppTypography.containerTitle,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
