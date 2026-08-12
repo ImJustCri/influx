@@ -126,7 +126,9 @@ class _GroupAdminSettingsState extends ConsumerState<GroupAdminSettings> {
                                 .update({
                                   'spent': totalSpent,
                                   'isActive': false,
-                            })
+                                  'endDate': DateTime.now().toIso8601String(),
+                                }
+                            )
                                 .eq('group_id', widget.groupId)
                                 .eq('isActive', true);
 
