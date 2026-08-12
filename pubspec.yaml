@@ -28,6 +28,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.16.0
   refresh_rate: ^1.0.2
   flutter_launcher_icons: ^0.14.4
+  pinput: ^6.0.2
 
 dev_dependencies:
   flutter_test:
