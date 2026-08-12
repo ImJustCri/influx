@@ -1,9 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/pages/initial_page.dart';
 import 'package:influx/theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../main.dart';
 
-class DeleteAccountBottomSheet extends StatelessWidget {
+class DeleteAccountBottomSheet extends StatefulWidget {
   const DeleteAccountBottomSheet({super.key});
+
+  @override
+  State<DeleteAccountBottomSheet> createState() =>
+      _DeleteAccountBottomSheetState();
+}
+
+class _DeleteAccountBottomSheetState extends State<DeleteAccountBottomSheet> {
+  bool _isLoading = false;
+
+  Future<void> _deleteAccount() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      final res = await supabase.functions.invoke(
+        'delete-account',
+        body: {'userId': supabase.auth.currentUser!.id},
+      );
+
+      if (res.status != 200) {
+        throw Exception('Errore della funzione (${res.status})');
+      }
+
+      await supabase.auth.signOut();
+
+      if (!mounted) return;
+
+      RootApp.restartApp(context);
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const InitialPage()),
+            (route) => false,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Errore durante l'eliminazione dell'account: $error"),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +72,7 @@ class DeleteAccountBottomSheet extends StatelessWidget {
             child: Icon(
               LucideIcons.trash,
               size: 32,
+              color: AppColors.white,
             ),
           ),
           const SizedBox(height: 24),
@@ -29,7 +83,7 @@ class DeleteAccountBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile e rimuoverà i tuoi dati.',
+            'Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile e rimuoverà tutti i tuoi dati.',
             textAlign: TextAlign.center,
             style: AppTypography.pageSubtitle,
           ),
@@ -41,9 +95,13 @@ class DeleteAccountBottomSheet extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   style: const ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(AppColors.containerBackground),
+                    backgroundColor: WidgetStatePropertyAll(
+                      AppColors.containerBackground,
+                    ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _isLoading
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   child: const Text(
                     'Annulla',
                     style: AppTypography.containerTitle,
@@ -52,13 +110,20 @@ class DeleteAccountBottomSheet extends StatelessWidget {
               ),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: _isLoading ? null : _deleteAccount,
                   style: const ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(Colors.redAccent),
                   ),
-                  child: const Text(
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.white,
+                    ),
+                  )
+                      : const Text(
                     'Elimina',
                     style: AppTypography.containerTitle,
                   ),
