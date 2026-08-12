@@ -30,6 +30,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   pinput: ^6.0.2
   package_info_plus: ^10.2.1
+  github_release_apk_updater: ^1.0.6
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
