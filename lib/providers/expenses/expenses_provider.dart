@@ -161,3 +161,26 @@ final fetchLatestInactivePeriodExpenses = FutureProvider<List<ExpenseData>>((ref
 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
 });
+
+/// Fetch expenses from the latest inactive period by category
+final fetchInactivePeriodExpensesByCategory = FutureProvider.family<List<ExpenseData>, String>((ref, categoryId) async {
+  final supabase = Supabase.instance.client;
+  final userId = supabase.auth.currentUser!.id;
+
+  final inactivePeriod = await ref.watch(latestInactiveUserPeriodProvider.future);
+
+  if (inactivePeriod == null) {
+    return [];
+  }
+
+  final response = await supabase
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('profile_id', userId)
+      .eq('category_id', categoryId)
+      .gte('created_at', inactivePeriod.createdAt.toIso8601String())
+      .lte('created_at', inactivePeriod.endDate.toIso8601String())
+      .order('created_at', ascending: false);
+
+  return response.map((item) => ExpenseData.convertJson(item)).toList();
+});
