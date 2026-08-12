@@ -172,11 +172,7 @@ class OtpState extends State<OtpPage> {
                 onPressed: () => _verifyOtp(otpCodeContent.text),
                 child: const Text(
                   "Continua",
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.containerTitle
                 ),
               ),
             )
