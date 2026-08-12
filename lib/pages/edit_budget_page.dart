@@ -178,11 +178,6 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Importo budget',
-                    style: AppTypography.containerTitle,
-                  ),
-                  const SizedBox(height: 16),
                   AppContainer(
                     width: double.infinity,
                     child: Column(
