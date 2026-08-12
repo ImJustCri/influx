@@ -144,6 +144,10 @@ final ThemeData darkTheme = ThemeData(
         ),
       ),
     ),
+
+  datePickerTheme: DatePickerThemeData(
+    backgroundColor: AppColors.backgroundAccent
+  )
 );
 
 
