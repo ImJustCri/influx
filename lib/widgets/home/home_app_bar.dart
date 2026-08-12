@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
+import '../../pages/notifications_page.dart';
+
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
 
@@ -26,7 +28,11 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(LucideIcons.bell),
           tooltip: 'Notifiche',
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context, MaterialPageRoute(builder: (context) => NotificationsPage())
+            );
+          },
         ),
         IconButton(
           icon: const Icon(LucideIcons.circle_user),
