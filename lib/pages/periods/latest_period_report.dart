@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:influx/widgets/expenses/all_expenses_page.dart';
 import 'package:influx/widgets/page_padding.dart';
-import 'package:influx/widgets/settings_tile.dart';
 import '../../global.dart';
 import '../../models/expense_data.dart';
 import '../../providers/periods/user_period_providers.dart';
@@ -28,8 +26,12 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text(
+          'Report ultimo periodo',
+        ),
         toolbarHeight: 72,
         elevation: 0,
+        centerTitle: true,
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
@@ -46,11 +48,6 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Report ultimo periodo',
-                  style: AppTypography.pageTitle,
-                ),
-                SizedBox(height: 24),
                 periodAsync.when(
                   loading: () => const AppContainer(
                     padding: EdgeInsets.all(24),
@@ -123,7 +120,6 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
                   },
                 ),
 
-                // Expenses Section
                 expensesAsync.when(
                   loading: () => const Center(
                     child: CircularProgressIndicator(),
@@ -137,14 +133,21 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
                           (sum, item) => sum + item.numericAmount,
                     );
 
-                    // Group expenses by categories
                     final Map<String, List<ExpenseData>> categories = {};
                     for (final expense in expenses) {
-                      categories.putIfAbsent(
-                        expense.categoryName,
-                            () => [],
-                      ).add(expense);
+                      categories
+                          .putIfAbsent(expense.categoryName, () => [])
+                          .add(expense);
                     }
+
+                    final sortedEntries = categories.entries.toList()
+                      ..sort((a, b) {
+                        final aSum = a.value.fold(
+                            0.0, (sum, item) => sum + item.numericAmount);
+                        final bSum = b.value.fold(
+                            0.0, (sum, item) => sum + item.numericAmount);
+                        return bSum.compareTo(aSum);
+                      });
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,16 +174,16 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
                               ],
                             ),
                           ),
-                        ],
-                        if (expenses.isNotEmpty) ...[
+                        ] else ...[
                           const SizedBox(height: 24),
                           Column(
                             spacing: 16,
-                            children: categories.entries.map(
+                            children: sortedEntries.map(
                                   (entry) {
                                 final categoryExpenses = entry.value;
                                 final categoryInfo = categoryExpenses.first;
-                                final double categorySpent = categoryExpenses.fold(
+                                final double categorySpent =
+                                categoryExpenses.fold(
                                   0.0,
                                       (sum, item) => sum + item.numericAmount,
                                 );
@@ -191,9 +194,10 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
                                   categoryColor: categoryInfo.categoryColor,
                                   amount: categorySpent,
                                   percentage: totalSpent == 0
-                                      ? 0
+                                      ? 0.0
                                       : categorySpent / totalSpent,
                                   categoryId: categoryInfo.categoryId,
+                                  isLatestInactive: true,
                                 );
                               },
                             ).toList(),
