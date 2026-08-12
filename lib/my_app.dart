@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/initial_page.dart';
 import 'package:influx/pages/account/profile.dart';
@@ -17,6 +18,16 @@ class MyApp extends StatelessWidget {
         routes: {
           '/profile': (context) => const ProfilePage(),
         },
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('it', 'IT'),
+          Locale('en', 'US'),
+        ],
+        locale: const Locale('it'),
       ),
     );
   }
