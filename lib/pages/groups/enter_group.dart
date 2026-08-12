@@ -3,8 +3,10 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pinput/pinput.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
+import '../../widgets/settings_tile.dart';
 
 class EnterGroupPage extends ConsumerStatefulWidget {
   const EnterGroupPage({super.key});
@@ -15,6 +17,7 @@ class EnterGroupPage extends ConsumerStatefulWidget {
 
 class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
   late TextEditingController groupCodeController;
+  late FocusNode groupCodeFocusNode;
   bool _isModified = false;
   bool _isLoading = false;
 
@@ -22,6 +25,7 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
   void initState() {
     super.initState();
     groupCodeController = TextEditingController();
+    groupCodeFocusNode = FocusNode();
 
     groupCodeController.addListener(() {
       setState(() {
@@ -33,6 +37,7 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
   @override
   void dispose() {
     groupCodeController.dispose();
+    groupCodeFocusNode.dispose();
     super.dispose();
   }
 
@@ -141,6 +146,29 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Default Pin Theme
+    final defaultPinTheme = PinTheme(
+      width: 50,
+      height: 56,
+      textStyle: const TextStyle(
+        fontSize: 20,
+        color: AppColors.white,
+        fontWeight: FontWeight.w600,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.inputBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.inputBorder, width: 1),
+      ),
+    );
+
+    // Focused Pin Theme
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: defaultPinTheme.decoration?.copyWith(
+        border: Border.all(color: AppColors.inputBorder, width: 2),
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -192,42 +220,26 @@ class _EnterGroupPageState extends ConsumerState<EnterGroupPage> {
               ),
               const SizedBox(height: 40),
 
-              TextFormField(
-                keyboardType: TextInputType.text,
-                controller: groupCodeController,
-                decoration: InputDecoration(
-                  hintText: "Inserisci il codice",
-                  hintStyle: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.inputBackground,
-                  suffixIcon: IconButton(
-                    icon: const Icon(
-                      LucideIcons.qr_code,
-                      color: AppColors.white,
-                    ),
-                    onPressed: _openQrScanner,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Pinput(
+                      length: 6,
+                      controller: groupCodeController,
+                      focusNode: groupCodeFocusNode,
+                      defaultPinTheme: defaultPinTheme,
+                      focusedPinTheme: focusedPinTheme,
+                      onCompleted: (pin) => _joinGroup(),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 2,
-                    ),
-                  ),
-                ),
+                ],
               ),
-              const SizedBox(height: 16),
 
+              const SizedBox(height: 24),
+              SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona Codice QR', onTap: _openQrScanner),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
