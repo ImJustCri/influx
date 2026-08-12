@@ -81,7 +81,7 @@ class LoginPage extends StatefulWidget {
 
                       Center(
                         child: SizedBox(
-                          width: 364,
+                          width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
@@ -99,6 +99,10 @@ class LoginPage extends StatefulWidget {
                                 );
                               }else{
                                 String? result= await auth.loginWithEmail(email);
+
+                                if (!context.mounted) {
+                                  return;
+                                }
 
                                 if(result!=null){
                                   showDialog(
@@ -193,6 +197,10 @@ class LoginPage extends StatefulWidget {
 
                                   Supabase.instance.client.auth.onAuthStateChange.listen((data){
                                     final session=data.session;
+
+                                    if (!context.mounted) {
+                                      return;
+                                    }
 
                                     if(session!=null){
                                       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=> const InitialPage()), (route)=>false);
