@@ -8,7 +8,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import '../../models/profile.dart';
 import '../../providers/profile_provider.dart';
-import '../../services/auth_service.dart';
 import '../../theme.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
@@ -94,142 +93,192 @@ class ProfilePage extends ConsumerWidget {
       WidgetRef ref,
       Profile userProfile,
       ) {
-    final userEmail = Supabase.instance.client.auth.currentUser?.email ?? 'Nessuna email';
+    final userEmail =
+        Supabase.instance.client.auth.currentUser?.email ?? 'Nessuna email';
 
     return PagePadding(
-      child: Center(
-        child: Column(
-          spacing: 40,
-          children: [
-            Column(
-              spacing: 24,
-              children: [
-                CircleAvatar(
+      child: Column(
+        spacing: 48,
+        children: [
+          Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.purple,
+                    width: 3,
+                  ),
+                ),
+                child: CircleAvatar(
                   radius: 48,
+                  backgroundColor: AppColors.backgroundAccent,
                   backgroundImage: NetworkImage(
-                    userProfile.avatarUrl ?? 'https://i.pinimg.com/736x/f9/b6/ee/f9b6ee085996dee0e22ddc52dda03ac2.jpg',
+                    userProfile.avatarUrl ??
+                        'https://i.pinimg.com/736x/f9/b6/ee/f9b6ee085996dee0e22ddc52dda03ac2.jpg',
                   ),
                 ),
-                Column(
-                  spacing: 8,
-                  children: [
-                    Text(userProfile.fullName!, style: AppTypography.username, textAlign: TextAlign.center),
-                    Text(userEmail, style: AppTypography.userEmailSubtitle, textAlign: TextAlign.center),
-                  ],
-                ),
-              ],
-            ),
-            Column(
-              spacing: 16,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) => UserQrDialog(userId: userProfile.id),
-                      isScrollControlled: true
-                    );
-                  },
-                  child: AppContainer(
-                    width: double.infinity,
-                    child: Column(
-                      spacing: 16,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          spacing: 16,
-                          children: [
-                            const Icon(LucideIcons.fingerprint_pattern, color: AppColors.white),
-                            Expanded(
-                              child: Column(
-                                spacing: 2,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "ID utente",
-                                    style: AppTypography.containerTitle,
-                                  ),
-                                  Text(
-                                    "Mostra QR Code",
-                                    style: AppTypography.containerBody,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(LucideIcons.chevron_right, color: Colors.white54),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Azioni", style: AppTypography.containerBody),
-                    const SizedBox(height: 4),
-                    SettingsTile(
-                      icon: LucideIcons.pencil,
-                      title: "Modifica profilo",
-                      onTap: () async {
-                        // wait for the edit page to close
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => EditProfilePage(
-                              userUuid: userProfile.id,
-                              initialName: userProfile.fullName!,
-                              initialAvatarUrl: userProfile.avatarUrl,
-                            ),
-                          ),
-                        );
-                        // reload user profile
-                        ref.invalidate(profileProvider);
-                      },
-                    ),
-                    SettingsTile(
-                      icon: LucideIcons.calendar,
-                      title: "Periodi precedenti",
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => PeriodsOverviewPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    SettingsTile(
-                      icon: LucideIcons.lock,
-                      title: "Sicurezza Account",
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const SecurityPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    SettingsTile(
-                      icon: LucideIcons.log_out,
-                      title: "Logout",
-                      onTap: () async {
-                        await Supabase.instance.client.auth.signOut();
-                        if (!context.mounted) return;
-                        RootApp.restartApp(context);
+              ),
+              const SizedBox(height: 16),
 
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => InitialPage()),
-                              (route) => false,
-                        );
-                      },
+              Text(
+                userProfile.fullName ?? 'Utente',
+                style: AppTypography.username,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.inputBackground,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(
+                    color: AppColors.inputBorder,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      LucideIcons.mail,
+                      size: 14,
+                      color: AppColors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      userEmail,
+                      style: AppTypography.userEmailSubtitle.copyWith(
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
-              ],
-            )
-          ],
-        ),
+              ),
+            ],
+          ),
+          Column(
+            spacing: 16,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) =>
+                        UserQrDialog(userId: userProfile.id),
+                    isScrollControlled: true,
+                  );
+                },
+                child: AppContainer(
+                  width: double.infinity,
+                  child: Column(
+                    spacing: 16,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        spacing: 16,
+                        children: [
+                          const Icon(
+                            LucideIcons.fingerprint_pattern,
+                            color: AppColors.white,
+                          ),
+                          Expanded(
+                            child: Column(
+                              spacing: 2,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "ID utente",
+                                  style: AppTypography.containerTitle,
+                                ),
+                                Text(
+                                  "Mostra QR Code",
+                                  style: AppTypography.containerBody,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            LucideIcons.chevron_right,
+                            color: Colors.white54,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Azioni", style: AppTypography.containerBody),
+                  const SizedBox(height: 4),
+                  SettingsTile(
+                    icon: LucideIcons.pencil,
+                    title: "Modifica profilo",
+                    onTap: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => EditProfilePage(
+                            userUuid: userProfile.id,
+                            initialName: userProfile.fullName!,
+                            initialAvatarUrl: userProfile.avatarUrl,
+                          ),
+                        ),
+                      );
+                      ref.invalidate(profileProvider);
+                    },
+                  ),
+                  SettingsTile(
+                    icon: LucideIcons.calendar,
+                    title: "Periodi precedenti",
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const PeriodsOverviewPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  SettingsTile(
+                    icon: LucideIcons.lock,
+                    title: "Sicurezza Account",
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SecurityPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  SettingsTile(
+                    icon: LucideIcons.log_out,
+                    title: "Logout",
+                    onTap: () async {
+                      await Supabase.instance.client.auth.signOut();
+                      if (!context.mounted) return;
+                      RootApp.restartApp(context);
+
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const InitialPage(),
+                        ),
+                            (route) => false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
