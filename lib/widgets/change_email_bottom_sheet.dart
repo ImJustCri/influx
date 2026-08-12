@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:influx/theme.dart';
 
 class ChangeEmailBottomSheet extends StatefulWidget {
@@ -11,17 +12,76 @@ class ChangeEmailBottomSheet extends StatefulWidget {
 
 class _ChangeEmailBottomSheetState extends State<ChangeEmailBottomSheet> {
   late final TextEditingController _emailController;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController(text: 'utente@example.com');
+    final currentEmail = Supabase.instance.client.auth.currentUser?.email ?? '';
+    _emailController = TextEditingController(text: currentEmail);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updateEmail() async {
+    final newEmail = _emailController.text.trim();
+
+    if (newEmail.isEmpty || !newEmail.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Inserisci un indirizzo email valido.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(email: newEmail),
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email inviata! Controlla la tua casella di posta per confermare.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AuthException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Errore: ${error.message}'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Si è verificato un errore inaspettato.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -43,6 +103,7 @@ class _ChangeEmailBottomSheetState extends State<ChangeEmailBottomSheet> {
             child: Icon(
               LucideIcons.mails,
               size: 32,
+              color: AppColors.white,
             ),
           ),
           const SizedBox(height: 24),
@@ -53,7 +114,7 @@ class _ChangeEmailBottomSheetState extends State<ChangeEmailBottomSheet> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Riceverai una mail con un link per modificare il tuo indirizzo email.',
+            'Riceverai una mail con un link per confermare il tuo nuovo indirizzo email.',
             textAlign: TextAlign.center,
             style: AppTypography.pageSubtitle,
           ),
@@ -61,6 +122,7 @@ class _ChangeEmailBottomSheetState extends State<ChangeEmailBottomSheet> {
           TextField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
+            enabled: !_isLoading,
             decoration: const InputDecoration(
               hintText: 'Nuova email',
               border: OutlineInputBorder(),
@@ -76,21 +138,23 @@ class _ChangeEmailBottomSheetState extends State<ChangeEmailBottomSheet> {
                   style: const ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(AppColors.containerBackground),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                   child: const Text('Annulla', style: AppTypography.containerBody),
                 ),
               ),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Email inviata'),
-                      ),
-                    );
-                  },
-                  child: const Text('Invia Email', style: AppTypography.containerTitle),
+                  onPressed: _isLoading ? null : _updateEmail,
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.white,
+                    ),
+                  )
+                      : const Text('Invia Email', style: AppTypography.containerTitle),
                 ),
               ),
             ],
