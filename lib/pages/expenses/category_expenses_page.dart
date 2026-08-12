@@ -14,13 +14,14 @@ class CategoryExpensesPage extends ConsumerWidget {
   final String? categoryName;
   final List<GroupMember>? groupMembers;
   final String? groupId;
+  final bool? isLatestInactive;
 
   const CategoryExpensesPage({
     super.key,
     required this.categoryId,
     this.categoryName,
     this.groupMembers,
-    this.groupId,
+    this.groupId, this.isLatestInactive,
   });
 
   /// Helper function to group expenses by formatted date string
@@ -51,10 +52,16 @@ class CategoryExpensesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = ref.watch(
-        groupId != null ? fetchExpensesByCategoryGroupProvider((groupId!, categoryId)) :
-        fetchExpensesByCategory(categoryId)
-    );
+    final AsyncValue<List<ExpenseData>> expensesAsync;
+
+    if (groupId != null) {
+      expensesAsync = ref.watch(
+          fetchExpensesByCategoryGroupProvider((groupId!, categoryId)));
+    } else if (isLatestInactive == true) {
+      expensesAsync = ref.watch(fetchInactivePeriodExpensesByCategory(categoryId));
+    } else {
+      expensesAsync = ref.watch(fetchExpensesByCategory(categoryId));
+    }
 
     return Scaffold(
       appBar: AppBar(
