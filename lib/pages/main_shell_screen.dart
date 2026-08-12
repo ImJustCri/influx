@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/pages/switch/switch_page.dart';
 import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
+import '../theme.dart';
 import 'expenses/expenses_page.dart';
 import 'groups/groups_page.dart';
 import 'home_page.dart';
@@ -16,11 +19,11 @@ class MainShellScreen extends StatefulWidget {
 class _MainShellScreenState extends State<MainShellScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    Center(child: Text('Switch', style: TextStyle(color: Colors.white, fontSize: 14))),
-    ExpensesPage(),
-    GroupsPage(),
+  final List<Widget> _pages = [
+    const HomePage(),
+    const SwitchPage(),
+    const ExpensesPage(),
+    const GroupsPage(),
   ];
 
   @override
