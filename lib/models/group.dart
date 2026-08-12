@@ -4,8 +4,6 @@ class Group {
   final String? inviteCode;
   final String status;
   final int maxMembers;
-  final double totalBudget;
-  final double perCapitaBudget;
   final DateTime createdAt;
   final DateTime? startedAt;
   final String creatorId;
@@ -16,8 +14,6 @@ class Group {
     this.inviteCode,
     required this.status,
     required this.maxMembers,
-    required this.totalBudget,
-    required this.perCapitaBudget,
     required this.createdAt,
     this.startedAt,
     required this.creatorId,
@@ -30,8 +26,6 @@ class Group {
       inviteCode: json['invite_code'] as String?,
       status: json['status'] as String,
       maxMembers: json['max_members'] as int,
-      totalBudget: (json['total_budget'] as num).toDouble(),
-      perCapitaBudget: (json['per_capita_budget'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
       creatorId: json['created_by'] as String,
       startedAt: json['started_at'] != null
@@ -47,8 +41,6 @@ class Group {
       'invite_code': inviteCode,
       'status': status,
       'max_members': maxMembers,
-      'total_budget': totalBudget,
-      'per_capita_budget': perCapitaBudget,
       'created_at': createdAt.toIso8601String(),
       'creator_id': creatorId,
       'started_at': startedAt?.toIso8601String(),
