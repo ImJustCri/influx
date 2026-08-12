@@ -119,8 +119,39 @@ class _CreatePeriodPageState extends State<CreatePeriodPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Stabilisci un periodo', style: AppTypography.pageTitle),
-              Text('Gestisci le tue spese fino alla scadenza', style: AppTypography.pageSubtitle),
+              Center(
+                child: CircleAvatar(
+                  backgroundColor: AppColors.backgroundAccent,
+                  radius: 48,
+                  child: const Icon(
+                    LucideIcons.calendar_range,
+                    color: AppColors.white,
+                    size: 32,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              Center(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      "Stabilisci un periodo",
+                      style: AppTypography.pageTitle,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Gestisci le tue spese fino alla scadenza",
+                      style: AppTypography.pageSubtitle.copyWith(
+                        color: AppColors.white.withValues(alpha: 0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(height: 24),
               // Budget Input Section
               const SizedBox(height: 16),
@@ -170,13 +201,7 @@ class _CreatePeriodPageState extends State<CreatePeriodPage> {
                 ),
               ),
 
-              const SizedBox(height: 32),
-
               // End Date Selection Section
-              Text(
-                'Periodo di calcolo',
-                style: AppTypography.containerTitle,
-              ),
               const SizedBox(height: 16),
               InkWell(
                 onTap: _selectDate,
