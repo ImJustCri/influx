@@ -46,7 +46,7 @@ class PeriodEndedPage extends ConsumerWidget {
                       style: AppTypography.pageTitle,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     Text(
                       "Ecco cosa puoi fare ora:",
                       style: AppTypography.pageSubtitle.copyWith(
@@ -57,7 +57,7 @@ class PeriodEndedPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
               SettingsTile(
                   icon: LucideIcons.chart_column,
