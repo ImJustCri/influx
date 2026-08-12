@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/account/security_page.dart';
 import 'package:influx/pages/initial_page.dart';
 import 'package:influx/widgets/app_container.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import '../../models/profile.dart';
@@ -38,10 +39,12 @@ class ProfilePage extends ConsumerWidget {
               ),
             );
           }
-          return _buildProfileContent(
-            context,
-            ref,
-            userProfile,
+          return SingleChildScrollView(
+            child: _buildProfileContent(
+              context,
+              ref,
+              userProfile,
+            ),
           );
         },
       ),
@@ -121,14 +124,12 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
               Text(
                 userProfile.fullName ?? 'Utente',
                 style: AppTypography.username,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -162,6 +163,7 @@ class ProfilePage extends ConsumerWidget {
               ),
             ],
           ),
+
           Column(
             spacing: 16,
             children: [
@@ -176,38 +178,32 @@ class ProfilePage extends ConsumerWidget {
                 },
                 child: AppContainer(
                   width: double.infinity,
-                  child: Column(
+                  child: Row(
                     spacing: 16,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        spacing: 16,
-                        children: [
-                          const Icon(
-                            LucideIcons.fingerprint_pattern,
-                            color: AppColors.white,
-                          ),
-                          Expanded(
-                            child: Column(
-                              spacing: 2,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "ID utente",
-                                  style: AppTypography.containerTitle,
-                                ),
-                                Text(
-                                  "Mostra QR Code",
-                                  style: AppTypography.containerBody,
-                                ),
-                              ],
+                      const Icon(
+                        LucideIcons.fingerprint_pattern,
+                        color: AppColors.white,
+                      ),
+                      Expanded(
+                        child: Column(
+                          spacing: 2,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "ID utente",
+                              style: AppTypography.containerTitle,
                             ),
-                          ),
-                          const Icon(
-                            LucideIcons.chevron_right,
-                            color: Colors.white54,
-                          ),
-                        ],
+                            Text(
+                              "Mostra QR Code",
+                              style: AppTypography.containerBody,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        LucideIcons.chevron_right,
+                        color: Colors.white54,
                       ),
                     ],
                   ),
@@ -277,7 +273,26 @@ class ProfilePage extends ConsumerWidget {
                 ],
               ),
             ],
-          )
+          ),
+
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final version = snapshot.data!.version;
+                final buildNumber = snapshot.data!.buildNumber;
+                return Text(
+                  "Versione $version ($buildNumber)",
+                  style: AppTypography.containerBody.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.4),
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
     );
