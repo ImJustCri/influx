@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
@@ -15,7 +14,6 @@ class CreateGroupPage extends ConsumerStatefulWidget {
 
 class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
   late TextEditingController groupNameController;
-  late TextEditingController totalBudgetController;
 
   bool _isModified = false;
   bool _isLoading = false;
@@ -24,31 +22,26 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
   void initState() {
     super.initState();
     groupNameController = TextEditingController();
-    totalBudgetController = TextEditingController();
 
     groupNameController.addListener(_validateInputs);
-    totalBudgetController.addListener(_validateInputs);
   }
 
   void _validateInputs() {
     setState(() {
-      _isModified = groupNameController.text.trim().isNotEmpty &&
-          totalBudgetController.text.trim().isNotEmpty;
+      _isModified = groupNameController.text.trim().isNotEmpty;
     });
   }
 
   @override
   void dispose() {
     groupNameController.dispose();
-    totalBudgetController.dispose();
     super.dispose();
   }
 
   Future<void> _createGroup() async {
     final name = groupNameController.text.trim();
-    final totalBudget = double.tryParse(totalBudgetController.text.trim().replaceAll(',', '.'));
 
-    if (name.isEmpty || totalBudget == null) {
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Inserisci valori validi per tutti i campi.'),
@@ -72,7 +65,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
       // database insert into the 'group' table
       await supabase.from('group').insert({
         'name': name,
-        'total_budget': totalBudget,
         'status': 'creation',
         'created_by': userId,
       });
@@ -163,7 +155,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
               ),
               const SizedBox(height: 40),
 
-              // Group Name Field
               TextFormField(
                 keyboardType: TextInputType.text,
                 controller: groupNameController,
@@ -189,54 +180,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                       width: 2,
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Total Budget Custom Container
-              AppContainer(
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 12,
-                  children: [
-                    Text(
-                      'Budget disponibile',
-                      style: AppTypography.containerBody,
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: totalBudgetController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            style: AppTypography.budgetIndicator,
-                            decoration: InputDecoration(
-                              hintText: '0',
-                              hintStyle: AppTypography.budgetIndicator.copyWith(
-                                color: AppColors.white.withValues(alpha: 0.3),
-                              ),
-                              fillColor: Colors.transparent,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '€ ',
-                          style: AppTypography.budgetIndicator.copyWith(
-                            color: AppColors.white.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 24),
