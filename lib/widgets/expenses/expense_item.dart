@@ -77,35 +77,51 @@ class ExpenseItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: Color(int.parse(categoryColor, radix: 16)).withAlpha(10),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Color(int.parse(categoryColor, radix: 16)).withAlpha(10),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Color(int.parse(categoryColor, radix: 16)),
+                              width: .5,
+                            ),
+                          ),
+                          child: Icon(
+                            getIconFromName(categoryIcon),
                             color: Color(int.parse(categoryColor, radix: 16)),
-                            width: .5,
+                            size: 22,
                           ),
                         ),
-                        child: Icon(getIconFromName(categoryIcon), color: Color(int.parse(categoryColor, radix: 16)), size: 22),
-                      ),
-                      const SizedBox(width: 16),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, style: AppTypography.expenseTitle),
-                          Text(
-                            categoryName,
-                            style: AppTypography.expenseDescription,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: AppTypography.expenseTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                categoryName,
+                                style: AppTypography.expenseDescription,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 16),
                   Text(
                     '${amount.toStringAsFixed(2)}$currency',
                     style: AppTypography.expenseTitle,
@@ -115,10 +131,6 @@ class ExpenseItem extends StatelessWidget {
             ),
           ),
         ),
-        // const Divider(
-        //   color: AppColors.containerBorder,
-        //   height: .5,
-        // ),
       ],
     );
   }
