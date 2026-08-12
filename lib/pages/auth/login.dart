@@ -154,10 +154,7 @@ class LoginPage extends StatefulWidget {
                             ),
                             child: Text(
                               "Continua",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold
-                              ),
+                              style: AppTypography.containerTitle
                             ),
                           ),
                         ),
@@ -170,17 +167,17 @@ class LoginPage extends StatefulWidget {
                           Expanded(
                             child: Container(
                               height: 1,
-                              color: AppColors.white,
+                              color: AppColors.white.withValues(alpha: 0.5),
                             ),
                           ),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text("Oppure"),
+                            child: Text("Oppure", style: AppTypography.containerBody.copyWith(color: AppColors.white)),
                           ),
                           Expanded(
                             child: Container(
                               height: 1,
-                              color: AppColors.white,
+                              color: AppColors.white.withValues(alpha: 0.5),
                             ),
                           ),
                         ],
@@ -212,7 +209,7 @@ class LoginPage extends StatefulWidget {
                                   height: 36,
                                   width: 36,
                                 ),
-                                label: Text("Google"),
+                                label: Text("Continua con Google", style: AppTypography.containerTitle,),
                               style: TextButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8)
