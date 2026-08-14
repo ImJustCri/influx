@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
@@ -102,18 +104,19 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
                           ),
                           ...dayExpenses.map(
                                 (expense) => ExpenseItem(
-                              categoryColor: expense.categoryColor,
-                              categoryIcon: expense.categoryIcon,
-                              categoryName: expense.categoryName,
-                              title: expense.title,
-                              amount: expense.amount,
-                              purchaseDate: expense.purchaseDate,
-                              description: expense.description,
-                              groupName: expense.groupName,
-                              expenseId: expense.id,
-                              categoryId: expense.categoryId,
+                                  categoryColor: expense.categoryColor,
+                                  categoryIcon: expense.categoryIcon,
+                                  categoryName: expense.categoryName,
+                                  title: expense.title,
+                                  amount: expense.amount,
+                                  purchaseDate: expense.purchaseDate,
+                                  description: expense.description,
+                                  groupName: expense.groupName,
+                                  expenseId: expense.id,
+                                  categoryId: expense.categoryId,
                                   profileId: Supabase.instance.client.auth.currentUser!.id,
                                   isGroupView: false,
+                                  isRecurring: expense.isRecurring,
                             ),
                           ),
                         ],
