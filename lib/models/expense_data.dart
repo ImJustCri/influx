@@ -10,6 +10,7 @@ class ExpenseData {
   final DateTime purchaseDate;
   final String? description;
   final String? groupName;
+  final bool isRecurring;
 
   double get numericAmount => amount;
 
@@ -25,6 +26,7 @@ class ExpenseData {
     required this.profileId,
     this.description,
     this.groupName,
+    required this.isRecurring,
   });
 
   factory ExpenseData.convertJson(Map<String, dynamic> item) {
@@ -53,6 +55,7 @@ class ExpenseData {
       description: item['description'] as String?,
       groupName: group != null ? group['name'] as String? : null,
       profileId: item['profile_id'],
+      isRecurring: item['isRecurring'],
     );
   }
 }
