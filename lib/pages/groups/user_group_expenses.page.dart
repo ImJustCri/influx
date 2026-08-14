@@ -133,6 +133,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
                                     userPfp: userPfp,
                                     isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
                                     isGroupView: true,
+                                    isRecurring: expense.isRecurring,
                                   );
                                 },
                               ),
