@@ -112,11 +112,10 @@ class AllExpensesPage extends ConsumerWidget {
                                     expenseId: expense.id,
                                     categoryId: expense.categoryId,
                                     isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
-
-                                    // Pass properties safely using null-aware operators
                                     userName: matchingMember?.name,
                                     userPfp: matchingMember?.avatarImageUrl,
                                     isGroupView: isGroupView,
+                                    isRecurring: expense.isRecurring,
                                   );
                                 },
                               ),
