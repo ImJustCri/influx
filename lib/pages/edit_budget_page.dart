@@ -164,7 +164,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Modifica Budget'),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(LucideIcons.x),
           onPressed: () => Navigator.pop(context),
@@ -178,6 +178,40 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.backgroundAccent,
+                      radius: 48,
+                      child: const Icon(
+                        LucideIcons.dollar_sign,
+                        color: AppColors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  Center(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          "Modifica budget",
+                          style: AppTypography.pageTitle,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Quanto vuoi spendere al massimo in questo periodo?",
+                          textAlign: TextAlign.center,
+                          style: AppTypography.pageSubtitle.copyWith(
+                            color: AppColors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                   AppContainer(
                     width: double.infinity,
                     child: Column(
