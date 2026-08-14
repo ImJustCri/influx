@@ -17,8 +17,13 @@ class AllExpensesPage extends ConsumerWidget {
   final bool? isCurrentUserGroupAdmin;
   final bool isGroupView;
 
-
-  const AllExpensesPage({super.key, this.members, this.groupId, this.isCurrentUserGroupAdmin, required this.isGroupView});
+  const AllExpensesPage({
+    super.key,
+    this.members,
+    this.groupId,
+    this.isCurrentUserGroupAdmin,
+    required this.isGroupView,
+  });
 
   /// Helper function to group expenses by formatted date string
   Map<String, List<ExpenseData>> _groupExpensesByDate(List<ExpenseData> expenses) {
@@ -48,7 +53,17 @@ class AllExpensesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = groupId != null ? ref.watch(fetchExpensesByGroupProvider(groupId!)) : ref.watch(fetchExpenses);
+    final expensesAsync = groupId != null
+        ? ref.watch(fetchExpensesByGroupProvider(groupId!))
+        : ref.watch(fetchExpenses);
+
+    Future<void> refreshExpenses() async {
+      if (groupId != null) {
+        ref.invalidate(fetchExpensesByGroupProvider(groupId!));
+      } else {
+        ref.invalidate(fetchExpenses);
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -56,84 +71,133 @@ class AllExpensesPage extends ConsumerWidget {
         elevation: 0,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        child: PagePadding(
-          child: expensesAsync.when(
-            data: (expenses) {
-              if (expenses.isEmpty) {
-                return StatusContainer(
-                  icon: LucideIcons.book_search,
-                  title: "Niente da vedere qui",
-                  description: "Che ne dici di aggiungere una nuova spesa?",
-                );
-              }
+      body: RefreshIndicator(
+        onRefresh: refreshExpenses,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: PagePadding(
+            child: expensesAsync.when(
+              data: (expenses) {
+                if (expenses.isEmpty) {
+                  return StatusContainer(
+                    icon: LucideIcons.book_search,
+                    title: "Niente da vedere qui",
+                    description: "Che ne dici di aggiungere una nuova spesa?",
+                  );
+                }
 
-              final groupedExpenses = _groupExpensesByDate(expenses);
+                // Separate recurring and non-recurring expenses
+                final recurringExpenses = expenses.where((e) => e.isRecurring).toList();
+                final nonRecurringExpenses = expenses.where((e) => !e.isRecurring).toList();
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Tutte le spese', style: AppTypography.pageTitle),
-                  Text('Aggiunte in questo periodo', style: AppTypography.pageSubtitle),
-                  const SizedBox(height: 24),
+                final groupedExpenses = _groupExpensesByDate(nonRecurringExpenses);
 
-                  ...groupedExpenses.entries.map((entry) {
-                    final dateLabel = entry.key;
-                    final dayExpenses = entry.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Tutte le spese', style: AppTypography.pageTitle),
+                    Text('Aggiunte in questo periodo', style: AppTypography.pageSubtitle),
+                    const SizedBox(height: 24),
 
-                    return Column(
-                      children: [
-                        AppContainer(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text(
-                                  dateLabel,
-                                  style: AppTypography.containerTitle,
-                                ),
+                    if (recurringExpenses.isNotEmpty) ...[
+                      AppContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                "Spese ricorrenti",
+                                style: AppTypography.containerTitle,
                               ),
+                            ),
+                            ...recurringExpenses.map(
+                                  (expense) {
+                                final matchingMember = _findMember(expense.profileId);
 
-                              ...dayExpenses.map(
-                                    (expense) {
-                                  // Look up the member using the expense's profileId
-                                  final matchingMember = _findMember(expense.profileId);
-
-                                  return ExpenseItem(
-                                    categoryColor: expense.categoryColor,
-                                    categoryIcon: expense.categoryIcon,
-                                    categoryName: expense.categoryName,
-                                    title: expense.title,
-                                    amount: expense.amount,
-                                    purchaseDate: expense.purchaseDate,
-                                    description: expense.description,
-                                    groupName: expense.groupName,
-                                    expenseId: expense.id,
-                                    categoryId: expense.categoryId,
-                                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
-                                    userName: matchingMember?.name,
-                                    userPfp: matchingMember?.avatarImageUrl,
-                                    isGroupView: isGroupView,
-                                    isRecurring: expense.isRecurring,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
+                                return ExpenseItem(
+                                  categoryColor: expense.categoryColor,
+                                  categoryIcon: expense.categoryIcon,
+                                  categoryName: expense.categoryName,
+                                  title: expense.title,
+                                  amount: expense.amount,
+                                  purchaseDate: expense.purchaseDate,
+                                  description: expense.description,
+                                  groupName: expense.groupName,
+                                  expenseId: expense.id,
+                                  categoryId: expense.categoryId,
+                                  isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                  userName: matchingMember?.name,
+                                  userPfp: matchingMember?.avatarImageUrl,
+                                  isGroupView: isGroupView,
+                                  isRecurring: expense.isRecurring,
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  }),
-                ],
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (error, stackTrace) => Center(
-              child: Text('Error: $error'),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(color: AppColors.containerBorder),
+                      const SizedBox(height: 16),
+                    ],
+
+                    ...groupedExpenses.entries.map((entry) {
+                      final dateLabel = entry.key;
+                      final dayExpenses = entry.value;
+
+                      return Column(
+                        children: [
+                          AppContainer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    dateLabel,
+                                    style: AppTypography.containerTitle,
+                                  ),
+                                ),
+                                ...dayExpenses.map(
+                                      (expense) {
+                                    final matchingMember = _findMember(expense.profileId);
+
+                                    return ExpenseItem(
+                                      categoryColor: expense.categoryColor,
+                                      categoryIcon: expense.categoryIcon,
+                                      categoryName: expense.categoryName,
+                                      title: expense.title,
+                                      amount: expense.amount,
+                                      purchaseDate: expense.purchaseDate,
+                                      description: expense.description,
+                                      groupName: expense.groupName,
+                                      expenseId: expense.id,
+                                      categoryId: expense.categoryId,
+                                      isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                      userName: matchingMember?.name,
+                                      userPfp: matchingMember?.avatarImageUrl,
+                                      isGroupView: isGroupView,
+                                      isRecurring: expense.isRecurring,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (error, stackTrace) => Center(
+                child: Text('Error: $error'),
+              ),
             ),
           ),
         ),
