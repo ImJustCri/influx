@@ -7,6 +7,7 @@ import 'package:influx/widgets/app_container.dart';
 import 'package:influx/widgets/settings_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../theme.dart';
+import '../../widgets/category_picker_modal.dart';
 import '../../widgets/expenses/add/group_selection_section.dart';
 import '../../widgets/expenses/add/scan_instructions_modal.dart';
 import '../../widgets/expenses/expense_type_helpers.dart';
@@ -31,6 +32,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   final OcrService _ocrService = OcrService();
 
   late bool isGroup;
+  bool isRecurring = false;
   String? selectedGroupId;
   bool _isLoading = false;
 
@@ -65,6 +67,26 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
       context: context,
       isScrollControlled: true,
       builder: (context) => const ScanInstructionsModal(),
+    );
+  }
+
+  void _showCategoryPicker() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      elevation: 0,
+      builder: (context) {
+        return CategoryPickerModal(
+          categories: categories,
+          selectedCategory: selectedCategory,
+          onCategorySelected: (category) {
+            setState(() {
+              selectedCategory = category;
+            });
+            Navigator.pop(context);
+          },
+        );
+      },
     );
   }
 
@@ -114,7 +136,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         },
       );
     } else {
-      // Popola i campi con i dati estratti dallo scontrino
       if (result.total != null) {
         amountController.text = result.total!;
       }
@@ -170,6 +191,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         'category_id': selectedCategory!.id,
         'group_id': isGroup ? selectedGroupId : null,
         'amount': amount,
+        'isRecurring': isRecurring,
         'created_at': DateTime.now().toIso8601String(),
       };
 
@@ -338,6 +360,56 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                     ),
 
                     // Category Selection
+                    GestureDetector(
+                      onTap: _showCategoryPicker,
+                      child: AppContainer(
+                        width: double.infinity,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: selectedCategory != null
+                                    ? Color(int.parse(selectedCategory!.color,
+                                    radix: 16))
+                                    .withValues(alpha: 0.15)
+                                    : AppColors.btnBackground
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                selectedCategory != null
+                                    ? getIconFromName(selectedCategory!.icon)
+                                    : LucideIcons.tag,
+                                size: 20,
+                                color: selectedCategory != null
+                                    ? Color(int.parse(selectedCategory!.color,
+                                    radix: 16))
+                                    : AppColors.btnBackground,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                selectedCategory?.name ?? 'Seleziona Categoria',
+                                style: AppTypography.containerTitle.copyWith(
+                                  color: selectedCategory != null
+                                      ? AppColors.white
+                                      : AppColors.white.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              LucideIcons.chevron_down,
+                              color: Colors.white54,
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Recurring Expense Switch Card
                     AppContainer(
                       width: double.infinity,
                       child: Row(
@@ -350,60 +422,26 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
-                              LucideIcons.tag,
+                              LucideIcons.calendar_range,
                               size: 20,
                               color: AppColors.btnBackground,
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<CategoryModel>(
-                                value: selectedCategory,
-                                borderRadius: BorderRadius.circular(32),
-                                dropdownColor: AppColors.backgroundAccent,
-                                hint: Text(
-                                  'Seleziona Categoria',
-                                  style: AppTypography.containerTitle.copyWith(
-                                    color: AppColors.white
-                                        .withValues(alpha: 0.5),
-                                  ),
-                                ),
-                                isExpanded: true,
-                                icon: const Icon(
-                                  LucideIcons.chevron_down,
-                                  color: Colors.white54,
-                                  size: 20,
-                                ),
-                                items: categories.map((category) {
-                                  return DropdownMenuItem<CategoryModel>(
-                                    value: category,
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          getIconFromName(category.icon),
-                                          color: Color(
-                                            int.parse(category.color, radix: 16),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          category.name,
-                                          style: AppTypography.containerTitle.copyWith(
-                                            color: AppColors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (CategoryModel? newValue) {
-                                  setState(() {
-                                    selectedCategory = newValue;
-                                  });
-                                },
-                              ),
+                            child: Text(
+                              'Spesa Ricorrente',
+                              style: AppTypography.containerTitle,
                             ),
+                          ),
+                          Switch(
+                            value: isRecurring,
+                            activeThumbColor: AppColors.btnBackground,
+                            onChanged: (value) {
+                              setState(() {
+                                isRecurring = value;
+                              });
+                            },
                           ),
                         ],
                       ),
@@ -437,9 +475,15 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
             Row(
               spacing: 8,
               children: [
-                Expanded(child: SettingsTile(icon: LucideIcons.qr_code, title: 'Scansiona scontrino', onTap: _handleOcrScan)),
+                Expanded(
+                  child: SettingsTile(
+                    icon: LucideIcons.qr_code,
+                    title: 'Scansiona scontrino',
+                    onTap: _handleOcrScan,
+                  ),
+                ),
                 AppContainer(
-                  padding: EdgeInsetsGeometry.all(4),
+                  padding: const EdgeInsets.all(4),
                   child: IconButton(
                     icon: const Icon(LucideIcons.info),
                     onPressed: _showScanInstructions,
@@ -448,6 +492,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
               ],
             ),
             const SizedBox(height: 16),
+
             // Save Button
             SizedBox(
               width: double.infinity,
