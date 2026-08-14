@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/expense_data.dart';
+import '../periods/group_period_providers.dart';
 import '../periods/user_period_providers.dart';
 
-/// Fetch latest expenses
+/// Fetch latest expenses (includes active period range OR isRecurring = true)
 final fetchLatestExpenses = FutureProvider.family<List<ExpenseData>, int>((ref, limit) async {
   final userId = Supabase.instance.client.auth.currentUser!.id;
   final activePeriod = await ref.watch(activeUserPeriodProvider.future);
@@ -12,12 +13,14 @@ final fetchLatestExpenses = FutureProvider.family<List<ExpenseData>, int>((ref, 
     return [];
   }
 
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
+
   final response = await Supabase.instance.client
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
-      .gte('created_at', activePeriod.createdAt.toIso8601String())
-      .lte('created_at', activePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false)
       .limit(limit);
 
@@ -35,12 +38,14 @@ final fetchExpenses = FutureProvider<List<ExpenseData>>((ref) async {
     return [];
   }
 
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
+
   final response = await supabase
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
-      .gte('created_at', activePeriod.createdAt.toIso8601String())
-      .lte('created_at', activePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
@@ -56,34 +61,37 @@ final fetchExpensesByCategory = FutureProvider.family<List<ExpenseData>, String>
     return [];
   }
 
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
+
   final response = await Supabase.instance.client
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
       .eq('category_id', categoryId)
-      .gte('created_at', activePeriod.createdAt.toIso8601String())
-      .lte('created_at', activePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
 });
 
-/// Fetch expenses filtered by groupId
+/// Fetch expenses filtered by groupId within active group period
 final fetchExpensesByGroupProvider =
 FutureProvider.family<List<ExpenseData>, String>((ref, groupId) async {
-
-  final activePeriod = await ref.watch(activeUserPeriodProvider.future);
+  final activePeriod = await ref.watch(activeGroupPeriodProvider(groupId).future);
 
   if (activePeriod == null) {
     return [];
   }
 
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
+
   final response = await Supabase.instance.client
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('group_id', groupId)
-      .gte('created_at', activePeriod.createdAt.toIso8601String())
-      .lte('created_at', activePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return (response as List)
@@ -91,16 +99,26 @@ FutureProvider.family<List<ExpenseData>, String>((ref, groupId) async {
       .toList();
 });
 
-/// Fetch expenses filtered by category and groupId
+/// Fetch expenses filtered by category and groupId within active group period
 final fetchExpensesByCategoryGroupProvider =
 FutureProvider.family<List<ExpenseData>, (String, String)>((ref, arg) async {
   final (groupId, categoryId) = arg;
+
+  final activePeriod = await ref.watch(activeGroupPeriodProvider(groupId).future);
+
+  if (activePeriod == null) {
+    return [];
+  }
+
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
 
   final response = await Supabase.instance.client
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('category_id', categoryId)
       .eq('group_id', groupId)
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return (response as List)
@@ -108,31 +126,26 @@ FutureProvider.family<List<ExpenseData>, (String, String)>((ref, arg) async {
       .toList();
 });
 
-/// Fetch expenses filtered by groupId and profileId within the active group period
+/// Fetch expenses filtered by groupId and profileId within active group period
 final fetchExpensesByUserAndGroupProvider =
 FutureProvider.family<List<ExpenseData>, (String, String)>((ref, args) async {
   final (userId, groupId) = args;
-  final supabase = Supabase.instance.client;
 
-  final periodResponse = await supabase
-      .from('groupPeriod')
-      .select('created_at, endDate')
-      .eq('group_id', groupId)
-      .eq('isActive', true)
-      .maybeSingle();
+  final activePeriod = await ref.watch(activeGroupPeriodProvider(groupId).future);
 
-  if (periodResponse == null) return [];
+  if (activePeriod == null) {
+    return [];
+  }
 
-  final String createdAt = periodResponse['created_at'];
-  final String endDate = periodResponse['endDate'];
+  final start = activePeriod.createdAt.toIso8601String();
+  final end = activePeriod.endDate.toIso8601String();
 
-  final response = await supabase
+  final response = await Supabase.instance.client
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
       .eq('group_id', groupId)
-      .gte('created_at', createdAt)
-      .lte('created_at', endDate)
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return (response as List)
@@ -151,12 +164,14 @@ final fetchLatestInactivePeriodExpenses = FutureProvider<List<ExpenseData>>((ref
     return [];
   }
 
+  final start = inactivePeriod.createdAt.toIso8601String();
+  final end = inactivePeriod.endDate.toIso8601String();
+
   final response = await supabase
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
-      .gte('created_at', inactivePeriod.createdAt.toIso8601String())
-      .lte('created_at', inactivePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
@@ -173,13 +188,15 @@ final fetchInactivePeriodExpensesByCategory = FutureProvider.family<List<Expense
     return [];
   }
 
+  final start = inactivePeriod.createdAt.toIso8601String();
+  final end = inactivePeriod.endDate.toIso8601String();
+
   final response = await supabase
       .from('expense')
       .select('*, category(*), group(*)')
       .eq('profile_id', userId)
       .eq('category_id', categoryId)
-      .gte('created_at', inactivePeriod.createdAt.toIso8601String())
-      .lte('created_at', inactivePeriod.endDate.toIso8601String())
+      .or('and(created_at.gte.$start,created_at.lte.$end),isRecurring.eq.true')
       .order('created_at', ascending: false);
 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
