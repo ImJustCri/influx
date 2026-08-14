@@ -336,41 +336,6 @@ class ExpenseDetailPage extends StatelessWidget {
                       ],
                     ],
                   ),
-                ],
-              ) : SizedBox.shrink(),
-
-              // group (optional)
-              if (groupName != null) ...[
-                Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    AppContainer(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            spacing: 12,
-                            children: [
-                              const CircleAvatar(
-                                backgroundColor: AppColors.backgroundAccent,
-                                radius: 24,
-                                child: Icon(
-                                  LucideIcons.users_round,
-                                  size: 20,
-                                  color: AppColors.white,
-                                ),
-                              ),
-                              Text(
-                                groupName!,
-                                style: AppTypography.containerTitle
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ],
 
