@@ -43,8 +43,12 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final limitedExpenses = widget.expenses.take(_limit).toList();
+    // Separate recurring expenses from one-time expenses
+    final recurringExpenses = widget.expenses.where((e) => e.isRecurring).toList();
+    final nonRecurringExpenses = widget.expenses.where((e) => !e.isRecurring).toList();
 
+    // Limit only the non-recurring recent expenses
+    final limitedExpenses = nonRecurringExpenses.take(_limit).toList();
     final groupedExpenses = _groupExpensesByDate(limitedExpenses);
 
     return Column(
@@ -56,86 +60,124 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
             title: "Niente da vedere qui",
             description: "Che ne dici di aggiungere una nuova spesa?",
           )
-        else
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        else ...[
+          // ================= RECENT EXPENSES SECTION =================
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text("Ultime spese", style: AppTypography.containerTitle),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                spacing: 8,
+                children: [3, 5].map((count) {
+                  final isSelected = _limit == count;
+                  return ChoiceChip(
+                    label: Text('$count'),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _limit = count;
+                        });
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          ...groupedExpenses.entries.map((entry) {
+            final dateLabel = entry.key;
+            final dayExpenses = entry.value;
+
+            return Column(
+              children: [
+                AppContainer(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          dateLabel,
+                          style: AppTypography.containerTitle,
+                        ),
+                      ),
+                      ...dayExpenses.map(
+                            (expense) => ExpenseItem(
+                          categoryColor: expense.categoryColor,
+                          categoryIcon: expense.categoryIcon,
+                          categoryName: expense.categoryName,
+                          title: expense.title,
+                          amount: expense.amount,
+                          purchaseDate: expense.purchaseDate,
+                          description: expense.description,
+                          groupName: expense.groupName,
+                          expenseId: expense.id,
+                          categoryId: expense.categoryId,
+                          profileId: Supabase.instance.client.auth.currentUser!.id,
+                          isGroupView: false,
+                          isRecurring: expense.isRecurring,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }),
+
+          // ================= RECURRING EXPENSES SECTION =================
+          if (recurringExpenses.isNotEmpty) ...[
+            AppContainer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Ultime spese", style: AppTypography.containerTitle),
-                  Row(
-                    spacing: 8,
-                    children: [3, 5].map((count) {
-                      final isSelected = _limit == count;
-                      return ChoiceChip(
-                        label: Text('$count'),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _limit = count;
-                            });
-                          }
-                        },
-                      );
-                    }).toList(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      "Spese ricorrenti",
+                      style: AppTypography.containerTitle,
+                    ),
+                  ),
+                  ...recurringExpenses.map(
+                        (expense) => ExpenseItem(
+                      categoryColor: expense.categoryColor,
+                      categoryIcon: expense.categoryIcon,
+                      categoryName: expense.categoryName,
+                      title: expense.title,
+                      amount: expense.amount,
+                      purchaseDate: expense.purchaseDate,
+                      description: expense.description,
+                      groupName: expense.groupName,
+                      expenseId: expense.id,
+                      categoryId: expense.categoryId,
+                      profileId: Supabase.instance.client.auth.currentUser!.id,
+                      isGroupView: false,
+                      isRecurring: expense.isRecurring,
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 16),
+          ],
 
-              ...groupedExpenses.entries.map((entry) {
-                final dateLabel = entry.key;
-                final dayExpenses = entry.value;
-
-                return Column(
-                  children: [
-                    AppContainer(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              dateLabel,
-                              style: AppTypography.containerTitle,
-                            ),
-                          ),
-                          ...dayExpenses.map(
-                                (expense) => ExpenseItem(
-                                  categoryColor: expense.categoryColor,
-                                  categoryIcon: expense.categoryIcon,
-                                  categoryName: expense.categoryName,
-                                  title: expense.title,
-                                  amount: expense.amount,
-                                  purchaseDate: expense.purchaseDate,
-                                  description: expense.description,
-                                  groupName: expense.groupName,
-                                  expenseId: expense.id,
-                                  categoryId: expense.categoryId,
-                                  profileId: Supabase.instance.client.auth.currentUser!.id,
-                                  isGroupView: false,
-                                  isRecurring: expense.isRecurring,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              }),
-
-              SettingsTile(
-                  icon: LucideIcons.list_collapse,
-                  title: "Vedi di più",
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AllExpensesPage(isGroupView: false)));
-                  }
-              ),
-            ],
-          )
+          SettingsTile(
+            icon: LucideIcons.list_collapse,
+            title: "Vedi di più",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AllExpensesPage(isGroupView: false),
+                ),
+              );
+            },
+          ),
+        ],
       ],
     );
   }
