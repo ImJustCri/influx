@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
@@ -61,7 +59,6 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
             description: "Che ne dici di aggiungere una nuova spesa?",
           )
         else ...[
-          // ================= RECENT EXPENSES SECTION =================
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -129,7 +126,6 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
             );
           }),
 
-          // ================= RECURRING EXPENSES SECTION =================
           if (recurringExpenses.isNotEmpty) ...[
             AppContainer(
               child: Column(
