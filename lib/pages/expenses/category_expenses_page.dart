@@ -125,6 +125,7 @@ class CategoryExpensesPage extends ConsumerWidget {
                                   userPfp: matchingMember?.avatarImageUrl,
                                   profileId: expense.profileId,
                                   isGroupView: (groupId != null) ? true : false,
+                                  isRecurring: expense.isRecurring,
                                 );
                               }),
                             ],
