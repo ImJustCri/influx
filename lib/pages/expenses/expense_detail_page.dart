@@ -23,6 +23,7 @@ class ExpenseDetailPage extends StatelessWidget {
   final String? expenseUserId;
   final bool? isCurrentUserGroupAdmin;
   final bool isGroupView;
+  final bool isRecurring;
 
   const ExpenseDetailPage({
     super.key,
@@ -40,6 +41,7 @@ class ExpenseDetailPage extends StatelessWidget {
     this.expenseUserId,
     this.isCurrentUserGroupAdmin,
     required this.isGroupView,
+    required this.isRecurring,
   });
 
   String _formatDate(DateTime date) {
@@ -54,8 +56,6 @@ class ExpenseDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isAdmin = isCurrentUserGroupAdmin ?? false;
 
-    print(isGroupView);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -65,7 +65,7 @@ class ExpenseDetailPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (groupName == null || isAdmin ) ...[
+          if (groupName == null || isAdmin) ...[
             IconButton(
               icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
               tooltip: 'Elimina spesa',
@@ -86,9 +86,8 @@ class ExpenseDetailPage extends StatelessWidget {
                 }
               },
             ),
-          ]
-          else if (!isGroupView)
-            ...[ IconButton(
+          ] else if (!isGroupView) ...[
+            IconButton(
               icon: const Icon(LucideIcons.info),
               tooltip: 'Elimina spesa',
               onPressed: () {
@@ -104,9 +103,10 @@ class ExpenseDetailPage extends StatelessWidget {
                           StatusContainer(
                             title: "Vuoi eliminare questa spesa?!",
                             icon: LucideIcons.shield_alert,
-                            description: "Se sei un admin di $groupName e vuoi rimuovere questa spesa, passa dalla sezione dedicata al gruppo.",
+                            description:
+                            "Se sei un admin di $groupName e vuoi rimuovere questa spesa, passa dalla sezione dedicata al gruppo.",
                           ),
-                          SizedBox(height: 24),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     );
@@ -114,8 +114,7 @@ class ExpenseDetailPage extends StatelessWidget {
                 );
               },
             ),
-          ]
-          else
+          ] else ...[
             IconButton(
               icon: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
               tooltip: 'Elimina spesa',
@@ -132,9 +131,10 @@ class ExpenseDetailPage extends StatelessWidget {
                           StatusContainer(
                             title: "Alt! Zona riservata",
                             icon: LucideIcons.shield_alert,
-                            description: "Solo gli admin del gruppo possono eliminare le spese!",
+                            description:
+                            "Solo gli admin del gruppo possono eliminare le spese!",
                           ),
-                          SizedBox(height: 24),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     );
@@ -142,6 +142,7 @@ class ExpenseDetailPage extends StatelessWidget {
                 );
               },
             ),
+          ],
           const SizedBox(width: 8),
         ],
         centerTitle: false,
@@ -174,7 +175,7 @@ class ExpenseDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              // Amount Section
+              // Amount & Title Section
               Center(
                 child: Column(
                   children: [
@@ -198,115 +199,142 @@ class ExpenseDetailPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
-              // details
-
-              // date
+              // --- MAIN DETAILS CONTAINER ---
               AppContainer(
                 width: double.infinity,
-                child: Row(
-                  spacing: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(LucideIcons.calendar, color: AppColors.white),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                            "Data d'acquisto",
-                            style: AppTypography.containerTitle
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _formatDate(purchaseDate),
-                          style: AppTypography.containerBody,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // time
-              AppContainer(
-                width: double.infinity,
-                child: Row(
-                  spacing: 16,
-                  children: [
-                    const Icon(LucideIcons.clock, color: AppColors.white),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                            "Orario d'acquisto",
-                            style: AppTypography.containerTitle
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _formatTime(purchaseDate),
-                          style: AppTypography.containerBody,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // description (optional)
-              if (description != null && description!.isNotEmpty) ...[
-                Column(
-                  children: [
-                    AppContainer(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            description!,
-                            style: AppTypography.containerBody,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              if (groupName != null || expenseUserPfp != null) ...[
-                const SizedBox(height: 16),
-                const Text(
-                  'Appartiene a:',
-                  style: AppTypography.containerTitle,
-                  textAlign: TextAlign.left,
-                ),
-              ],
-
-
-              // expense owner
-              expenseUserPfp != null ? Column(
-                children: [
-                  const SizedBox(height: 16),
-                  AppContainer(
-                    width: double.infinity,
-                    child: Row(
+                    // Date Row
+                    Row(
                       spacing: 16,
                       children: [
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(expenseUserPfp!),
-                        ),
+                        const Icon(LucideIcons.calendar, color: AppColors.white),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                                expenseUserName!,
-                                style: AppTypography.containerTitle
-                            ),
+                            const Text("Data d'acquisto", style: AppTypography.containerTitle),
+                            const SizedBox(height: 4),
+                            Text(_formatDate(purchaseDate), style: AppTypography.containerBody),
                           ],
                         ),
                       ],
                     ),
+                    const Divider(height: 32, color: AppColors.containerBorder),
+
+                    // Time Row
+                    Row(
+                      spacing: 16,
+                      children: [
+                        const Icon(LucideIcons.clock, color: AppColors.white),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Orario d'acquisto", style: AppTypography.containerTitle),
+                            const SizedBox(height: 4),
+                            Text(_formatTime(purchaseDate), style: AppTypography.containerBody),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    // Recurring Indicator (if active)
+                    if (isRecurring) ...[
+                      const Divider(height: 32, color: AppColors.containerBorder),
+                      Row(
+                        spacing: 16,
+                        children: [
+                          const Icon(LucideIcons.calendar_range, color: AppColors.white),
+                          const Text("Spesa Ricorrente", style: AppTypography.containerTitle),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // --- DESCRIPTION CONTAINER ---
+              if (description != null && description!.trim().isNotEmpty) ...[
+                const SizedBox(height: 16),
+                AppContainer(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            LucideIcons.list_collapse,
+                            size: 18,
+                            color: AppColors.white.withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text("Descrizione", style: AppTypography.containerTitle),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        description!,
+                        style: AppTypography.containerBody,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // --- OWNERSHIP CONTAINER (USER & GROUP) ---
+              if (expenseUserPfp != null || groupName != null) ...[
+                const SizedBox(height: 16),
+                AppContainer(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User Profile (if present)
+                      if (expenseUserPfp != null) ...[
+                        Row(
+                          spacing: 16,
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundImage: NetworkImage(expenseUserPfp!),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(expenseUserName ?? '', style: AppTypography.containerTitle),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+
+                      // Divider if both User & Group are visible
+                      if (expenseUserPfp != null && groupName != null)
+                        const Divider(height: 32, color: AppColors.containerBorder),
+
+                      // Group Info (if present)
+                      if (groupName != null) ...[
+                        Row(
+                          spacing: 16,
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: AppColors.backgroundAccent,
+                              radius: 18,
+                              child: Icon(LucideIcons.users_round, size: 18, color: AppColors.white),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(groupName!, style: AppTypography.containerTitle),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ) : SizedBox.shrink(),
@@ -344,7 +372,6 @@ class ExpenseDetailPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
               ],
 
               const SizedBox(height: 32),
