@@ -290,70 +290,76 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                       ),
                     ),
 
-                    // Name
+                    // Name & Description
                     AppContainer(
                       width: double.infinity,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8,
                         children: [
-                          Text(
-                            'Nome',
-                            style: AppTypography.containerTitle.copyWith(
-                              fontSize: 12,
-                              color: AppColors.white.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          TextField(
-                            controller: nameController,
-                            style: AppTypography.containerBody,
-                            decoration: InputDecoration(
-                              hintText: 'Es. Pranzo, Benzina...',
-                              hintStyle: AppTypography.containerBody.copyWith(
-                                color: AppColors.white.withValues(alpha: 0.3),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 8,
+                            children: [
+                              Text(
+                                'Nome',
+                                style: AppTypography.containerBody
                               ),
-                              fillColor: Colors.transparent,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Description
-                    AppContainer(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8,
-                        children: [
-                          Text(
-                            'Descrizione',
-                            style: AppTypography.containerTitle.copyWith(
-                              fontSize: 12,
-                              color: AppColors.white.withValues(alpha: 0.5),
-                            ),
-                          ),
-                          TextField(
-                            controller: descriptionController,
-                            style: AppTypography.containerTitle,
-                            maxLines: 2,
-                            decoration: InputDecoration(
-                              hintText: 'Aggiungi note...',
-                              hintStyle: AppTypography.containerBody.copyWith(
-                                color: AppColors.white.withValues(alpha: 0.3),
+                              TextField(
+                                controller: nameController,
+                                style: AppTypography.containerTitle,
+                                decoration: InputDecoration(
+                                  hintText: 'Es. Pranzo, Benzina...',
+                                  hintStyle:
+                                  AppTypography.containerBody.copyWith(
+                                    color: AppColors.white
+                                        .withValues(alpha: 0.3),
+                                  ),
+                                  fillColor: Colors.transparent,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
+                                ),
                               ),
-                              fillColor: Colors.transparent,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: AppColors.white.withValues(alpha: 0.1),
                             ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 8,
+                            children: [
+                              Text(
+                                'Descrizione',
+                                style: AppTypography.containerBody
+                              ),
+                              TextField(
+                                controller: descriptionController,
+                                style: AppTypography.containerTitle,
+                                maxLines: 2,
+                                decoration: InputDecoration(
+                                  hintText: 'Aggiungi note...',
+                                  hintStyle:
+                                  AppTypography.containerBody.copyWith(
+                                    color: AppColors.white
+                                        .withValues(alpha: 0.3),
+                                  ),
+                                  fillColor: Colors.transparent,
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
