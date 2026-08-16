@@ -48,6 +48,9 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
     // Limit only the non-recurring recent expenses
     final limitedExpenses = nonRecurringExpenses.take(_limit).toList();
     final groupedExpenses = _groupExpensesByDate(limitedExpenses);
+    final double cardWidth = recurringExpenses.length == 1
+        ? MediaQuery.of(context).size.width - 48
+        : MediaQuery.of(context).size.width - 96;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +62,43 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
             description: "Che ne dici di aggiungere una nuova spesa?",
           )
         else ...[
+          if (recurringExpenses.isNotEmpty) ...[
+            Text("Spese ricorrenti", style: AppTypography.containerTitle),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 114,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: recurringExpenses.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final expense = recurringExpenses[index];
+                  return SizedBox(
+                    width: cardWidth,
+                    child: AppContainer(
+                      child: ExpenseItem(
+                        categoryColor: expense.categoryColor,
+                        categoryIcon: expense.categoryIcon,
+                        categoryName: expense.categoryName,
+                        title: expense.title,
+                        amount: expense.amount,
+                        purchaseDate: expense.purchaseDate,
+                        description: expense.description,
+                        groupName: expense.groupName,
+                        expenseId: expense.id,
+                        categoryId: expense.categoryId,
+                        profileId: Supabase.instance.client.auth.currentUser!.id,
+                        isGroupView: false,
+                        isRecurring: expense.isRecurring,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -125,41 +165,6 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
               ],
             );
           }),
-
-          if (recurringExpenses.isNotEmpty) ...[
-            AppContainer(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Spese ricorrenti",
-                      style: AppTypography.containerTitle,
-                    ),
-                  ),
-                  ...recurringExpenses.map(
-                        (expense) => ExpenseItem(
-                      categoryColor: expense.categoryColor,
-                      categoryIcon: expense.categoryIcon,
-                      categoryName: expense.categoryName,
-                      title: expense.title,
-                      amount: expense.amount,
-                      purchaseDate: expense.purchaseDate,
-                      description: expense.description,
-                      groupName: expense.groupName,
-                      expenseId: expense.id,
-                      categoryId: expense.categoryId,
-                      profileId: Supabase.instance.client.auth.currentUser!.id,
-                      isGroupView: false,
-                      isRecurring: expense.isRecurring,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
 
           SettingsTile(
             icon: LucideIcons.list_collapse,
