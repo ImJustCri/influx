@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../pages/preferences/interface_settings_page.dart';
 import '../../theme.dart';
 
-class MainBottomNav extends StatelessWidget {
+class MainBottomNav extends ConsumerWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final VoidCallback onAddPressed;
@@ -15,7 +17,10 @@ class MainBottomNav extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showTextHints =
+        ref.watch(navbarTextHintsProvider).value ?? true;
+
     return SafeArea(
       top: false,
       child: Padding(
@@ -29,8 +34,13 @@ class MainBottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildNavItem(0, LucideIcons.house, 'Home'),
-              _buildNavItem(1, LucideIcons.arrow_left_right, 'Switch'),
+              _buildNavItem(0, LucideIcons.house, 'Home', showTextHints),
+              _buildNavItem(
+                1,
+                LucideIcons.arrow_left_right,
+                'Switch',
+                showTextHints,
+              ),
 
               Material(
                 color: AppColors.purple,
@@ -50,8 +60,8 @@ class MainBottomNav extends StatelessWidget {
                 ),
               ),
 
-              _buildNavItem(2, LucideIcons.banknote, 'Spese'),
-              _buildNavItem(3, LucideIcons.users, 'Gruppi'),
+              _buildNavItem(2, LucideIcons.banknote, 'Spese', showTextHints),
+              _buildNavItem(3, LucideIcons.users, 'Gruppi', showTextHints),
             ],
           ),
         ),
@@ -59,7 +69,12 @@ class MainBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(
+      int index,
+      IconData icon,
+      String label,
+      bool showTextHints,
+      ) {
     final isSelected = selectedIndex == index;
     final activeFgColor = AppColors.white;
     final inactiveFgColor = const Color(0xFF6D678D);
@@ -74,7 +89,7 @@ class MainBottomNav extends StatelessWidget {
         child: Container(
           width: 64,
           height: 64,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.transparent,
             shape: BoxShape.circle,
           ),
@@ -82,16 +97,19 @@ class MainBottomNav extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: contentColor, size: 20),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  color: contentColor,
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              Icon(icon, color: contentColor, size: showTextHints ? 20 : 22),
+              if (showTextHints) ...[
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: contentColor,
+                    fontSize: 10,
+                    fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
