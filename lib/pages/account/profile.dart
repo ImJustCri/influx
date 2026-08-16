@@ -14,6 +14,7 @@ import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
 import '../../widgets/user_qr_dialog.dart';
 import '../periods/periods_overview_page.dart';
+import '../preferences/interface_settings_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -230,6 +231,17 @@ class ProfilePage extends ConsumerWidget {
                         ),
                       );
                       ref.invalidate(profileProvider);
+                    },
+                  ),
+                  SettingsTile(
+                    icon: LucideIcons.palette,
+                    title: "Personalizza interfaccia",
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const InterfaceSettingsPage(),
+                        ),
+                      );
                     },
                   ),
                   SettingsTile(
