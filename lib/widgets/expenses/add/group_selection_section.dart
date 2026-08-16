@@ -59,7 +59,6 @@ class GroupSelectionSection extends ConsumerWidget {
               ),
               Switch(
                 value: isGroup,
-                activeThumbColor: AppColors.btnBackground,
                 onChanged: onToggleChanged,
               ),
             ],

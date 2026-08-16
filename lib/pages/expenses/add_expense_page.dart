@@ -442,7 +442,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
                           ),
                           Switch(
                             value: isRecurring,
-                            activeThumbColor: AppColors.btnBackground,
                             onChanged: (value) {
                               setState(() {
                                 isRecurring = value;
