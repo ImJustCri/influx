@@ -58,15 +58,11 @@ class UserGroupExpensesPage extends ConsumerWidget {
         child: PagePadding(
           child: expensesAsync.when(
             data: (expenses) {
-              // if (expenses.isEmpty) {
-              //   return const StatusContainer(
-              //     icon: LucideIcons.sparkles,
-              //     title: "Niente da dichiarare!",
-              //     description: "O non ha speso un centesimo, o sta nascondendo le ricevute.",
-              //   );
-              // }
+              // Separate recurring and non-recurring expenses
+              final recurringExpenses = expenses.where((e) => e.isRecurring).toList();
+              final nonRecurringExpenses = expenses.where((e) => !e.isRecurring).toList();
 
-              final groupedExpenses = _groupExpensesByDate(expenses);
+              final groupedExpenses = _groupExpensesByDate(nonRecurringExpenses);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -77,7 +73,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
                       CircleAvatar(
                         radius: 48,
                         backgroundImage: NetworkImage(
-                          userPfp!
+                          userPfp ?? 'https://i.pinimg.com/736x/f9/b6/ee/f9b6ee085996dee0e22ddc52dda03ac2.jpg',
                         ),
                       ),
                       Column(
@@ -88,7 +84,7 @@ class UserGroupExpensesPage extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             spacing: 8,
                             children: [
-                              Icon(LucideIcons.users, size: 16),
+                              const Icon(LucideIcons.users, size: 16),
                               Text(groupName, style: AppTypography.userEmailSubtitle, textAlign: TextAlign.center),
                             ],
                           ),
@@ -96,59 +92,104 @@ class UserGroupExpensesPage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 48),
+                  const SizedBox(height: 48),
 
-                  if (expenses.isNotEmpty) ...groupedExpenses.entries.map((entry) {
-                    final dateLabel = entry.key;
-                    final dayExpenses = entry.value;
-
-                    return Column(
-                      children: [
-                        AppContainer(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text(
-                                  dateLabel,
-                                  style: AppTypography.containerTitle,
-                                ),
+                  if (expenses.isNotEmpty) ...[
+                    // Recurring Expenses Section
+                    if (recurringExpenses.isNotEmpty) ...[
+                      AppContainer(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                "Spese ricorrenti",
+                                style: AppTypography.containerTitle,
                               ),
-
-                              ...dayExpenses.map(
-                                    (expense) {
-                                  return ExpenseItem(
-                                    categoryColor: expense.categoryColor,
-                                    categoryIcon: expense.categoryIcon,
-                                    categoryName: expense.categoryName,
-                                    title: expense.title,
-                                    amount: expense.amount,
-                                    purchaseDate: expense.purchaseDate,
-                                    description: expense.description,
-                                    groupName: expense.groupName,
-                                    expenseId: expense.id,
-                                    categoryId: expense.categoryId,
-                                    userName: userName,
-                                    userPfp: userPfp,
-                                    isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
-                                    isGroupView: true,
-                                    isRecurring: expense.isRecurring,
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
+                            ),
+                            ...recurringExpenses.map(
+                                  (expense) {
+                                return ExpenseItem(
+                                  categoryColor: expense.categoryColor,
+                                  categoryIcon: expense.categoryIcon,
+                                  categoryName: expense.categoryName,
+                                  title: expense.title,
+                                  amount: expense.amount,
+                                  purchaseDate: expense.purchaseDate,
+                                  description: expense.description,
+                                  groupName: expense.groupName,
+                                  expenseId: expense.id,
+                                  categoryId: expense.categoryId,
+                                  userName: userName,
+                                  userPfp: userPfp,
+                                  isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                  isGroupView: true,
+                                  isRecurring: expense.isRecurring,
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  })
-                  else StatusContainer(
-                    icon: LucideIcons.sparkles,
-                    title: "Niente da vedere qui",
-                    description: "O $userName non ha speso un centesimo, o sta nascondendo le ricevute.",
-                  ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(color: AppColors.containerBorder),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Non-Recurring Expenses Grouped by Date
+                    ...groupedExpenses.entries.map((entry) {
+                      final dateLabel = entry.key;
+                      final dayExpenses = entry.value;
+
+                      return Column(
+                        children: [
+                          AppContainer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    dateLabel,
+                                    style: AppTypography.containerTitle,
+                                  ),
+                                ),
+
+                                ...dayExpenses.map(
+                                      (expense) {
+                                    return ExpenseItem(
+                                      categoryColor: expense.categoryColor,
+                                      categoryIcon: expense.categoryIcon,
+                                      categoryName: expense.categoryName,
+                                      title: expense.title,
+                                      amount: expense.amount,
+                                      purchaseDate: expense.purchaseDate,
+                                      description: expense.description,
+                                      groupName: expense.groupName,
+                                      expenseId: expense.id,
+                                      categoryId: expense.categoryId,
+                                      userName: userName,
+                                      userPfp: userPfp,
+                                      isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                      isGroupView: true,
+                                      isRecurring: expense.isRecurring,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }),
+                  ] else
+                    StatusContainer(
+                      icon: LucideIcons.sparkles,
+                      title: "Niente da vedere qui",
+                      description: "O $userName non ha speso un centesimo, o sta nascondendo le ricevute.",
+                    ),
                 ],
               );
             },
