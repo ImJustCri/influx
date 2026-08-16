@@ -62,8 +62,8 @@ class PeriodsOverviewPage extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final period = inactivePeriods[index];
 
-                        final startDateFormatted = DateFormat('dd MMMM yyyy', 'it').format(period.createdAt);
-                        final endDateFormatted = DateFormat('dd MMMM yyyy', 'it').format(period.endDate);
+                        final startDateFormatted = DateFormat('dd MMM yyyy', 'it').format(period.createdAt);
+                        final endDateFormatted = DateFormat('dd MMM yyyy', 'it').format(period.endDate);
 
                         return PeriodOverviewCard(
                           periodStartDate: startDateFormatted,
