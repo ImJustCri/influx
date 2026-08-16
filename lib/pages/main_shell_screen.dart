@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/pages/expenses/add_expense_page.dart';
 import 'package:influx/pages/switch/switch_page.dart';
 import 'package:influx/widgets/bottom_nav/bottom_navbar.dart';
 import '../theme.dart';
@@ -60,7 +61,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
                 setState(() {
                   _currentIndex = index;
                 });
-              },
+              }, onAddPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpensePage()));
+            },
             ),
           ),
         ],
