@@ -27,7 +27,7 @@ Tieni sotto controllo le tue uscite per categoria: alimentari, carburante, abbig
 ### 📈 Inflazione personale
 L'inflazione che ti riguarda non è quella media nazionale. Influx calcola il tuo tasso reale basandosi su quello che compri tu, e ti mostra esattamente quali categorie ti stanno costando di più.
 
-### 🌿 ecoSwitch
+### 🌿 Switch / ecoSwitch
 La funzione principale dell'app. ecoSwitch ti suggerisce alternative più economiche o più ecosostenibili ai ciò che acquisti abitualmente.
 
 Modalità disponibili:
@@ -41,7 +41,8 @@ Crea un gruppo condiviso con amici (per viaggi, per esempio) o con la famiglia. 
 
 ## Note
 
-Questa repository contiene **solo il client Flutter**. Il backend non è incluso.
+- Questa repository contiene **solo il client Flutter**. Il backend non è incluso.
+- Applicazione sviluppata per il [Premio GFMarilli](https://projects.hackersgen.com/) 2026
 
 ---
 
