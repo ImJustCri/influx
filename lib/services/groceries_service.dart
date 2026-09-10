@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../models/switch/grocery_models.dart';
+import '../models/switch/grocery_model.dart';
 
 class GroceriesService {
   static const String _productBaseUrl = 'https://world.openfoodfacts.org/api/v3';
