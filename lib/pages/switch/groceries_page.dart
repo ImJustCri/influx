@@ -4,8 +4,8 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../models/switch/grocery_models.dart';
-import '../../services/switch_services.dart';
+import '../../models/switch/grocery_model.dart';
+import '../../services/groceries_service.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
 import '../../widgets/page_padding.dart';
