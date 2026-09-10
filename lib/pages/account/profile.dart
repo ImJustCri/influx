@@ -234,8 +234,8 @@ class ProfilePage extends ConsumerWidget {
                     },
                   ),
                   SettingsTile(
-                    icon: LucideIcons.palette,
-                    title: "Personalizza interfaccia",
+                    icon: LucideIcons.settings_2,
+                    title: "Preferenze applicazione",
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
