@@ -1,4 +1,6 @@
-# Influx: App di Budgeting
+<p align="center">
+  <img src="assets/Cover.png" alt="App Banner" width="100%">
+</p>
 
 <p align="center">
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">
@@ -6,6 +8,9 @@
   <img src="https://m3-markdown-badges.vercel.app/stars/1/3/imjustcri/influx">
   <img src="https://m3-markdown-badges.vercel.app/issues/1/2/imjustcri/influx">
 </p>
+
+
+# Influx: App di Budgeting
 
 **Influx** è un'app di finanza personale che ti aiuta a monitorare le spese, capire la tua inflazione reale e trovare alternative più economiche o sostenibili ai prodotti che compri già.
 
