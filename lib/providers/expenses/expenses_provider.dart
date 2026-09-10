@@ -27,6 +27,25 @@ final fetchLatestExpenses = FutureProvider.family<List<ExpenseData>, int>((ref, 
   return response.map((item) => ExpenseData.convertJson(item)).toList();
 });
 
+/// Fetch all recurring expenses
+final fetchRecurringExpenses = FutureProvider<List<ExpenseData>>((ref) async {
+  final userId = Supabase.instance.client.auth.currentUser!.id;
+  final activePeriod = await ref.watch(activeUserPeriodProvider.future);
+
+  if (activePeriod == null) {
+    return [];
+  }
+
+  final response = await Supabase.instance.client
+      .from('expense')
+      .select('*, category(*), group(*)')
+      .eq('profile_id', userId)
+      .eq('isRecurring', true)
+      .order('created_at', ascending: false);
+
+  return response.map((item) => ExpenseData.convertJson(item)).toList();
+});
+
 /// Fetch all expenses
 final fetchExpenses = FutureProvider<List<ExpenseData>>((ref) async {
   final supabase = Supabase.instance.client;
