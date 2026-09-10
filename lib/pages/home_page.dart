@@ -5,6 +5,7 @@ import 'package:influx/services/ocr_service.dart';
 import 'package:influx/theme.dart';
 import 'package:influx/widgets/home/home_app_bar.dart';
 import 'package:influx/widgets/page_padding.dart';
+import '../models/expense_data.dart';
 import '../providers/expenses/total_expenses_provider.dart';
 import '../widgets/home/budget_card.dart';
 import '../widgets/home/recent_expenses_section.dart';
@@ -21,6 +22,7 @@ class HomePageState extends ConsumerState<HomePage> {
   Future<void> _refreshData() async {
     // invalidate both providers so the total and recent expenses refresh together
     ref.invalidate(fetchLatestExpenses);
+    ref.invalidate(fetchRecurringExpenses);
     ref.invalidate(totalExpensesProvider);
 
     await ref.read(fetchLatestExpenses(3).future);
@@ -28,6 +30,7 @@ class HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final recurringExpensesAsync = ref.watch(fetchRecurringExpenses);
     final expensesAsync = ref.watch(fetchLatestExpenses(5));
     final totalExpensesAsync = ref.watch(totalExpensesProvider);
 
@@ -67,10 +70,18 @@ class HomePageState extends ConsumerState<HomePage> {
                       expensesAsync.when(
                         loading: () => const StatusContainer(),
                         data: (expenses) {
-                          return RecentExpensesSection(expenses: expenses);
+                          final List<ExpenseData> recurringExpenses = recurringExpensesAsync.maybeWhen(
+                            data: (recurring) => recurring,
+                            orElse: () => [],
+                          );
+
+                          return RecentExpensesSection(
+                            expenses: expenses,
+                            recurringExpenses: recurringExpenses,
+                          );
                         },
                         error: (error, stack) => Text(error.toString()),
-                      ),
+                      )
                     ],
                   ),
                 ),

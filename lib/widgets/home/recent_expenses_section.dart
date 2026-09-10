@@ -12,10 +12,12 @@ import '../status_container.dart';
 
 class RecentExpensesSection extends StatefulWidget {
   final List<ExpenseData> expenses;
+  final List<ExpenseData> recurringExpenses;
 
   const RecentExpensesSection({
     super.key,
     required this.expenses,
+    required this.recurringExpenses,
   });
 
   @override
@@ -42,7 +44,7 @@ class _RecentExpensesSectionState extends State<RecentExpensesSection> {
   @override
   Widget build(BuildContext context) {
     // Separate recurring expenses from one-time expenses
-    final recurringExpenses = widget.expenses.where((e) => e.isRecurring).toList();
+    final recurringExpenses = widget.recurringExpenses;
     final nonRecurringExpenses = widget.expenses.where((e) => !e.isRecurring).toList();
 
     // Limit only the non-recurring recent expenses
