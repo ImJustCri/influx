@@ -30,10 +30,6 @@ L'inflazione che ti riguarda non è quella media nazionale. Influx calcola il tu
 ### 🌿 Switch / ecoSwitch
 Switch ti suggerisce alternative più economiche, mentre EcoSwitch ti indica prodotti più ecosostenibili a quelli che acquisti abitualmente.
 
-Modalità disponibili:
-- **Risparmio** — priorità al prezzo più basso
-- **Eco-sostenibile** — priorità a prodotti bio, locali, packaging riciclabile
-- **Entrambi** — il miglior equilibrio tra costo e sostenibilità
 ---
 
 ### Group mode
