@@ -28,7 +28,7 @@ Tieni sotto controllo le tue uscite per categoria: alimentari, carburante, abbig
 L'inflazione che ti riguarda non è quella media nazionale. Influx calcola il tuo tasso reale basandosi su quello che compri tu, e ti mostra esattamente quali categorie ti stanno costando di più.
 
 ### 🌿 Switch / ecoSwitch
-La funzione principale dell'app. ecoSwitch ti suggerisce alternative più economiche o più ecosostenibili ai ciò che acquisti abitualmente.
+Switch ti suggerisce alternative più economiche, mentre EcoSwitch ti indica prodotti più ecosostenibili a quelli che acquisti abitualmente.
 
 Modalità disponibili:
 - **Risparmio** — priorità al prezzo più basso
