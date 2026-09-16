@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 import '../../pages/notifications_page.dart';
+import '../../theme.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
@@ -25,17 +26,17 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        // IconButton(
+        //   icon: const Icon(LucideIcons.bell),
+        //   tooltip: 'Notifiche',
+        //   onPressed: () {
+        //     Navigator.push(
+        //       context, MaterialPageRoute(builder: (context) => NotificationsPage())
+        //     );
+        //   },
+        // ),
         IconButton(
-          icon: const Icon(LucideIcons.bell),
-          tooltip: 'Notifiche',
-          onPressed: () {
-            Navigator.push(
-              context, MaterialPageRoute(builder: (context) => NotificationsPage())
-            );
-          },
-        ),
-        IconButton(
-          icon: const Icon(LucideIcons.circle_user),
+          icon: const Icon(LucideIcons.circle_user, color: AppColors.white,),
           tooltip: 'Il tuo account',
           onPressed: () {
             Navigator.pushNamed(context, '/profile');
