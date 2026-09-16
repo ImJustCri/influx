@@ -11,7 +11,7 @@ import '../../providers/expenses/expenses_provider.dart';
 import '../../widgets/expenses/expense_item.dart';
 import '../status_container.dart';
 
-class AllExpensesPage extends ConsumerWidget {
+class AllExpensesPage extends ConsumerStatefulWidget {
   final List<GroupMember>? members;
   final String? groupId;
   final bool? isCurrentUserGroupAdmin;
@@ -24,6 +24,20 @@ class AllExpensesPage extends ConsumerWidget {
     this.isCurrentUserGroupAdmin,
     required this.isGroupView,
   });
+
+  @override
+  ConsumerState<AllExpensesPage> createState() => _AllExpensesPageState();
+}
+
+class _AllExpensesPageState extends ConsumerState<AllExpensesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   /// Helper function to group expenses by formatted date string
   Map<String, List<ExpenseData>> _groupExpensesByDate(List<ExpenseData> expenses) {
@@ -41,9 +55,9 @@ class AllExpensesPage extends ConsumerWidget {
 
   /// Helper function to find a member by profileId
   GroupMember? _findMember(String? profileId) {
-    if (members == null || profileId == null) return null;
+    if (widget.members == null || profileId == null) return null;
 
-    for (final member in members!) {
+    for (final member in widget.members!) {
       if (member.id == profileId) {
         return member;
       }
@@ -51,15 +65,28 @@ class AllExpensesPage extends ConsumerWidget {
     return null;
   }
 
+  /// Filters expenses by title OR category name, case-insensitive
+  List<ExpenseData> _filterExpenses(List<ExpenseData> expenses) {
+    if (_searchQuery.trim().isEmpty) return expenses;
+
+    final query = _searchQuery.trim().toLowerCase();
+
+    return expenses.where((expense) {
+      final titleMatch = expense.title.toLowerCase().contains(query);
+      final categoryMatch = expense.categoryName.toLowerCase().contains(query);
+      return titleMatch || categoryMatch;
+    }).toList();
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = groupId != null
-        ? ref.watch(fetchExpensesByGroupProvider(groupId!))
+  Widget build(BuildContext context) {
+    final expensesAsync = widget.groupId != null
+        ? ref.watch(fetchExpensesByGroupProvider(widget.groupId!))
         : ref.watch(fetchExpenses);
 
     Future<void> refreshExpenses() async {
-      if (groupId != null) {
-        ref.invalidate(fetchExpensesByGroupProvider(groupId!));
+      if (widget.groupId != null) {
+        ref.invalidate(fetchExpensesByGroupProvider(widget.groupId!));
       } else {
         ref.invalidate(fetchExpenses);
       }
@@ -86,9 +113,12 @@ class AllExpensesPage extends ConsumerWidget {
                   );
                 }
 
+                // Apply search filter (by title or category) before splitting
+                final filteredExpenses = _filterExpenses(expenses);
+
                 // Separate recurring and non-recurring expenses
-                final recurringExpenses = expenses.where((e) => e.isRecurring).toList();
-                final nonRecurringExpenses = expenses.where((e) => !e.isRecurring).toList();
+                final recurringExpenses = filteredExpenses.where((e) => e.isRecurring).toList();
+                final nonRecurringExpenses = filteredExpenses.where((e) => !e.isRecurring).toList();
 
                 final groupedExpenses = _groupExpensesByDate(nonRecurringExpenses);
 
@@ -98,6 +128,37 @@ class AllExpensesPage extends ConsumerWidget {
                     Text('Tutte le spese', style: AppTypography.pageTitle),
                     Text('Aggiunte in questo periodo', style: AppTypography.pageSubtitle),
                     const SizedBox(height: 24),
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Cerca per titolo o categoria',
+                        prefixIcon: const Icon(LucideIcons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                          icon: const Icon(LucideIcons.x),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    if (filteredExpenses.isEmpty)
+                      StatusContainer(
+                        icon: LucideIcons.book_search,
+                        title: "Nessun risultato",
+                        description: "Nessuna spesa corrisponde alla ricerca.",
+                      ),
 
                     if (recurringExpenses.isNotEmpty) ...[
                       AppContainer(
@@ -126,10 +187,10 @@ class AllExpensesPage extends ConsumerWidget {
                                   groupName: expense.groupName,
                                   expenseId: expense.id,
                                   categoryId: expense.categoryId,
-                                  isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                  isCurrentUserGroupAdmin: widget.isCurrentUserGroupAdmin,
                                   userName: matchingMember?.name,
                                   userPfp: matchingMember?.avatarImageUrl,
-                                  isGroupView: isGroupView,
+                                  isGroupView: widget.isGroupView,
                                   isRecurring: expense.isRecurring,
                                 );
                               },
@@ -174,10 +235,10 @@ class AllExpensesPage extends ConsumerWidget {
                                       groupName: expense.groupName,
                                       expenseId: expense.id,
                                       categoryId: expense.categoryId,
-                                      isCurrentUserGroupAdmin: isCurrentUserGroupAdmin,
+                                      isCurrentUserGroupAdmin: widget.isCurrentUserGroupAdmin,
                                       userName: matchingMember?.name,
                                       userPfp: matchingMember?.avatarImageUrl,
-                                      isGroupView: isGroupView,
+                                      isGroupView: widget.isGroupView,
                                       isRecurring: expense.isRecurring,
                                     );
                                   },
