@@ -7,7 +7,7 @@ import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/switch/station_model.dart';
 
-const _kCacheMaxAge = Duration(hours: 3);
+const _kCacheMaxAge = Duration(hours: 24);
 
 /// Runs entirely in a background isolate via compute() — never touches
 /// the UI thread. Must be top-level (or static) so it can be sent to
