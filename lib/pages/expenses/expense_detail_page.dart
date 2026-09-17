@@ -215,7 +215,7 @@ class ExpenseDetailPage extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Data d'acquisto", style: AppTypography.containerTitle),
+                            Text(isRecurring ? "Data d'inizio" : "Data d'acquisto", style: AppTypography.containerTitle),
                             const SizedBox(height: 4),
                             Text(_formatDate(purchaseDate), style: AppTypography.containerBody),
                           ],
@@ -232,7 +232,7 @@ class ExpenseDetailPage extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Orario d'acquisto", style: AppTypography.containerTitle),
+                            Text(isRecurring ? "Orario d'inizio" : "Orario d'acquisto", style: AppTypography.containerTitle),
                             const SizedBox(height: 4),
                             Text(_formatTime(purchaseDate), style: AppTypography.containerBody),
                           ],
