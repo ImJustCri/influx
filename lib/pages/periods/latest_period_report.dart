@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/widgets/page_padding.dart';
-import '../../global.dart';
 import '../../models/expense_data.dart';
 import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import 'package:influx/providers/expenses/expenses_provider.dart';
 import '../../widgets/app_container.dart';
 import '../../widgets/expenses/expense_category_bar.dart';
-import '../../widgets/round_linear_progress_bar.dart';
+import '../../widgets/periods/inactive_budget_card.dart';
 
 class LatestPeriodReport extends ConsumerStatefulWidget {
   const LatestPeriodReport({super.key});
@@ -68,54 +67,9 @@ class _LatestPeriodReportState extends ConsumerState<LatestPeriodReport> {
                   data: (period) {
                     if (period == null) return const SizedBox.shrink();
 
-                    final double totalBudget = period.budget;
-                    final double actualSpent = period.spent;
-                    final double remaining = totalBudget - actualSpent;
-                    final double progressValue = totalBudget > 0
-                        ? (actualSpent / totalBudget).clamp(0.0, 1.0)
-                        : 0.0;
-
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 24.0),
-                      child: AppContainer(
-                        padding: const EdgeInsets.all(24),
-                        width: double.infinity,
-                        child: Column(
-                          spacing: 4,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Spesi",
-                              style: AppTypography.containerBody,
-                            ),
-                            SelectableText(
-                              "$actualSpent$currency",
-                              style: AppTypography.budgetIndicator,
-                            ),
-                            const SizedBox(height: 8),
-                            RoundedLinearProgressBar(
-                              value: progressValue,
-                              minHeight: 8,
-                              backgroundColor: AppColors.backgroundAccent,
-                              valueColor: AppColors.btnBackground,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Rimanente: $remaining$currency",
-                                  style: AppTypography.containerBody,
-                                ),
-                                Text(
-                                  "Totale: $totalBudget$currency",
-                                  style: AppTypography.containerBody,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: InactiveBudgetCard(period: period),
                     );
                   },
                 ),
