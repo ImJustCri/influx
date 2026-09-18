@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:influx/pages/account/security_page.dart';
-import 'package:influx/pages/initial_page.dart';
-import 'package:influx/widgets/app_container.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import '../../models/profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme.dart';
+import '../../widgets/app_container.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
 import '../../widgets/user_qr_dialog.dart';
+import '../account/security_page.dart';
+import '../initial_page.dart';
 import '../periods/periods_overview_page.dart';
 import '../preferences/interface_settings_page.dart';
 import 'edit_profile_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
+
+  String _obscureEmail(String email) {
+    if (!email.contains('@')) return '••••••••';
+    final parts = email.split('@');
+    final name = parts[0];
+    final domain = parts[1];
+
+    final maskedName = name.length > 2
+        ? '${name[0]}${'•' * (name.length - 2)}${name[name.length - 1]}'
+        : '•••';
+
+    final domainParts = domain.split('.');
+    if (domainParts.length > 1) {
+      final domainName = domainParts[0];
+      final tld = domainParts.sublist(1).join('.');
+      final maskedDomain = domainName.length > 2
+          ? '${domainName[0]}${'•' * (domainName.length - 2)}${domainName[domainName.length - 1]}'
+          : '•••';
+      return '$maskedName@$maskedDomain.$tld';
+    }
+
+    return '$maskedName@$domain';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -97,8 +120,15 @@ class ProfilePage extends ConsumerWidget {
       WidgetRef ref,
       Profile userProfile,
       ) {
-    final userEmail =
+    // Watch the sensitivity toggle state
+    final hideSensitiveInfo =
+        ref.watch(hideSensitiveInfoProvider).value ?? false;
+
+    final rawEmail =
         Supabase.instance.client.auth.currentUser?.email ?? 'Nessuna email';
+
+    // Obscure email if privacy mode is active
+    final displayedEmail = hideSensitiveInfo ? _obscureEmail(rawEmail) : rawEmail;
 
     return PagePadding(
       child: Column(
@@ -154,7 +184,7 @@ class ProfilePage extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      userEmail,
+                      displayedEmail,
                       style: AppTypography.userEmailSubtitle.copyWith(
                         fontSize: 13,
                       ),
@@ -164,7 +194,6 @@ class ProfilePage extends ConsumerWidget {
               ),
             ],
           ),
-
           Column(
             spacing: 16,
             children: [
@@ -286,7 +315,6 @@ class ProfilePage extends ConsumerWidget {
               ),
             ],
           ),
-
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
             builder: (context, snapshot) {
