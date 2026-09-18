@@ -29,6 +29,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   Timer? _debounceTimer;
   int _resultCount = 0;
   bool _hasInitialComuneApplied = false;
+  DateTime? _lastUpdated;
 
   @override
   void initState() {
@@ -66,15 +67,16 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     });
 
     try {
-      final stationsMap = await _fuelService.loadData(
-        onCacheLoaded: (cachedMap) {
+      final result = await _fuelService.loadData(
+        onCacheLoaded: (cachedResult) {
           if (!mounted) return;
           setState(() {
             _stationsMap
               ..clear()
-              ..addAll(cachedMap);
+              ..addAll(cachedResult.stationsMap);
             _isLoading = false;
             _errorMessage = null;
+            _lastUpdated = cachedResult.lastUpdated;
           });
           _applyDefaultComune();
           _applyFilter(_searchController.text);
@@ -85,9 +87,10 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       setState(() {
         _stationsMap
           ..clear()
-          ..addAll(stationsMap);
+          ..addAll(result.stationsMap);
         _isLoading = false;
         _errorMessage = null;
+        _lastUpdated = result.lastUpdated;
       });
 
       _applyDefaultComune();
@@ -117,6 +120,14 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       _filteredStations = _fuelService.filterStations(_stationsMap, query);
       _resultCount = _filteredStations.length;
     });
+  }
+
+  String _formatDateTime(DateTime dt) {
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = dt.month.toString().padLeft(2, '0');
+    final hour = dt.hour.toString().padLeft(2, '0');
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return '$day/$month $hour:$minute';
   }
 
   @override
@@ -179,13 +190,25 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             ),
             const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (_searchController.text.trim().isNotEmpty)
                   Text(
                     '$_resultCount risultat${_resultCount != 1 ? 'i' : 'o'}',
                     style: const TextStyle(
-                        fontSize: 12, color: AppColors.whiteDim),
+                      fontSize: 12,
+                      color: AppColors.whiteDim,
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
+                if (_lastUpdated != null)
+                  Text(
+                    'Aggiornato: ${_formatDateTime(_lastUpdated!)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.whiteDim,
+                    ),
                   ),
               ],
             ),
