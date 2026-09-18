@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/pages/edit_budget_page.dart';
 import '../../global.dart';
+import '../../pages/preferences/interface_settings_page.dart';
 import '../../providers/periods/user_period_providers.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
 
-class BudgetCard extends ConsumerWidget {
+class BudgetCard extends ConsumerStatefulWidget {
   final double totalExpenses;
   final bool isNotAuthorized;
   final bool isGroup;
@@ -20,24 +22,37 @@ class BudgetCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetCard> createState() => _BudgetCardState();
+}
+
+class _BudgetCardState extends ConsumerState<BudgetCard> {
+  bool _revealLocally = false;
+
+  @override
+  Widget build(BuildContext context) {
     final asyncActivePeriod = ref.watch(activeUserPeriodProvider);
+    final isGlobalHideActive =
+        ref.watch(hideSensitiveInfoProvider).value ?? false;
+
+    final bool shouldHide = isGlobalHideActive && !_revealLocally;
 
     return asyncActivePeriod.when(
       data: (period) {
         final double totalBudget = period?.budget ?? 0.0;
-        final double actualSpent = totalExpenses;
-        final DateTime resetDate = period!.endDate;
+        final double actualSpent = widget.totalExpenses;
+        final DateTime? resetDate = period?.endDate;
 
         final bool isOverBudget = actualSpent > totalBudget;
         final remaining = (totalBudget - actualSpent).toStringAsFixed(2);
         final progressValue = totalBudget > 0
             ? (actualSpent / totalBudget).clamp(0.0, 1.0)
             : 0.0;
-        final resetDateFormatted =
-            "${resetDate.day} ${_getMonthName(resetDate.month)}";
+        final resetDateFormatted = resetDate != null
+            ? "${resetDate.day} ${_getMonthName(resetDate.month)}"
+            : "N/D";
 
-        final Color alertColor = isOverBudget ? Colors.red : AppColors.btnBackground;
+        final Color alertColor =
+        isOverBudget ? Colors.red : AppColors.btnBackground;
 
         return AppContainer(
           padding: const EdgeInsets.all(24),
@@ -46,19 +61,40 @@ class BudgetCard extends ConsumerWidget {
             spacing: 4,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Budget rimanente",
-                style: AppTypography.containerBody,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Rimanente",
+                    style: AppTypography.containerBody,
+                  ),
+                  if (isGlobalHideActive)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: Icon(
+                        _revealLocally ? LucideIcons.eye_off : LucideIcons.eye,
+                        size: 20,
+                        color: AppColors.whiteDim,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _revealLocally = !_revealLocally;
+                        });
+                      },
+                    ),
+                ],
               ),
               SelectableText(
-                "$remaining$currency",
+                shouldHide ? "•••" : "$remaining$currency",
                 style: AppTypography.budgetIndicator.copyWith(
-                  color: isOverBudget ? Colors.red : null,
+                  color: (!shouldHide && isOverBudget) ? Colors.red : null,
                 ),
               ),
               const SizedBox(height: 8),
               RoundedLinearProgressBar(
-                value: progressValue,
+                value: shouldHide ? 0.0 : progressValue,
                 minHeight: 8,
                 backgroundColor: AppColors.backgroundAccent,
                 valueColor: alertColor,
@@ -68,13 +104,13 @@ class BudgetCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Spesi: ${actualSpent.toStringAsFixed(2)}$currency",
+                    "Spesi: ${shouldHide ? '•••' : '${actualSpent.toStringAsFixed(2)}$currency'}",
                     style: AppTypography.containerBody.copyWith(
-                      color: isOverBudget ? Colors.red : null,
+                      color: (!shouldHide && isOverBudget) ? Colors.red : null,
                     ),
                   ),
                   Text(
-                    "Totale: ${totalBudget.toStringAsFixed(2)}$currency",
+                    "Totale: ${shouldHide ? '•••' : '${totalBudget.toStringAsFixed(2)}$currency'}",
                     style: AppTypography.containerBody,
                   ),
                 ],
@@ -91,7 +127,7 @@ class BudgetCard extends ConsumerWidget {
                     "Reset: $resetDateFormatted",
                     style: AppTypography.containerBody,
                   ),
-                  if (!isNotAuthorized)
+                  if (!widget.isNotAuthorized)
                     GestureDetector(
                       onTap: () async {
                         await Navigator.push(
@@ -99,14 +135,17 @@ class BudgetCard extends ConsumerWidget {
                           MaterialPageRoute(
                             builder: (context) => EditBudgetPage(
                               initialBudget: totalBudget,
-                              totalExpenses: totalExpenses,
+                              totalExpenses: widget.totalExpenses,
                             ),
                           ),
                         );
 
                         ref.invalidate(activeUserPeriodProvider);
                       },
-                      child: Text("Modifica ->", style: AppTypography.containerBody),
+                      child: Text(
+                        "Modifica ->",
+                        style: AppTypography.containerBody,
+                      ),
                     ),
                 ],
               ),
