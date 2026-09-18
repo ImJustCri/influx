@@ -7,11 +7,16 @@ import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/switch/station_model.dart';
 
-const _kCacheMaxAge = Duration(hours: 24);
+class FuelDataResult {
+  final Map<String, Station> stationsMap;
+  final DateTime lastUpdated;
 
-/// Runs entirely in a background isolate via compute() — never touches
-/// the UI thread. Must be top-level (or static) so it can be sent to
-/// the isolate as a function pointer.
+  FuelDataResult({
+    required this.stationsMap,
+    required this.lastUpdated,
+  });
+}
+
 Map<String, Station> _parseStationsIsolate(Map<String, String> csvData) {
   final List<List<dynamic>> stationRows = csv.decode(csvData['stations']!);
   final List<List<dynamic>> priceRows = csv.decode(csvData['prices']!);
@@ -75,7 +80,25 @@ class FuelService {
 
   Future<Directory> _cacheDir() => getApplicationSupportDirectory();
 
-  Future<Map<String, String>?> _readCache() async {
+  /// Update time for the files is 8:00 AM (Italy / CET)
+  /// Check if cache is stale
+  bool _isCacheStale(DateTime lastModified) {
+    final now = DateTime.now();
+
+    final DateTime lastExpectedUpdate;
+    if (now.hour >= 8) {
+      // If it's 8:00 AM or above, the latest valid update is today, 8:00 AM
+      lastExpectedUpdate = DateTime(now.year, now.month, now.day, 8, 0);
+    } else {
+      // If below 8:00 AM, the latest valid update is yesterday, 8:00 AM
+      final yesterday = now.subtract(const Duration(days: 1));
+      lastExpectedUpdate = DateTime(yesterday.year, yesterday.month, yesterday.day, 8, 0);
+    }
+
+    return lastModified.isBefore(lastExpectedUpdate);
+  }
+
+  Future<Map<String, dynamic>?> _readCache() async {
     try {
       final dir = await _cacheDir();
       final pricesFile = File('${dir.path}/fuel_prices_cache.csv');
@@ -83,14 +106,15 @@ class FuelService {
 
       if (!await pricesFile.exists() || !await stationsFile.exists()) return null;
 
-      final age = DateTime.now().difference(await pricesFile.lastModified());
+      final lastModified = await pricesFile.lastModified();
       final prices = await pricesFile.readAsString();
       final stations = await stationsFile.readAsString();
 
       return {
         'prices': prices,
         'stations': stations,
-        'stale': (age > _kCacheMaxAge).toString(),
+        'stale': _isCacheStale(lastModified),
+        'lastModified': lastModified,
       };
     } catch (_) {
       return null;
@@ -102,29 +126,40 @@ class FuelService {
       final dir = await _cacheDir();
       await File('${dir.path}/fuel_prices_cache.csv').writeAsString(prices);
       await File('${dir.path}/fuel_stations_cache.csv').writeAsString(stations);
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
-  Future<Map<String, Station>> loadData({
-    required Function(Map<String, Station> stationsMap) onCacheLoaded,
+  Future<FuelDataResult> loadData({
+    required Function(FuelDataResult cachedResult) onCacheLoaded,
   }) async {
     final cached = await _readCache();
 
     if (cached != null) {
-      final stationsMap = await compute(_parseStationsIsolate, cached);
-      onCacheLoaded(stationsMap);
+      final Map<String, String> csvData = {
+        'prices': cached['prices'] as String,
+        'stations': cached['stations'] as String,
+      };
 
-      if (cached['stale'] == 'true') {
+      final stationsMap = await compute(_parseStationsIsolate, csvData);
+      final lastModified = cached['lastModified'] as DateTime;
+
+      final cachedResult = FuelDataResult(
+        stationsMap: stationsMap,
+        lastUpdated: lastModified,
+      );
+
+      onCacheLoaded(cachedResult);
+
+      if (cached['stale'] == true) {
         return await fetchAndProcessData();
       }
-      return stationsMap;
+      return cachedResult;
     } else {
       return await fetchAndProcessData();
     }
   }
 
-  Future<Map<String, Station>> fetchAndProcessData() async {
+  Future<FuelDataResult> fetchAndProcessData() async {
     final pricesUrl = Uri.parse("https://www.mimit.gov.it/images/exportCSV/prezzo_alle_8.csv");
     final stationUrl = Uri.parse("https://www.mimit.gov.it/images/exportCSV/anagrafica_impianti_attivi.csv");
 
@@ -139,8 +174,14 @@ class FuelService {
 
       final csvData = {'prices': priceCsvRaw, 'stations': stationCsvRaw};
       final stationsMap = await compute(_parseStationsIsolate, csvData);
-      unawaited(_writeCache(priceCsvRaw, stationCsvRaw));
-      return stationsMap;
+
+      final now = DateTime.now();
+      await _writeCache(priceCsvRaw, stationCsvRaw);
+
+      return FuelDataResult(
+        stationsMap: stationsMap,
+        lastUpdated: now,
+      );
     } else {
       throw Exception("Impossibile caricare i dati dal server.");
     }
