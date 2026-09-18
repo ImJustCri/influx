@@ -14,6 +14,9 @@
 
 **Influx** è un'app di finanza personale che ti aiuta a monitorare le spese, capire la tua inflazione reale e trovare alternative più economiche o sostenibili ai prodotti che compri già.
 
+> [!Important]
+> Questa applicazione è progettata per funzionare solo in Italia.
+
 ---
 
 ## Funzionalità
