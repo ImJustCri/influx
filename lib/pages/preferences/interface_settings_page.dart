@@ -10,6 +10,7 @@ import '../../widgets/preferences/comune_modal.dart';
 
 const String showNavbarTextHintsKey = 'show_navbar_text_hints';
 const String selectedComuneKey = 'selected_comune';
+const String hideSensitiveInfoKey = 'hide_sensitive_info';
 
 final navbarTextHintsProvider =
 AsyncNotifierProvider<NavbarTextHintsNotifier, bool>(() {
@@ -33,6 +34,28 @@ class NavbarTextHintsNotifier extends AsyncNotifier<bool> {
   }
 }
 
+final hideSensitiveInfoProvider =
+AsyncNotifierProvider<HideSensitiveInfoNotifier, bool>(() {
+  return HideSensitiveInfoNotifier();
+});
+
+class HideSensitiveInfoNotifier extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(hideSensitiveInfoKey) ?? false;
+  }
+
+  Future<void> toggle(bool value) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(hideSensitiveInfoKey, value);
+      return value;
+    });
+  }
+}
+
 class InterfaceSettingsPage extends ConsumerWidget {
   const InterfaceSettingsPage({super.key});
 
@@ -40,6 +63,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showNavbarHintsAsync = ref.watch(navbarTextHintsProvider);
     final comuneAsync = ref.watch(comuneProvider);
+    final hideSensitiveInfoAsync = ref.watch(hideSensitiveInfoProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +79,7 @@ class InterfaceSettingsPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Icon(
-                    LucideIcons.lock,
+                    LucideIcons.smartphone,
                     size: 16,
                     color: AppColors.white,
                   ),
@@ -64,14 +88,14 @@ class InterfaceSettingsPage extends ConsumerWidget {
                     child: Text(
                       "Tutte le impostazioni configurate in questa pagina vengono salvate unicamente sul tuo dispositivo e non sono sincronizzate con il tuo account.",
                       style: AppTypography.containerBody.copyWith(
-                        color: AppColors.whiteDim
-                      )
+                        color: AppColors.whiteDim,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Text(
               "Navigazione",
               style: AppTypography.containerBody,
@@ -126,7 +150,8 @@ class InterfaceSettingsPage extends ConsumerWidget {
                 onTap: comuneAsync.isLoading
                     ? null
                     : () async {
-                  final selectedComune = await showModalBottomSheet<String>(
+                  final selectedComune =
+                  await showModalBottomSheet<String>(
                     context: context,
                     isScrollControlled: true,
                     builder: (context) => const ComuneSelectionModal(),
@@ -172,6 +197,49 @@ class InterfaceSettingsPage extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Privacy",
+              style: AppTypography.containerBody,
+            ),
+            const SizedBox(height: 12),
+            AppContainer(
+              width: double.infinity,
+              child: Row(
+                children: [
+                  const Icon(
+                    LucideIcons.eye_off,
+                    color: AppColors.white,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 2),
+                        Text(
+                          "Nascondi le informazioni sensibili dall'interfaccia",
+                          style: AppTypography.containerBody.copyWith(
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Switch(
+                    value: hideSensitiveInfoAsync.value ?? false,
+                    onChanged: hideSensitiveInfoAsync.isLoading
+                        ? null
+                        : (bool value) {
+                      ref
+                          .read(hideSensitiveInfoProvider.notifier)
+                          .toggle(value);
+                    },
+                  ),
+                ],
               ),
             ),
           ],
