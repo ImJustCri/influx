@@ -1,117 +1,151 @@
-import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/switch/grocery_model.dart';
 
-class GroceriesService {
-  static const String _productBaseUrl = 'https://world.openfoodfacts.org/api/v3';
+/// Thrown when Open Food Facts responds 429 (too many requests in a minute)
+class OpenFoodFactsRateLimitException implements Exception {
+  const OpenFoodFactsRateLimitException();
+  @override
+  String toString() => 'Troppe richieste a Open Food Facts. Riprova tra qualche istante.';
+}
 
+class OpenFoodFactsServiceException implements Exception {
+  final String reason;
+  const OpenFoodFactsServiceException(this.reason);
+  @override
+  String toString() => 'Richiesta ad Open Food Facts fallita: $reason';
+}
+
+class GroceriesService {
   static const Map<String, String> _headers = {
     'User-Agent': 'YourAppName - Android/iOS - Version 1.0.0 (contact@yourdomain.com)',
     'Accept': 'application/json',
   };
 
-  /// Fetch a product directly by its barcode number
+  static const String _productBaseUrl = 'https://world.openfoodfacts.org/api/v3';
+
+  static const String _searchBaseUrl = 'https://search.openfoodfacts.org/search';
+
+  static const String _searchFields =
+      'code,product_name,brands,image_url,categories_tags,ecoscore_grade,'
+      'ecoscore_score,nutrition_grades,quantity';
+
+  // Barcodes are 8-14 digits. So this assesses if a string is a barcode
+  static final RegExp _barcodePattern = RegExp(r'^\d{8,14}$');
+  static bool looksLikeBarcode(String query) => _barcodePattern.hasMatch(query.trim());
+
+  /// GET with a couple of retries for transient failures
+  static Future<http.Response> _getWithRetry(
+      Uri url, {
+        int maxAttempts = 3,
+      }) async {
+    Object? lastError;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final response =
+        await http.get(url, headers: _headers).timeout(const Duration(seconds: 10));
+
+        if (response.statusCode == 429) {
+          throw const OpenFoodFactsRateLimitException();
+        }
+        if (response.statusCode == 200) {
+          return response;
+        }
+        // 5xx (and anything else unexpected) — worth a retry.
+        lastError = 'HTTP ${response.statusCode}';
+      } on OpenFoodFactsRateLimitException {
+        rethrow;
+      } on TimeoutException catch (e) {
+        lastError = e;
+      } catch (e) {
+        lastError = e;
+      }
+
+      if (attempt < maxAttempts) {
+        await Future.delayed(Duration(milliseconds: 300 * attempt));
+      }
+    }
+
+    throw OpenFoodFactsServiceException(lastError.toString());
+  }
+
+  /// Fetch a product directly by its barcode number.
   static Future<GroceryProduct?> searchByBarcode(String barcode) async {
     final cleanBarcode = barcode.trim();
     if (cleanBarcode.isEmpty) return null;
 
-    try {
-      final url = Uri.parse('$_productBaseUrl/product/$cleanBarcode');
+    final url = Uri.parse('$_productBaseUrl/product/$cleanBarcode');
+    final response = await _getWithRetry(url);
 
-      final response = await http.get(url, headers: _headers).timeout(
-        const Duration(seconds: 10),
-      );
+    final Map<String, dynamic> json = jsonDecode(response.body);
+    final hasProduct = json['product'] != null;
+    final hasNoErrors = (json['errors'] as List?)?.isEmpty ?? true;
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> json = jsonDecode(response.body);
-
-        final bool hasProduct = json['product'] != null;
-        final bool hasNoErrors = (json['errors'] as List?)?.isEmpty ?? true;
-
-        if (hasProduct && hasNoErrors) {
-          return GroceryProduct.fromJson(json['product'] as Map<String, dynamic>);
-        }
-      }
-      return null;
-    } catch (e, stackTrace) {
-      print('Error searching barcode: $e');
-      print('Stacktrace: $stackTrace');
-      return null;
+    if (hasProduct && hasNoErrors) {
+      return GroceryProduct.fromJson(json['product'] as Map<String, dynamic>);
     }
+    return null;
   }
 
-  /// Search for products by name or keyword
-  static Future<List<GroceryProduct>> searchByKeyword(String query) async {
+  /// Search for products by name or keyword, ranked by text relevance.
+  static Future<List<GroceryProduct>> searchByKeyword(
+      String query, {
+        int pageSize = 20,
+      }) async {
     final cleanQuery = query.trim();
     if (cleanQuery.isEmpty) return [];
 
-    try {
-      final response = await http.get(
-        Uri.parse('https://world.openfoodfacts.org/cgi/search.pl').replace(
-          queryParameters: {
-            'search_terms': cleanQuery,
-            'json': '1',
-            'page_size': '20',
-          },
-        ),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+    final url = Uri.parse(_searchBaseUrl).replace(queryParameters: {
+      'q': cleanQuery,
+      'page_size': '$pageSize',
+      'fields': _searchFields,
+      'boost_phrase': 'true',
+    });
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final products = (json['products'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-        return products.map((p) => GroceryProduct.fromJson(p)).toList();
-      }
-      return [];
-    } catch (e) {
-      print('Error searching keyword: $e');
-      return [];
-    }
+    final response = await _getWithRetry(url);
+    final Map<String, dynamic> json = jsonDecode(response.body);
+    final List hits = json['hits'] ?? [];
+    return hits.map((p) => GroceryProduct.fromJson(p as Map<String, dynamic>)).toList();
   }
 
-  /// Fetch eco-friendlier alternatives for a product based on its category or name
+  /// Fetch eco-friendlier alternatives for a product
   static Future<List<GroceryProduct>> getEcoFriendlyAlternatives(
-      GroceryProduct product,
-      ) async {
-    try {
-      final searchTerm = (product.category != null && product.category!.isNotEmpty)
-          ? product.category!
-          : product.name;
+      GroceryProduct product, {
+        int maxResults = 20,
+      }) async {
+    final categoryTag = _bestCategoryTag(product);
+    if (categoryTag == null) return [];
 
-      if (searchTerm.isEmpty) return [];
+    final query = 'categories_tags:"$categoryTag" ecoscore_score:[* TO *]';
+    final url = Uri.parse(_searchBaseUrl).replace(queryParameters: {
+      'q': query,
+      'page_size': '${maxResults + 5}',
+      'fields': _searchFields,
+      'sort_by': '-ecoscore_score',
+    });
 
-      final response = await http.get(
-        Uri.parse('https://world.openfoodfacts.org/cgi/search.pl').replace(
-          queryParameters: {
-            'search_terms': searchTerm,
-            'json': '1',
-            'page_size': '25',
-          },
-        ),
-        headers: _headers,
-      ).timeout(const Duration(seconds: 10));
+    final response = await _getWithRetry(url);
+    final Map<String, dynamic> json = jsonDecode(response.body);
+    final List hits = json['hits'] ?? [];
+    final rawProducts = hits.map((p) => GroceryProduct.fromJson(p as Map<String, dynamic>)).toList();
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final rawProducts = (json['products'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final alternatives = rawProducts
+        .where((p) =>
+    p.barcode != product.barcode &&
+        p.ecoscore != null &&
+        p.ecoRank > product.ecoRank)
+        .toList()
+      ..sort((a, b) => b.ecoRank.compareTo(a.ecoRank));
 
-        final currentEcoRank = product.ecoRank;
+    return alternatives.take(maxResults).toList();
+  }
 
-        final ecoAlternatives = rawProducts
-            .map((p) => GroceryProduct.fromJson(p))
-            .where((p) =>
-        p.barcode != product.barcode &&
-            p.ecoRank > currentEcoRank &&
-            p.ecoscore != null)
-            .toList();
-
-        ecoAlternatives.sort((a, b) => b.ecoRank.compareTo(a.ecoRank));
-        return ecoAlternatives;
-      }
-      return [];
-    } catch (e) {
-      print('Error getting eco-friendly alternatives: $e');
-      return [];
+  static String? _bestCategoryTag(GroceryProduct product) {
+    if (product.categoriesTags != null && product.categoriesTags!.isNotEmpty) {
+      return product.categoriesTags!.last;
     }
+    return null;
   }
 }
