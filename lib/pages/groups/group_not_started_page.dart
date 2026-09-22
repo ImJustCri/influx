@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/edit_group_page.dart';
+import 'package:influx/widgets/full_page_loading.dart';
 import 'package:influx/widgets/page_padding.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -290,7 +291,7 @@ class _GroupNotStartedPageState extends ConsumerState<GroupNotStartedPage> {
           ),
         ),
         loading: () => const Center(
-          child: CircularProgressIndicator(),
+          child: FullPageLoading()
         ),
         error: (error, stackTrace) => Center(
           child: Padding(

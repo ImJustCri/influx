@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:influx/theme.dart';
@@ -8,6 +9,7 @@ import 'package:influx/widgets/page_padding.dart';
 import '../../models/switch/station_model.dart';
 import '../../providers/preferences/comune_provider.dart';
 import '../../services/fuel_service.dart';
+import '../../widgets/full_page_loading.dart';
 import '../../widgets/switch/Fuel/fuel_search_bar.dart';
 import '../../widgets/switch/Fuel/station_card.dart';
 import '../../widgets/app_container.dart';
@@ -151,7 +153,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       body: PagePadding(
         child: _isLoading
             ? const Center(
-          child: CircularProgressIndicator(),
+            child: FullPageLoading()
         )
             : Column(
           children: [

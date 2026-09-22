@@ -8,6 +8,7 @@ import '../../models/profile.dart';
 import '../../providers/profile_provider.dart';
 import '../../theme.dart';
 import '../../widgets/app_container.dart';
+import '../../widgets/full_page_loading.dart';
 import '../../widgets/page_padding.dart';
 import '../../widgets/settings_tile.dart';
 import '../../widgets/user_qr_dialog.dart';
@@ -78,16 +79,8 @@ class ProfilePage extends ConsumerWidget {
   Widget _buildLoadingScreen(BuildContext context) {
     return PagePadding(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 24,
-          children: [
-            const CircularProgressIndicator(),
-            Text(
-              "Caricamento profilo...",
-              style: AppTypography.containerBody,
-            ),
-          ],
+        child: FullPageLoading(
+          title: "Caricamento profilo...",
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/models/group.dart';
 import 'package:influx/pages/groups/settings/group_admin_settings.dart';
+import 'package:influx/widgets/full_page_loading.dart';
 import 'package:influx/widgets/group/group_total_budget_card.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../providers/expenses/expenses_provider.dart';
@@ -216,7 +217,7 @@ class GroupDetailPage extends ConsumerWidget {
           ),
         ),
         loading: () => const Center(
-          child: CircularProgressIndicator(),
+          child: FullPageLoading()
         ),
         error: (error, stackTrace) => Center(
           child: Padding(
