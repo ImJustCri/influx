@@ -326,14 +326,7 @@ class _GroceriesPageState extends State<GroceriesPage> {
               icon: LucideIcons.search_x,
             ),
           if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(
-                  color: AppColors.btnBackground,
-                ),
-              ),
-            )
+            const StatusContainer()
           else if (_searchResults.isNotEmpty)
             ...List.generate(_searchResults.length, (index) {
               final product = _searchResults[index];
@@ -444,16 +437,7 @@ class _GroceriesPageState extends State<GroceriesPage> {
           fit: BoxFit.cover,
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
-            return Center(
-              child: SizedBox(
-                width: size * 0.3,
-                height: size * 0.3,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.white.withValues(alpha: 0.25),
-                ),
-              ),
-            );
+            return StatusContainer();
           },
           errorBuilder: (context, error, stackTrace) => placeholder,
         ),
@@ -557,20 +541,21 @@ class _GroceriesPageState extends State<GroceriesPage> {
             ),
             const SizedBox(height: 14),
             if (isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: CircularProgressIndicator(
-                    color: AppColors.btnBackground,
-                  ),
-                ),
-              )
+              const StatusContainer()
             else if (errorMessage != null)
-              _buildModalStatus(icon: LucideIcons.wifi_off, message: errorMessage)
+              _buildModalStatus(
+                icon: LucideIcons.wifi_off,
+                message: "Errore!",
+                description: errorMessage,
+                iconColor: Colors.redAccent,
+
+              )
             else if (ecoAlternatives.isEmpty)
                 _buildModalStatus(
-                  icon: LucideIcons.leaf,
-                  message: 'Nessuna alternativa più ecologica trovata',
+                  icon: LucideIcons.sprout,
+                  message: 'Scelta perfetta!',
+                  description: "Hai già scelto l'opzione migliore per il pianeta. Continua così!",
+                  iconColor: Colors.greenAccent,
                 )
               else
                 ...List.generate(ecoAlternatives.length, (index) {
@@ -630,12 +615,7 @@ class _GroceriesPageState extends State<GroceriesPage> {
           fit: BoxFit.cover,
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.white.withValues(alpha: 0.25),
-              ),
-            );
+            return StatusContainer();
           },
           errorBuilder: (context, error, stackTrace) => placeholder,
         ),
@@ -643,23 +623,12 @@ class _GroceriesPageState extends State<GroceriesPage> {
     );
   }
 
-  Widget _buildModalStatus({required IconData icon, required String message}) {
-    return AppContainer(
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: AppColors.white.withValues(alpha: 0.3), size: 28),
-            const SizedBox(height: 10),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTypography.containerBody,
-            ),
-          ],
-        ),
-      ),
+  Widget _buildModalStatus({required IconData icon, required String message, required String description, required Color iconColor}) {
+    return StatusContainer(
+      icon: icon,
+      title: message,
+      description: description,
+      iconColor: iconColor,
     );
   }
 
