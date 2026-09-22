@@ -7,6 +7,7 @@ class GroceryProduct {
   final double? nutriscore; // 0-100, lower is better
   final String? ecoscore; // 'a', 'b', 'c', 'd', 'e'
   final String? category;
+  final List<String>? categoriesTags;
   final List<GroceryProduct> alternatives;
   final List<GroceryProduct> ecoAlternatives;
 
@@ -19,21 +20,35 @@ class GroceryProduct {
     this.nutriscore,
     this.ecoscore,
     this.category,
+    this.categoriesTags,
     this.alternatives = const [],
     this.ecoAlternatives = const [],
   });
 
   factory GroceryProduct.fromJson(Map<String, dynamic> json) {
     return GroceryProduct(
-      barcode: json['code'] ?? '',
-      name: json['product_name'] ?? 'Unknown Product',
-      brand: json['brands'] ?? 'Unknown Brand',
-      imageUrl: json['image_url'] ?? '',
+      barcode: _asString(json['code']),
+      name: _asString(json['product_name'], fallback: 'Unknown Product'),
+      brand: _asString(json['brands'], fallback: 'Unknown Brand'),
+      imageUrl: _asString(json['image_url']),
       price: _parsePrice(json['prices']),
-      nutriscore: _parseNutriscore(json['nutrition_grades']),
+      nutriscore: _parseNutriscore(_asString(json['nutrition_grades'])),
       ecoscore: _parseEcoscore(json['ecoscore_grade']),
-      category: json['categories'] ?? '',
+      category: _asString(json['categories']),
+      categoriesTags: _parseCategoriesTags(json['categories_tags']),
     );
+  }
+
+  static String _asString(dynamic value, {String fallback = ''}) {
+    if (value == null) return fallback;
+    if (value is String) return value;
+
+    // if value is list join all values with commas
+    if (value is List) {
+      return value.map((e) => e.toString()).where((e) => e.isNotEmpty).join(', ');
+    }
+    // then turn it to string
+    return value.toString();
   }
 
   static double? _parsePrice(dynamic prices) {
@@ -45,19 +60,26 @@ class GroceryProduct {
     }
   }
 
-  static double? _parseNutriscore(String? grade) {
-    if (grade == null) return null;
+  static double? _parseNutriscore(String grade) {
+    if (grade.isEmpty) return null;
     final gradeMap = {'a': 20, 'b': 40, 'c': 60, 'd': 80, 'e': 100};
     return gradeMap[grade.toLowerCase()]?.toDouble();
   }
 
   static String? _parseEcoscore(dynamic grade) {
     if (grade == null || grade.toString().isEmpty) return null;
-    final cleanGrade = grade.toString().toLowerCase().trim();
+    final cleanGrade = _asString(grade).toLowerCase().trim();
     if (['a', 'b', 'c', 'd', 'e'].contains(cleanGrade)) {
       return cleanGrade;
     }
     return null;
+  }
+
+  static List<String>? _parseCategoriesTags(dynamic tags) {
+    if (tags == null) return null;
+    if (tags is! List) return null;
+    final parsed = tags.map((t) => t.toString()).where((t) => t.isNotEmpty).toList();
+    return parsed.isEmpty ? null : parsed;
   }
 
   /// Returns numeric rank for eco comparison (Higher is eco-friendlier)
