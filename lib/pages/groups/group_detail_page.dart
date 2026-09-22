@@ -42,7 +42,6 @@ class GroupDetailPage extends ConsumerWidget {
       ),
     );
 
-    // Calculate isAdmin at the build level so it can be accessed anywhere in the widget
     final bool isAdmin = profileGroupAsync.maybeWhen(
       data: (data) => data != null && data['role'] == 'admin',
       orElse: () => false,
@@ -55,8 +54,6 @@ class GroupDetailPage extends ConsumerWidget {
     );
 
     final totalGroupExpensesAsync = ref.watch(totalGroupExpensesProvider(group.id));
-
-    // Watch the active group period provider
     final activePeriodAsync = ref.watch(activeGroupPeriodProvider(group.id));
 
     void refresh() {
@@ -70,7 +67,6 @@ class GroupDetailPage extends ConsumerWidget {
       ref.invalidate(groupPeriodProvider);
     }
 
-    // Extract budgets from active period
     final double activeTotalBudget = activePeriodAsync.when(
       data: (period) => period?.budget ?? 0.0,
       loading: () => 0.0,
@@ -165,12 +161,12 @@ class GroupDetailPage extends ConsumerWidget {
                     spacing: 24,
                     children: [
                       GroupBudgetCard(
+                        asyncActiveGroupPeriod: activePeriodAsync,
                         totalExpenses: profileExpenseSumAsync.when(
                           data: (sum) => sum,
                           loading: () => 0.0,
                           error: (_, _) => 0.0,
                         ),
-                        groupId: group.id,
                       ),
                       GroupTotalBudgetCard(
                         resetDate: group.startedAt ?? DateTime.now(),

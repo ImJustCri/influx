@@ -2,27 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../global.dart';
-import '../../providers/periods/group_period_providers.dart';
 import '../../theme.dart';
 import '../app_container.dart';
 import '../round_linear_progress_bar.dart';
 
-class GroupBudgetCard extends ConsumerWidget {
-  final String groupId;
+class GroupBudgetCard extends StatelessWidget {
+  final AsyncValue<dynamic> asyncActiveGroupPeriod;
   final double totalExpenses;
   final bool isGroup;
 
   const GroupBudgetCard({
     super.key,
-    required this.groupId,
+    required this.asyncActiveGroupPeriod,
     required this.totalExpenses,
     this.isGroup = false,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncActiveGroupPeriod = ref.watch(activeGroupPeriodProvider(groupId));
-
+  Widget build(BuildContext context) {
     return asyncActiveGroupPeriod.when(
       data: (period) {
         final double perCapitaBudget = period?.perCapitaBudget ?? 0.0;
