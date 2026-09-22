@@ -7,7 +7,7 @@ class SwitchAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: 56,
+      toolbarHeight: 72,
       title: const Column(
         children: [
           Text(
@@ -24,5 +24,5 @@ class SwitchAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize => const Size.fromHeight(72);
 }
