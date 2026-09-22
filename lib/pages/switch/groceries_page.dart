@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:influx/widgets/status_container.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -52,7 +53,11 @@ class _GroceriesPageState extends State<GroceriesPage> {
     });
 
     try {
-      final product = await GroceriesService.searchByBarcode(cleanQuery);
+      // check if inserted product is a barcode
+      final product = GroceriesService.looksLikeBarcode(cleanQuery)
+          ? await GroceriesService.searchByBarcode(cleanQuery)
+          : null;
+
       if (product != null) {
         if (mounted) {
           _selectProduct(product);
@@ -66,6 +71,14 @@ class _GroceriesPageState extends State<GroceriesPage> {
           }
         });
       }
+    } on OpenFoodFactsRateLimitException {
+      setState(() {
+        _errorMessage = 'Troppe richieste a Open Food Facts. Riprova tra un minuto.';
+      });
+    } on OpenFoodFactsServiceException {
+      setState(() {
+        _errorMessage = 'Open Food Facts non risponde al momento. Riprova tra poco.';
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Errore nella ricerca: $e';
@@ -132,9 +145,14 @@ class _GroceriesPageState extends State<GroceriesPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.backgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (modalContext) {
         bool isModalLoading = true;
         List<GroceryProduct> ecoAlternatives = [];
+        String? ecoErrorMessage;
         bool hasFetched = false;
 
         return StatefulBuilder(
@@ -149,9 +167,16 @@ class _GroceriesPageState extends State<GroceriesPage> {
                     isModalLoading = false;
                   });
                 }
-              }).catchError((_) {
+              }).catchError((e) {
                 if (modalContext.mounted) {
                   setModalState(() {
+                    if (e is OpenFoodFactsRateLimitException) {
+                      ecoErrorMessage = 'Troppe richieste a Open Food Facts. Riprova tra un minuto.';
+                    } else if (e is OpenFoodFactsServiceException) {
+                      ecoErrorMessage = 'Open Food Facts non risponde al momento. Riprova tra poco.';
+                    } else {
+                      ecoErrorMessage = 'Errore nel caricamento delle alternative';
+                    }
                     isModalLoading = false;
                   });
                 }
@@ -170,6 +195,7 @@ class _GroceriesPageState extends State<GroceriesPage> {
                   product: product,
                   ecoAlternatives: ecoAlternatives,
                   isLoading: isModalLoading,
+                  errorMessage: ecoErrorMessage,
                 );
               },
             );
@@ -264,7 +290,7 @@ class _GroceriesPageState extends State<GroceriesPage> {
               ),
 
               const SizedBox(height: 16),
-              
+
               AppContainer(
                 width: double.infinity,
                 child: RichText(
@@ -294,15 +320,10 @@ class _GroceriesPageState extends State<GroceriesPage> {
           ),
           const SizedBox(height: 24),
           if (_errorMessage != null)
-            AppContainer(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.red.withValues(alpha: 0.1),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
-              child: Text(
-                _errorMessage!,
-                style: AppTypography.containerBody.copyWith(color: Colors.red),
-              ),
+            StatusContainer(
+              title: _errorMessage!,
+              description: "Prova a cercare qualcos'altro",
+              icon: LucideIcons.search_x,
             ),
           if (_isLoading)
             const Center(
@@ -333,100 +354,136 @@ class _GroceriesPageState extends State<GroceriesPage> {
     required GroceryProduct product,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AppContainer(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            if (product.imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  product.imageUrl,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppColors.containerBackground,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        LucideIcons.image,
-                        color: AppColors.white.withValues(alpha: 0.3),
-                      ),
-                    );
-                  },
-                ),
-              )
-            else
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.containerBackground,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  LucideIcons.package,
-                  color: AppColors.white.withValues(alpha: 0.3),
-                ),
-              ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: AppTypography.containerTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.brand,
-                    style: AppTypography.containerBody,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  if (product.ecoscore != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        children: [
-                          Icon(
-                            LucideIcons.leaf,
-                            color: _getEcoscoreColor(product.ecoscore!),
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Eco-Score ${product.ecoscore!.toUpperCase()}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: _getEcoscoreColor(product.ecoscore!),
-                            ),
-                          ),
-                        ],
-                      ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AppContainer(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildProductImage(product, size: 68),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.name,
+                      style: AppTypography.containerTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                ],
+                    if (product.brand.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        product.brand,
+                        style: AppTypography.containerBody.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.55),
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (product.ecoscore != null) ...[
+                      const SizedBox(height: 8),
+                      _buildEcoscoreBadge(product.ecoscore!),
+                    ],
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              LucideIcons.arrow_right,
-              color: AppColors.white.withValues(alpha: 0.3),
-              size: 16,
-            ),
-          ],
+              const SizedBox(width: 4),
+              Icon(
+                LucideIcons.chevron_right,
+                size: 18,
+                color: AppColors.white.withValues(alpha: 0.25),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductImage(GroceryProduct product, {required double size}) {
+    final placeholder = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: AppColors.containerBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.containerBorder, width: 1),
+      ),
+      child: Icon(
+        LucideIcons.package,
+        color: AppColors.white.withValues(alpha: 0.25),
+        size: size * 0.4,
+      ),
+    );
+
+    if (product.imageUrl.isEmpty) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: AppColors.containerBackground,
+          border: Border.all(color: AppColors.containerBorder, width: 1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Image.network(
+          product.imageUrl,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return Center(
+              child: SizedBox(
+                width: size * 0.3,
+                height: size * 0.3,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.white.withValues(alpha: 0.25),
+                ),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEcoscoreBadge(String grade) {
+    final color = _getEcoscoreColor(grade);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(LucideIcons.leaf, color: color, size: 12),
+          const SizedBox(width: 4),
+          Text(
+            'Eco-Score ${grade.toUpperCase()}',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: color,
+              height: 1,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -437,99 +494,68 @@ class _GroceriesPageState extends State<GroceriesPage> {
     required GroceryProduct product,
     required List<GroceryProduct> ecoAlternatives,
     required bool isLoading,
+    String? errorMessage,
   }) {
     return PagePadding(
       child: SingleChildScrollView(
         controller: scrollController,
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            _buildModalHeroImage(product),
+            const SizedBox(height: 24),
+            Text(
+              product.name,
+              style: AppTypography.pageTitle,
+            ),
+            if (product.brand.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                product.brand,
+                style: AppTypography.pageSubtitle,
+              ),
+            ],
+            if (product.ecoscore != null) ...[
+              const SizedBox(height: 12),
+              _buildEcoscoreBadge(product.ecoscore!),
+            ],
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.containerBorder,),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                if (product.imageUrl.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      product.imageUrl,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: AppColors.containerBackground,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              LucideIcons.image,
-                              color: AppColors.white.withValues(alpha: 0.3),
-                              size: 40,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                else
+                Icon(
+                  LucideIcons.leaf,
+                  size: 16,
+                  color: AppColors.white.withValues(alpha: 0.6),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Alternative più ecologiche',
+                  style: AppTypography.containerTitle,
+                ),
+                if (!isLoading && errorMessage == null && ecoAlternatives.isNotEmpty) ...[
+                  const SizedBox(width: 8),
                   Container(
-                    height: 200,
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.containerBackground,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(999),
                     ),
-                    child: Center(
-                      child: Icon(
-                        LucideIcons.package,
-                        color: AppColors.white.withValues(alpha: 0.3),
-                        size: 40,
+                    child: Text(
+                      '${ecoAlternatives.length}',
+                      style: AppTypography.containerBody.copyWith(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.white.withValues(alpha: 0.7),
                       ),
                     ),
-                  ),
-                const SizedBox(height: 16),
-                Text(
-                  product.name,
-                  style: AppTypography.pageTitle,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  product.brand,
-                  style: AppTypography.pageSubtitle,
-                ),
-                const SizedBox(height: 8),
-                if (product.ecoscore != null) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Icon(
-                        LucideIcons.leaf,
-                        color: _getEcoscoreColor(product.ecoscore!),
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Eco-Score ${product.ecoscore!.toUpperCase()}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: _getEcoscoreColor(product.ecoscore!),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
-            const Divider(color: AppColors.containerBorder),
-            const SizedBox(height: 16),
-            const Text(
-              'Alternative più ecologiche',
-              style: AppTypography.containerTitle,
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             if (isLoading)
               const Center(
                 child: Padding(
@@ -539,31 +565,98 @@ class _GroceriesPageState extends State<GroceriesPage> {
                   ),
                 ),
               )
+            else if (errorMessage != null)
+              _buildModalStatus(icon: LucideIcons.wifi_off, message: errorMessage)
             else if (ecoAlternatives.isEmpty)
-              const AppContainer(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    'Nessuna alternativa più ecologica trovata',
-                    style: AppTypography.containerBody,
-                  ),
-                ),
-              )
-            else
-              ...List.generate(ecoAlternatives.length, (index) {
-                final alt = ecoAlternatives[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildProductCard(
-                    product: alt,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _selectProduct(alt);
-                    },
-                  ),
-                );
-              }),
+                _buildModalStatus(
+                  icon: LucideIcons.leaf,
+                  message: 'Nessuna alternativa più ecologica trovata',
+                )
+              else
+                ...List.generate(ecoAlternatives.length, (index) {
+                  final alt = ecoAlternatives[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildProductCard(
+                      product: alt,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _selectProduct(alt);
+                      },
+                    ),
+                  );
+                }),
             const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModalHeroImage(GroceryProduct product) {
+    final placeholder = Container(
+      height: 300,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.containerBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.containerBorder, width: 1),
+      ),
+      child: Center(
+        child: Icon(
+          LucideIcons.package,
+          color: AppColors.white.withValues(alpha: 0.25),
+          size: 44,
+        ),
+      ),
+    );
+
+    if (product.imageUrl.isEmpty) return placeholder;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 300,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppColors.containerBackground,
+          border: Border.all(color: AppColors.containerBorder, width: 1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Image.network(
+          product.imageUrl,
+          height: 220,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.white.withValues(alpha: 0.25),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) => placeholder,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModalStatus({required IconData icon, required String message}) {
+    return AppContainer(
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: AppColors.white.withValues(alpha: 0.3), size: 28),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.containerBody,
+            ),
           ],
         ),
       ),
