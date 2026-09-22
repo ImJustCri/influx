@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:influx/providers/periods/group_period_providers.dart';
+import 'package:influx/widgets/full_page_loading.dart';
 import 'package:intl/intl.dart';
 import 'package:influx/widgets/page_padding.dart';
 import '../../models/periods/base_period.dart';
@@ -75,7 +76,7 @@ class PeriodsOverviewPage extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(
-                    child: CircularProgressIndicator(),
+                    child: FullPageLoading()
                   ),
                   error: (error, stackTrace) => Center(
                     child: Text(
